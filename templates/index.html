@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decibell | Encontre o seu som perfeito</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <!-- Ícones Font Awesome para Lupa, Carrinho e Login -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Cabeçalho Fixo -->
+    <header id="cabecalho">
+        <div class="container-cabecalho">
+            <div class="logo">
+                <h1>Decibell</h1>
+            </div>
+            <nav class="icones-navegacao">
+                <a href="#" aria-label="Pesquisar"><i class="fas fa-search"></i></a>
+                <a href="#" aria-label="Carrinho de Compras"><i class="fas fa-shopping-cart"></i></a>
+                <a href="#" aria-label="Login"><i class="fas fa-user-circle"></i></a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Seção de Apresentação: Descubra o Som -->
+        <section id="descubra-o-som" class="secao-hero">
+            <div class="overlay-video"></div>
+            <!-- Para um vídeo real, substitua o placeholder abaixo por uma tag <video> -->
+            <!-- Exemplo: <video autoplay muted loop playsinline class="video-fundo"> <source src="seu-video.mp4" type="video/mp4"> </video> -->
+            <img src="https://placehold.co/1920x1080/232526/414345?text=Video+de+Fundo+Placeholder" alt="Fones de ouvido em destaque" class="video-fundo-placeholder">
+
+            <div class="conteudo-hero">
+                <h2>Encontre o seu som perfeito</h2>
+                <p>Explore nossa seleção criteriosa de fones de ouvido de alta qualidade.<br>Feitos exclusivamente para você.</p>
+                <nav class="menu-interno">
+                    <a href="#siga-o-seu-estilo">Siga o seu estilo</a>
+                    <a href="#novidades">Novidades</a>
+                    <a href="#compre-por-marca">Compre por marca</a>
+                    <a href="#loja">Loja</a>
+                    <a href="#rodape">Rodapé</a>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Seção: Siga o seu estilo (Tipos de Fone) -->
+        <section id="siga-o-seu-estilo" class="secao-tipos-fone">
+            <div class="container">
+                <h2>Siga o seu estilo</h2>
+                <p class="subtitulo">Do imersivo ao portátil, encontre o fone de ouvido que se adapta perfeitamente à sua vida.</p>
+                <div class="grid-tipos-fone">
+                    <div class="banner-tipo">
+                        <img src="https://placehold.co/400x300/414345/FFFFFF?text=Supra-auriculares" alt="Fones Supra-auriculares">
+                        <h3>Supra-auriculares</h3>
+                    </div>
+                    <div class="banner-tipo">
+                        <img src="https://placehold.co/400x300/414345/FFFFFF?text=Intra-auriculares" alt="Fones Intra-auriculares">
+                        <h3>Intra-auriculares</h3>
+                    </div>
+                    <div class="banner-tipo">
+                        <img src="https://placehold.co/400x300/414345/FFFFFF?text=Esportivos" alt="Fones Esportivos">
+                        <h3>Esportivos</h3>
+                    </div>
+                    <div class="banner-tipo">
+                        <img src="https://placehold.co/400x300/414345/FFFFFF?text=Cancelamento+de+Ruido" alt="Fones com Cancelamento de Ruído">
+                        <h3>Cancelamento de Ruído</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Novidades (Lançamentos em Destaque) -->
+        <section id="novidades" class="secao-novidades">
+            <div class="container">
+                <h2>Lançamentos em Destaque</h2>
+                <div id="produto-destaque" class="produto-destaque">
+                    <!-- Conteúdo do produto será carregado via JavaScript -->
+                    <div class="carregando-produto">Carregando novidades...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Compre por Marca -->
+        <section id="compre-por-marca" class="secao-marcas">
+            <div class="container">
+                <h2>Compre por marca</h2>
+                <p class="subtitulo">Descubra as marcas líderes em inovação de áudio e encontre o seu par perfeito.</p>
+                <div class="grid-marcas">
+                    <a href="#" class="logo-marca" aria-label="Marca Sony">
+                        <img src="https://placehold.co/150x80/232526/FFFFFF?text=SONY" alt="Logo Sony">
+                    </a>
+                    <a href="#" class="logo-marca" aria-label="Marca Bose">
+                        <img src="https://placehold.co/150x80/232526/FFFFFF?text=BOSE" alt="Logo Bose">
+                    </a>
+                    <a href="#" class="logo-marca" aria-label="Marca JBL">
+                        <img src="https://placehold.co/150x80/232526/FFFFFF?text=JBL" alt="Logo JBL">
+                    </a>
+                    <a href="#" class="logo-marca" aria-label="Marca Sennheiser">
+                        <img src="https://placehold.co/150x80/232526/FFFFFF?text=SENNHEISER" alt="Logo Sennheiser">
+                    </a>
+                    <a href="#" class="logo-marca" aria-label="Marca Audio-Technica">
+                        <img src="https://placehold.co/150x80/232526/FFFFFF?text=AUDIO-TECHNICA" alt="Logo Audio-Technica">
+                    </a>
+                    <a href="#" class="logo-marca" aria-label="Marca Beats">
+                        <img src="https://placehold.co/150x80/232526/FFFFFF?text=BEATS" alt="Logo Beats">
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer id="rodape">
+        <div class="container-rodape">
+            <div class="coluna-rodape">
+                <h3>Decibell</h3>
+                <ul>
+                    <li><a href="#">Sobre Nós</a></li>
+                    <li><a href="#">Carreiras</a></li>
+                    <li><a href="#">Imprensa</a></li>
+                </ul>
+            </div>
+            <div class="coluna-rodape">
+                <h3>Ajuda</h3>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Contato</a></li>
+                    <li><a href="#">Trocas e Devoluções</a></li>
+                </ul>
+            </div>
+            <div class="coluna-rodape">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Termos de Uso</a></li>
+                    <li><a href="#">Política de Privacidade</a></li>
+                    <li><a href="#">Política de Cookies</a></li>
+                </ul>
+            </div>
+            <div class="coluna-rodape">
+                <h3>Conecte-se</h3>
+                <div class="redes-sociais">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+                <form class="formulario-newsletter">
+                    <input type="email" placeholder="Seu e-mail" aria-label="Assinar Newsletter">
+                    <button type="submit">Assinar</button>
+                </form>
+            </div>
+        </div>
+        <div class="direitos-autorais">
+            <p>&copy; 2025 Decibell. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
