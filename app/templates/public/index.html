@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decibell - Fones de Ouvido</title>
+    <!-- Adicionando a fonte Inter e nosso CSS puro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/global.css">
+</head>
+<body class="tema-claro">
+
+    <!-- Cabeçalho (Header) do Site -->
+    <header class="cabecalho">
+        <div class="cabecalho-conteiner">
+            <!-- Logo/Nome da Loja -->
+            <a href="#" class="logo">
+                Decibell
+            </a>
+
+            <!-- Navegação Principal para Desktop -->
+            <nav class="nav-desktop">
+                <a href="#" class="link-nav">Início</a>
+                <a href="#" class="link-nav">Produtos</a>
+                <a href="#" class="link-nav">Sobre</a>
+                <a href="#" class="link-nav">Contato</a>
+                
+                <!-- Botão para Login e Ícone de Modo Escuro/Claro -->
+                <div class="nav-utilidades">
+                    <a href="/login" class="link-nav link-entrar">Entrar</a>
+                    <button id="alternar-tema" class="botao-alternar-tema">
+                        <svg id="icone-lua" xmlns="http://www.w3.org/2000/svg" class="icone-tema" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        <svg id="icone-sol" xmlns="http://www.w3.org/2000/svg" class="icone-tema" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Botão do Menu Mobile (oculto em desktop) -->
+            <button id="botao-menu-mobile" class="botao-menu-mobile">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icone-menu" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Menu Mobile - Conteúdo (oculto por padrão) -->
+        <div id="menu-mobile" class="menu-mobile">
+            <a href="#" class="link-nav-mobile">Início</a>
+            <a href="#" class="link-nav-mobile">Produtos</a>
+            <a href="#" class="link-nav-mobile">Sobre</a>
+            <a href="#" class="link-nav-mobile">Contato</a>
+            <a href="/login" class="link-nav-mobile">Entrar</a>
+            <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">
+                Alternar Modo Escuro
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+        
+        <!-- Seção de Destaque (Hero) -->
+        <section class="secao-destaque">
+            <h1 class="titulo-destaque">
+                Decibell - Som em sua forma mais pura
+            </h1>
+            <p class="subtitulo-destaque">
+                Descubra a coleção de áudio que redefine a excelência.
+            </p>
+            <a href="#" class="botao-destaque">
+                Explorar Produtos
+            </a>
+        </section>
+
+        <!-- Seção de Banners -->
+        <section class="secao-banners">
+            <!-- Banner 1 -->
+            <div class="cartao-banner">
+                <div>
+                    <h2 class="titulo-banner">Novos Lançamentos</h2>
+                    <p class="texto-banner">A melhor tecnologia de áudio.</p>
+                </div>
+                <a href="#" class="link-banner">Ver Fones &rarr;</a>
+            </div>
+            <!-- Banner 2 -->
+            <div class="cartao-banner">
+                <div>
+                    <h2 class="titulo-banner">Ofertas Especiais</h2>
+                    <p class="texto-banner">Descontos imperdíveis, por tempo limitado.</p>
+                </div>
+                <a href="#" class="link-banner">Ver Ofertas &rarr;</a>
+            </div>
+        </section>
+
+        <!-- NOVO CÓDIGO: Seção de Tipos de Fones -->
+        <section class="secao-tipos-fones">
+            <div class="conteiner">
+                <h1 >Siga o seu estilo</h1>
+                <h2 class="titulo-tipos-fones">Do imersivo ao portátil, encontre o fone de ouvido que se adapta perfeitamente à sua vida.</h2>
+                <div class="grade-tipos-fones">
+                    <!-- Fone Supra-auricular -->
+                    <a href="/produtos?tipo=supra-auricular" class="cartao-tipo">
+                        <img src="https://placehold.co/400x400/94a3b8/ffffff?text=Supra-auricular" alt="Fone de ouvido supra-auricular" class="imagem-tipo">
+                        <h3 class="nome-tipo">Supra-auricular</h3>
+                    </a>
+                    <!-- Fone Circumaural -->
+                    <a href="/produtos?tipo=circumaural" class="cartao-tipo">
+                        <img src="https://placehold.co/400x400/64748b/ffffff?text=Circumaural" alt="Fone de ouvido circumaural" class="imagem-tipo">
+                        <h3 class="nome-tipo">Circumaural</h3>
+                    </a>
+                    <!-- Fone Intra-auricular -->
+                    <a href="/produtos?tipo=intra-auricular" class="cartao-tipo">
+                        <img src="https://placehold.co/400x400/475569/ffffff?text=Intra-auricular" alt="Fone de ouvido intra-auricular" class="imagem-tipo">
+                        <h3 class="nome-tipo">Intra-auricular</h3>
+                    </a>
+                    <!-- Fone Sem fio -->
+                    <a href="/produtos?tipo=sem-fio" class="cartao-tipo">
+                        <img src="https://placehold.co/400x400/334155/ffffff?text=Sem+fio" alt="Fone de ouvido sem fio" class="imagem-tipo">
+                        <h3 class="nome-tipo">Sem fio</h3>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Produtos em Destaque -->
+        <section class="secao-produtos-destaque">
+            <h2 class="titulo-secao">Produtos em Destaque</h2>
+            <div class="grade-produtos">
+                <!-- Cartão de Produto de Exemplo -->
+                <div class="cartao-produto">
+                    <img src="https://placehold.co/600x400/1a1a1a/FFFFFF?text=Fone+de+Ouvido" alt="Fone de Ouvido" class="imagem-produto">
+                    <div class="info-produto">
+                        <h3 class="nome-produto">Fone X Pro</h3>
+                        <p class="descricao-produto">Conforto e potência.</p>
+                        <p class="preco-produto">R$ 599,90</p>
+                        <button class="botao-add-carrinho">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+                <!-- Repita para mais produtos... -->
+                <div class="cartao-produto">
+                    <img src="https://placehold.co/600x400/333333/FFFFFF?text=Fone+de+Ouvido" alt="Fone de Ouvido" class="imagem-produto">
+                    <div class="info-produto">
+                        <h3 class="nome-produto">Fone Z Lite</h3>
+                        <p class="descricao-produto">Leve e elegante.</p>
+                        <p class="preco-produto">R$ 299,90</p>
+                        <button class="botao-add-carrinho">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+                <div class="cartao-produto">
+                    <img src="https://placehold.co/600x400/4d4d4d/FFFFFF?text=Fone+de+Ouvido" alt="Fone de Ouvido" class="imagem-produto">
+                    <div class="info-produto">
+                        <h3 class="nome-produto">Fone Y Studio</h3>
+                        <p class="descricao-produto">Para profissionais de áudio.</p>
+                        <p class="preco-produto">R$ 899,90</p>
+                        <button class="botao-add-carrinho">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+                <div class="cartao-produto">
+                    <img src="https://placehold.co/600x400/666666/FFFFFF?text=Fone+de+Ouvido" alt="Fone de Ouvido" class="imagem-produto">
+                    <div class="info-produto">
+                        <h3 class="nome-produto">Fone W Play</h3>
+                        <p class="descricao-produto">O parceiro do seu jogo.</p>
+                        <p class="preco-produto">R$ 499,90</p>
+                        <button class="botao-add-carrinho">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé (Footer) -->
+    <footer class="rodape">
+        <div class="rodape-conteiner">
+            <p>&copy; 2025 Decibell. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Link para o arquivo JavaScript -->
+    <script src="../../static/js/script.js"></script>
+</body>
+</html>

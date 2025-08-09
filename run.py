@@ -26,7 +26,7 @@ produtos_novidades = [
 ]
 
 # Rota principal para servir o arquivo HTML
-@app.route('/')
+@app.route('app/template/index.html')
 def index():
     """
     Renderiza a página principal do site de e-commerce.

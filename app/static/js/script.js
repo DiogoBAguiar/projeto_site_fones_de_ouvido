@@ -1,99 +1,69 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const cabecalho = document.getElementById('cabecalho');
-    const produtoDestaqueContainer = document.getElementById('produto-destaque');
+    // Referências para os elementos do DOM
+    const botaoAlternarTema = document.getElementById('alternar-tema');
+    const botaoAlternarTemaMobile = document.getElementById('botao-alternar-tema-mobile');
+    const iconeSol = document.getElementById('icone-sol');
+    const iconeLua = document.getElementById('icone-lua');
+    const botaoMenuMobile = document.getElementById('botao-menu-mobile');
+    const menuMobile = document.getElementById('menu-mobile');
+    const corpo = document.body;
+    const cabecalho = document.querySelector('.cabecalho');
 
-    // Função para mudar o estilo do cabeçalho ao rolar a página
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) { // Adiciona a classe 'rolagem' após 50px de scroll
-            cabecalho.classList.add('rolagem');
+    // Função para aplicar o tema com base na preferência do usuário ou no localStorage
+    const aplicarTema = (tema) => {
+        if (tema === 'escuro') {
+            corpo.classList.remove('tema-claro');
+            corpo.classList.add('tema-escuro');
+            iconeSol.style.display = 'none';
+            iconeLua.style.display = 'block';
         } else {
-            cabecalho.classList.remove('rolagem');
+            corpo.classList.remove('tema-escuro');
+            corpo.classList.add('tema-claro');
+            iconeSol.style.display = 'block';
+            iconeLua.style.display = 'none';
         }
-    });
+    };
 
-    // Função para rolagem suave para as seções
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-
-            if (targetElement) {
-                // Calcula a posição de rolagem, descontando a altura do cabeçalho fixo
-                const offsetTop = targetElement.offsetTop - cabecalho.offsetHeight;
-
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
-    // Função para carregar produtos de destaque da API Flask
-    async function carregarProdutosDestaque() {
-        try {
-            // Simula um atraso para mostrar o estado de carregamento
-            produtoDestaqueContainer.innerHTML = '<div class="carregando-produto">Carregando novidades...</div>';
-
-            const response = await fetch('/api/novidades'); // Endpoint da API Flask
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status}`);
-            }
-            const produtos = await response.json();
-
-            if (produtos.length > 0) {
-                // Exibe o primeiro produto como destaque
-                const produto = produtos[0]; // Você pode adicionar lógica para rotacionar produtos aqui
-
-                produtoDestaqueContainer.innerHTML = `
-                    <img src="${produto.imagem_url}" alt="${produto.nome}">
-                    <h3>${produto.nome}</h3>
-                    <p>${produto.descricao}</p>
-                    <div class="botoes-produto">
-                        <button onclick="alert('Funcionalidade de compra não implementada.')">Comprar agora</button>
-                        <button onclick="alert('Funcionalidade de adicionar ao carrinho não implementada.')">Adicionar ao carrinho</button>
-                    </div>
-                `;
-            } else {
-                produtoDestaqueContainer.innerHTML = '<p class="carregando-produto">Nenhum produto em destaque no momento.</p>';
-            }
-        } catch (error) {
-            console.error('Erro ao carregar produtos de destaque:', error);
-            produtoDestaqueContainer.innerHTML = '<p class="carregando-produto">Erro ao carregar produtos. Tente novamente mais tarde.</p>';
-        }
+    // Verifica o tema preferido do usuário ou o que está salvo no localStorage
+    const temaSalvo = localStorage.getItem('tema');
+    const prefereEscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (temaSalvo === 'escuro' || (!temaSalvo && prefereEscuro)) {
+        aplicarTema('escuro');
+    } else {
+        aplicarTema('claro');
     }
 
-    // Chama a função para carregar produtos quando a página é carregada
-    carregarProdutosDestaque();
-
-    // Placeholder para funcionalidades de Carrinho, Login e Pesquisa
-    // Você pode adicionar mais lógica aqui para modais ou redirecionamentos
-    document.querySelector('.icones-navegacao a[aria-label="Pesquisar"]').addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Funcionalidade de pesquisa em desenvolvimento!');
-    });
-
-    document.querySelector('.icones-navegacao a[aria-label="Carrinho de Compras"]').addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Seu carrinho está vazio. Comece a comprar!');
-    });
-
-    document.querySelector('.icones-navegacao a[aria-label="Login"]').addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Página de login em breve!');
-    });
-
-    // Funcionalidade do formulário de newsletter (apenas simulação)
-    document.querySelector('.formulario-newsletter').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const emailInput = e.target.querySelector('input[type="email"]');
-        if (emailInput.value) {
-            alert(`Obrigado por assinar a newsletter, ${emailInput.value}!`);
-            emailInput.value = ''; // Limpa o campo
+    // Função para alternar o tema
+    const alternarTema = () => {
+        if (corpo.classList.contains('tema-escuro')) {
+            aplicarTema('claro');
+            localStorage.setItem('tema', 'claro');
         } else {
-            alert('Por favor, insira um e-mail válido.');
+            aplicarTema('escuro');
+            localStorage.setItem('tema', 'escuro');
+        }
+    };
+
+    // Adiciona os event listeners aos botões
+    botaoAlternarTema.addEventListener('click', alternarTema);
+    botaoAlternarTemaMobile.addEventListener('click', alternarTema);
+    botaoMenuMobile.addEventListener('click', () => {
+        // Alterna a visibilidade do menu mobile
+        if (menuMobile.style.display === 'block') {
+            menuMobile.style.display = 'none';
+        } else {
+            menuMobile.style.display = 'block';
+        }
+    });
+
+    // Listener para o evento de scroll da janela
+    window.addEventListener('scroll', () => {
+        // Se a posição de scroll for maior que 50px, adiciona a classe
+        if (window.scrollY > 50) {
+            cabecalho.classList.add('cabecalho-rolado');
+        } else {
+            // Caso contrário, remove a classe
+            cabecalho.classList.remove('cabecalho-rolado');
         }
     });
 });
