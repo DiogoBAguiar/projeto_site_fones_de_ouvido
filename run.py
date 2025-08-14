@@ -1,76 +1,60 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, request, flash, redirect, url_for
+import csv
 
 app = Flask(__name__)
+app.secret_key = "LArapio123@"
 
-# Dados de produtos de exemplo (em um ambiente real, viriam de um banco de dados)
-produtos_novidades = [
-    {
-        "id": 1,
-        "nome": "Fone de Ouvido Sem Fio Decibell Pro X",
-        "descricao": "Experimente a liberdade do som sem fios com o Decibell Pro X. Áudio imersivo, cancelamento de ruído ativo e bateria de longa duração para acompanhar seu ritmo.",
-        "imagem_url": "https://placehold.co/600x400/414345/FFFFFF?text=Fone+Decibell+Pro+X"
-    },
-    {
-        "id": 2,
-        "nome": "Fone Intra-auricular Decibell Fit Sport",
-        "descricao": "Projetado para atletas, o Decibell Fit Sport oferece um ajuste seguro e confortável, resistência à água e suor, e qualidade de som que te impulsiona.",
-        "imagem_url": "https://placehold.co/600x400/232526/FFFFFF?text=Fone+Fit+Sport"
-    },
-    {
-        "id": 3,
-        "nome": "Headset Gamer Decibell Vortex",
-        "descricao": "Domine o campo de batalha com o Decibell Vortex. Som surround 7.1, microfone retrátil e iluminação RGB para uma experiência de jogo inigualável.",
-        "imagem_url": "https://placehold.co/600x400/414345/FFFFFF?text=Headset+Vortex"
-    }
-]
+# --- Funções de validação de senha ---
+def teste_tamanho(senha: str) -> bool:
+    return len(senha) >= 8
 
-# Rota principal para servir o arquivo HTML
-@app.route('app/template/index.html')
-def index():
-    """
-    Renderiza a página principal do site de e-commerce.
-    """
-    return render_template('index.html')
+def teste_maiscula(senha: str) -> bool:
+    return any(c.isupper() for c in senha)
 
-# Rota da API para retornar os produtos de novidades
-@app.route('/api/novidades', methods=['GET'])
-def obter_novidades():
-    """
-    Retorna uma lista de produtos em destaque para a seção 'Novidades'.
-    Em um cenário real, esta função poderia filtrar produtos por 'novidade', 'mais vendidos', etc.
-    """
-    return jsonify(produtos_novidades)
+def teste_minuscula(senha: str) -> bool:
+    return sum(1 for c in senha if c.islower()) >= 2
 
-# --- Rotas de exemplo para futuras funcionalidades (não implementadas neste escopo) ---
+def teste_numero(senha: str) -> bool:
+    return any(c.isdigit() for c in senha)
 
-@app.route('/api/login', methods=['POST'])
-def login_usuario():
-    """
-    Rota para simular o login de um usuário.
-    Em um ambiente real, processaria credenciais e autenticaria o usuário.
-    """
-    dados = request.json
-    usuario = dados.get('usuario')
-    senha = dados.get('senha')
-    # Lógica de autenticação aqui
-    if usuario == "teste" and senha == "senha123":
-        return jsonify({"mensagem": "Login bem-sucedido!", "token": "abc123def456"}), 200
-    else:
-        return jsonify({"mensagem": "Credenciais inválidas."}), 401
+def teste_especial(senha: str) -> bool:
+    return sum(1 for c in senha if not c.isalnum()) >= 2
 
-@app.route('/api/carrinho/adicionar', methods=['POST'])
-def adicionar_ao_carrinho():
-    """
-    Rota para simular a adição de um produto ao carrinho.
-    """
-    dados = request.json
-    produto_id = dados.get('produto_id')
-    quantidade = dados.get('quantidade', 1)
-    # Lógica para adicionar ao carrinho (ex: em uma sessão ou banco de dados)
-    return jsonify({"mensagem": f"Produto {produto_id} adicionado ao carrinho (x{quantidade})."}), 200
+# --- Rota de login / cadastro ---
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    email = ""
+    if request.method == "POST":
+        email = request.form["email"]
+        senha = request.form["senha"]
 
-# Executa o aplicativo Flask
-if __name__ == '__main__':
-    # 'debug=True' permite recarregamento automático e depuração.
-    # Em produção, use um servidor WSGI como Gunicorn ou uWSGI.
-    app.run(debug=True)
+        # Verifica senha
+        if not (teste_tamanho(senha) and teste_maiscula(senha) and teste_minuscula(senha) and teste_numero(senha) and teste_especial(senha)):
+            flash("Senha inválida! Certifique-se de atender todos os requisitos.")
+            return render_template("login.html", email=email)
+
+        # Lê usuários existentes
+        usuarios = []
+        try:
+            with open("usuarios.csv", mode="r", newline="") as arquivo:
+                reader = csv.reader(arquivo)
+                for linha in reader:
+                    if linha:
+                        usuarios.append(linha[0])  # pega emails
+        except FileNotFoundError:
+            pass
+
+        if email in usuarios:
+            flash("Usuário já cadastrado!")
+            return render_template("login.html", email=email)
+
+        # Salvar novo usuário
+        with open("usuarios.csv", mode="a", newline="") as arquivo:
+            writer = csv.writer(arquivo)
+            writer.writerow([email, senha])
+
+        flash("Cadastro realizado com sucesso!")
+        return redirect(url_for("login"))
+
+    return render_template("login.html", email=email)
+
