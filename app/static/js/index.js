@@ -151,22 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Lógica do Dropdown de Perfil (Login/Sair/Tema) ---
+    // --- Lógica do Dropdown de Perfil (Login/Sair/Tema) e Modal de Login ---
     const btnPerfil = document.getElementById('btn-perfil');
     const dropdownPerfil = document.getElementById('dropdown-perfil');
-    
-    function toggleDropdownPerfil() {
-        dropdownPerfil.classList.toggle('ativo');
-    }
+    const modalLogin = document.getElementById('modal-login');
+    const fecharModalLogin = document.querySelector('.fechar-modal-login');
+    const formLogin = document.getElementById('form-login');
 
-    btnPerfil.addEventListener('click', toggleDropdownPerfil);
-
-    document.addEventListener('click', (e) => {
-        if (!btnPerfil.contains(e.target) && !dropdownPerfil.contains(e.target)) {
-            dropdownPerfil.classList.remove('ativo');
-        }
-    });
-    
     // Lógica para lidar com os botões de tema
     function configurarBotoesTema() {
         const alternarTemaDropdown = document.getElementById('alternar-tema-dropdown');
@@ -203,12 +194,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Re-atribui o evento de alternar tema para o menu dropdown, pois o HTML é recriado
-        // A função de configurar botões de tema garante que o evento seja sempre adicionado
+        configurarBotoesTema();
     }
+    
+    // Adiciona evento para abrir o modal de login
+    btnPerfil.addEventListener('click', (e) => {
+        if (!usuarioLogado) {
+            e.preventDefault();
+            modalLogin.style.display = 'block';
+            dropdownPerfil.classList.remove('ativo'); // Garante que o dropdown está fechado
+        } else {
+            dropdownPerfil.classList.toggle('ativo');
+        }
+    });
 
-    // Chama a função para configurar os botões de tema no início
-    configurarBotoesTema();
+    // Adiciona evento para fechar o modal de login
+    fecharModalLogin.addEventListener('click', () => {
+        modalLogin.style.display = 'none';
+    });
 
+    // Fecha o modal se o usuário clicar fora
+    window.addEventListener('click', (e) => {
+        if (e.target === modalLogin) {
+            modalLogin.style.display = 'none';
+        }
+    });
+    
+    // Lógica fictícia para o envio do formulário
+    formLogin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('Login fictício realizado!');
+        modalLogin.style.display = 'none';
+        // Aqui você faria uma chamada a uma API para autenticar o usuário
+    });
 
     // --- Lógica do Modal de Produto ---
     const modalProduto = document.getElementById('modal-produto');

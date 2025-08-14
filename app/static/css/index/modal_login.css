@@ -1,0 +1,142 @@
+/* Estilos para o Modal de Login */
+.modal {
+    display: none; /* Oculto por padrão */
+    position: fixed;
+    z-index: 102;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding-top: 60px;
+}
+
+.conteudo-modal-login {
+    background-color: var(--card-claro);
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 4px 15px var(--sombra-claro);
+}
+
+.tema-escuro .conteudo-modal-login {
+    background-color: #2c2e30;
+}
+
+.fechar-modal-login {
+    color: var(--texto-claro);
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.fechar-modal-login:hover {
+    color: var(--cor-link);
+}
+
+.header-modal {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header-modal h2 {
+    font-size: 1.8rem;
+    color: var(--primaria-claro);
+}
+
+.form-login .input-grupo {
+    margin-bottom: 1.5rem;
+}
+
+.form-login label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--primaria-claro);
+}
+
+.tema-escuro .form-login label {
+    color: var(--texto-claro);
+}
+
+.form-login input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--borda-claro);
+    border-radius: 8px;
+    background-color: var(--fundo-claro);
+    color: var(--texto-claro);
+}
+
+.btn-login-modal {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primaria-claro);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-login-modal:hover {
+    background-color: var(--secundaria-claro);
+}
+
+.link-recuperar-senha {
+    text-align: right;
+    margin-top: 1rem;
+}
+
+.form-login hr {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid var(--borda-claro);
+}
+
+.btn-login-google {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.tema-escuro .btn-login-google {
+    background-color: #f0f2f5;
+    color: #1a1a1a;
+}
+
+.btn-login-google:hover {
+    background-color: #f0f0f0;
+}
+
+.footer-modal {
+    text-align: center;
+    margin-top: 1rem;
+    color: var(--secundaria-claro);
+}
+
+@media (max-width: 768px) {
+    .conteudo-modal-login {
+        max-width: 90%;
+        margin: 10% auto;
+    }
+}

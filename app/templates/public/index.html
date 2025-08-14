@@ -70,7 +70,7 @@
             <a href="#depoimentos" class="link-nav-mobile">Depoimentos</a>
             <a href="#sobre" class="link-nav-mobile">Sobre</a>
             <a href="#faq" class="link-nav-mobile">FAQ</a>
-            <a href="/login" class="link-nav-mobile">Entrar</a>
+            
             <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">
                 Alternar Tema
             </button>
@@ -363,6 +363,34 @@
             </div>
         </div>
     </div>    
-<script src="../../static/js/script.js"></script>         
+<div id="modal-login" class="modal">
+    <div class="conteudo-modal-login">
+        <span class="fechar-modal-login">&times;</span>
+        <div class="header-modal">
+            <h2>Entrar na Decibell</h2>
+        </div>
+        <form id="form-login" class="form-login">
+            <div class="input-grupo">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-grupo">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" required>
+            </div>
+            <button type="submit" class="btn-login-modal">Entrar</button>
+            <p class="link-recuperar-senha"><a href="#">Esqueceu a senha?</a></p>
+            <hr>
+            <button type="button" class="btn-login-google">
+                <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
+                Entrar com o Google
+            </button>
+        </form>
+        <div class="footer-modal">
+            <p>Ainda não tem uma conta? <a href="#">Cadastre-se</a></p>
+        </div>
+    </div>
+</div>
+<script src="../../static/js/index.js"></script>         
 </body>
 </html>
