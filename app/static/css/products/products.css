@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+header, footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+}
+.container {
+    display: flex;
+}
+.filters {
+    width: 20%;
+    padding: 1rem;
+    background-color: #f4f4f4;
+}
+.products {
+    width: 80%;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+.product {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    text-align: center;
+}
+.product img {
+    width: 100px;
+    height: 100px;
+}
+.pagination {
+    text-align: center;
+    margin: 1rem 0;
+}
+.pagination button {
+    margin: 0 5px;
+    padding: 0.5rem 1rem;
+}
+.price-display {
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
