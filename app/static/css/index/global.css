@@ -12,6 +12,7 @@
 @import url(./rodape.css);
 @import url(./modal_produto.css);
 @import url(./responsividade.css);
+@import url(./modal_login.css);
 /* Paleta de cores */
 :root {
     --fundo-claro: #f0f2f5;
