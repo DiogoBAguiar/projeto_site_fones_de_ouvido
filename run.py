@@ -1,6 +1,5 @@
 from flask import Flask, render_template, jsonify, request
 
-# Inicializa o aplicativo Flask
 app = Flask(__name__)
 
 # Dados de produtos de exemplo (em um ambiente real, viriam de um banco de dados)
