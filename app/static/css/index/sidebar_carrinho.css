@@ -1,4 +1,17 @@
 /* Sidebar do Carrinho */
+.carrinho {
+    position: relative; /* Adicione esta linha */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--primaria-claro);
+    transition: color 0.2s;
+}
+
+.carrinho:hover {
+    color: var(--secundaria-claro);
+}
 .overlay {
     position: fixed;
     top: 0;
@@ -127,4 +140,24 @@
 .carrinho-vazio {
     text-align: center;
     color: var(--secundaria-claro);
+}
+/* Adicione este código no final do seu arquivo CSS */
+.contador-carrinho {
+    background-color: var(--cor-link);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 50%;
+    padding: 1px 3px;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    transform: scale(0);
+    transform-origin: top right;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Mostra o contador quando o valor é maior que zero */
+.contador-carrinho.visivel {
+    transform: scale(1);
 }
