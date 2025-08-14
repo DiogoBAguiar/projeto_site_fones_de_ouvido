@@ -1,0 +1,46 @@
+/* Menu Mobile */
+.menu-mobile {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 280px;
+    height: 100%;
+    background-color: var(--card-claro);
+    box-shadow: -2px 0 5px var(--sombra-claro);
+    padding: 2rem;
+    transition: right 0.3s ease;
+    z-index: 101;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.menu-mobile.ativo {
+    right: 0;
+}
+
+.menu-mobile a,
+.menu-mobile button {
+    display: block;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--borda-claro);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primaria-claro);
+    background: none;
+    border: none;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+}
+
+.fechar-menu-mobile {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: var(--primaria-claro);
+    cursor: pointer;
+}

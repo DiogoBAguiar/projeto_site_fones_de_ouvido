@@ -1,0 +1,39 @@
+/* Seção de Destaque (Hero) */
+.secao-destaque {
+    background-image: var(--gradiente-escuro);
+    color: #ffffff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.titulo-destaque {
+    font-size: clamp(2rem, 5vw, 4rem);
+    margin-bottom: 1rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.subtitulo-destaque {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    max-width: 600px;
+    margin-bottom: 2rem;
+    color: #e0e0e0;
+}
+
+.botao-destaque {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.botao-destaque:hover {
+    transform: translateY(-5px);
+    background-color: #e0e0e0;
+}

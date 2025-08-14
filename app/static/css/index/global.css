@@ -1,0 +1,113 @@
+@import url(./header.css);
+@import url(./menu_mobile.css);
+@import url(./sidebar_carrinho.css);
+@import url(./section_destaque.css);
+@import url(./section_banners.css);
+@import url(./section_tipos_de_fones.css);
+@import url(./section_produtos_destaque.css);
+@import url(./section_depoimentos.css);
+@import url(./section_faq.css);
+@import url(./section_sobre.css);
+@import url(./section_receber_novidades.css);
+@import url(./rodape.css);
+@import url(./modal_produto.css);
+@import url(./responsividade.css);
+/* Paleta de cores */
+:root {
+    --fundo-claro: #f0f2f5;
+    --texto-claro: #1a1a1a;
+    --card-claro: #ffffff;
+    --borda-claro: #e0e0e0;
+    --primaria-claro: #2c3e50;
+    --secundaria-claro: #34495e;
+    --sombra-claro: rgba(0, 0, 0, 0.1);
+    --gradiente-escuro: linear-gradient(to right, #232526, #414345);
+    --gradiente-escuro-hover: linear-gradient(to right, #414345, #232526);
+    --cor-link: #3498db;
+    --cor-link-hover: #2980b9;    
+}
+
+/* Modo Escuro */
+.tema-escuro {
+    background: var(--gradiente-escuro);
+    color: #ffffff;
+    --fundo-claro: #1a1a1a;
+    --texto-claro: #f0f2f5;
+    --card-claro: #2c2e30;
+    --borda-claro: #3a3d40;
+    --primaria-claro: #e0e0e0;
+    --secundaria-claro: #c0c0c0;
+    --sombra-claro: rgba(255, 255, 255, 0.1);
+    --cor-link: #87ceeb;
+    --cor-link-hover: #6a95b8;
+}
+
+/* Estilos Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;    
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: poppins, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+    background-color: var(--fundo-claro);
+    color: var(--texto-claro);
+}
+
+.conteiner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+h1, h2, h3 {
+    color: var(--primaria-claro);
+}
+
+.tema-escuro h1, .tema-escuro h2, .tema-escuro h3 {
+    color: var(--primaria-claro);
+}
+
+a {
+    text-decoration: none;
+    color: var(--cor-link);
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--cor-link-hover);
+}
+
+/* Animação para o "aparecer" das seções */
+.oculta {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.visivel {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Conteúdo Principal */
+.conteudo-principal {
+    padding-top: 80px; /* Para não sobrepor o header fixo */
+}
+
+.secao {
+    padding: 6rem 0;
+}
+
+.titulo-secao {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+}

@@ -1,0 +1,36 @@
+/* Seção de Banners */
+.secao-banners .conteiner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.cartao-banner {
+    background-color: var(--card-claro);
+    border-radius: 12px;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px var(--sombra-claro);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.cartao-banner:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 15px var(--sombra-claro);
+}
+
+.titulo-banner {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.texto-banner {
+    color: var(--secundaria-claro);
+}
+
+.link-banner {
+    margin-top: 1.5rem;
+    font-weight: 600;
+}

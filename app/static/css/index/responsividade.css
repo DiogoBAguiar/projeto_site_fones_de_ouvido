@@ -1,0 +1,51 @@
+/* Responsividade */
+@media (max-width: 768px) {
+    .cabecalho-conteiner {
+        padding: 1rem;
+    }
+
+    .nav-utilidades {
+        display: none;
+    }
+
+    .botao-menu-mobile {
+        display: block;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: var(--primaria-claro);
+        cursor: pointer;
+    }
+    
+    .secao {
+        padding: 4rem 0;
+    }
+    
+    .titulo-secao {
+        font-size: 2rem;
+    }
+
+    .secao-destaque {
+        height: auto;
+        padding: 10rem 2rem 6rem;
+    }
+
+    .conteudo-sobre {
+        grid-template-columns: 1fr;
+    }
+    
+    .conteudo-modal {
+        flex-direction: column;
+        text-align: center;
+        width: 90%;
+        margin: 5% auto;
+    }
+    
+    .modal-imagem {
+        width: 100%;
+    }
+    
+    .modal-detalhes {
+        width: 100%;
+    }
+}

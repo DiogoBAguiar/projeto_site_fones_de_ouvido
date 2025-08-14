@@ -1,0 +1,42 @@
+/* Seção de Depoimentos */
+.grade-depoimentos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.cartao-depoimento {
+    background-color: var(--card-claro);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 10px var(--sombra-claro);
+    display: flex;
+    flex-direction: column;
+}
+
+.cartao-depoimento p {
+    flex-grow: 1;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    color: var(--texto-claro);
+    font-style: italic;
+}
+
+.info-cliente {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: auto;
+}
+
+.avatar-cliente {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.nome-cliente {
+    font-weight: 600;
+    font-size: 1.1rem;
+}

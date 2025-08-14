@@ -1,0 +1,24 @@
+/* Seção Sobre */
+.conteudo-sobre {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    align-items: center;
+}
+
+.imagem-sobre {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+.texto-sobre h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.texto-sobre p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: var(--secundaria-claro);
+}
