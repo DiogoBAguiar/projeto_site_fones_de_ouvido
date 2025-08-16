@@ -20,7 +20,7 @@ def create_app(config_class=Config):
     db.init_app(app)
 
     # Cria a pasta 'instance' para o banco de dados se ela não existir.
-    # É uma boa prática do Flask para arquivos de instância.
+    
     if not os.path.exists('instance'):
         os.makedirs('instance')
     
