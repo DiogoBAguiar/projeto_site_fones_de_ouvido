@@ -382,3 +382,53 @@ table tr:last-child td { border-bottom: none; }
 }
 
 .hidden { display: none !important; }
+
+
+
+
+
+
+
+/* Estilos Específicos para a Página de Administração */
+
+#gerenciar-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+  max-width: 450px;
+}
+
+
+#manage-filters-form input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#manage-filters-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#add-filter-btn {
+  background-color: #28a745; /* Verde */
+  color: white;
+  transition: 0.4s ease;
+}
+#add-filter-btn:hover {
+  background-color: #218838; /* Verde escuro */
+  transition: 0.4s ease;
+}
+#remove-filter-btn {
+  background-color: #dc3545; /* Vermelho */
+  color: white;
+  transition: 0.4s ease;
+}
+#remove-filter-btn:hover {
+  background-color: #c82333; /* Vermelho escuro */
+  transition: 0.4s ease;
+}

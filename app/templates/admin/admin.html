@@ -47,8 +47,9 @@
                             <input type="text" id="product-name" placeholder="Nome do Produto" required>
                             <input type="text" id="product-brand" placeholder="Marca" required>
                             <input type="number" id="product-price" placeholder="Preço" step="0.01" required>
-                            <input type="text" id="product-status" placeholder="Status (Ex: 'Em estoque')" required>
-                            <label for="product-image" class="upload-label">
+                            <input type="description" id="product-description" placeholder="Descrição do Produto" required>
+                            <input type="text" id="product-status" placeholder="Status (Ex: 'Em estoque')" required>  
+                                                     
                                 <i class="fas fa-camera"></i>
                                 <span>Selecionar Imagens</span>
                             </label>
@@ -58,7 +59,15 @@
                     </div>
                 </div>
             </div>
-
+            <div id="gerenciar-filtros" class="card">
+            <h3>Gerenciar Filtros</h3>
+            <form id="manage-filters-form">
+                <input type="text" id="filter-name" placeholder="Nome do Filtro (Ex: 'Acessórios')" required>
+                <button type="button" id="add-filter-btn" class="add-filter-btn">Adicionar Filtro</button>
+                <button type="button" id="remove-filter-btn" class="remove-filter-btn">Remover Filtro</button>
+            </form>
+            </div>
+            
             <div class="tables-container">
                 <div class="flex items-center justify-between">
                     <h3 class="mb-4">Tabela de Produtos</h3>
@@ -73,7 +82,7 @@
         </div>
     </div>
 
-    <script src="../../static/js/admin.js"></script>
+    <script src="../../static/js/admin_js/admin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </body>
 </html>
