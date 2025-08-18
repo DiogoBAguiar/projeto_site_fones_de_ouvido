@@ -36,7 +36,7 @@ function displayProducts(page, filteredProducts = products) {
         
         // Cria o link que envolve o conteúdo do produto
         const link = document.createElement('a');
-        link.href = `products-details.html?id=${product.id}`; // Altere para o link desejado
+        link.href = `/products-details?id=${product.id}`; // Altere para o link desejado
         link.innerHTML = `
             <img src="${product.img}" alt="${product.name}">
             <div class="product-info">
