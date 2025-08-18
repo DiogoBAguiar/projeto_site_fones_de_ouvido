@@ -7,6 +7,8 @@ from app import db
 
 from flask import Blueprint, render_template
 
+import mysql.connector
+from mysql.connector import Error
 # Cria o Blueprint com o nome 'public'.
 public_bp = Blueprint('public', __name__)
 
@@ -15,10 +17,25 @@ def home():
     """Rota para a página inicial."""
     return render_template('public/index.html')
 
+@public_bp.route('/admin')
+def admin():
+    """Rota para a página de administrador."""
+    return render_template('admin/admin.html')
+
 @public_bp.route('/products')
 def products():
     """Rota para a página de produtos."""
     return render_template('public/products.html')
+
+@public_bp.route('/products-details')
+def products_details():
+    """Rota para a página de produtos detalhada."""
+    return render_template('public/products-details.html')
+
+@public_bp.route('/index')
+def index():
+    """Rota para a página de login."""
+    return render_template('public/index.html')
 
 @public_bp.route('/login')
 def login():
@@ -29,6 +46,19 @@ def login():
 def register():
     """Rota para a página de registro."""
     return render_template('public/register.html')
+
+
+@public_bp.route("/prod", methods=['GET','POST'])
+def prod():
+    connection = create_connection()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Products")
+    produtos = cursor.fetchall()
+    cursor.close()
+    connection.close()
+
+    return render_template('lista.html', prod=produtos)
+
 
 class Product(db.Model):
     """Modelo para a tabela 'products'."""
