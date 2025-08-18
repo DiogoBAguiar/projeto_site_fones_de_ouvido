@@ -1,47 +1,167 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+/* Estilizando a main usando variáveis */
+.conteudo-principal {
+    background-color: var(--fundo-claro);
+    color: var(--texto-claro);
+    padding: 2rem;
+    padding-top: 4rem; /* Espaço acima para não ficar encoberto pelo header */
 }
-header, footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 1rem;
-}
+
 .container {
-    display: flex;
+    display: flex; /* Mantém os filtros e produtos em linha */
+    max-width: 100%; /* Ajustado para ocupar 100% da largura */
+    margin: 0 auto; /* Centraliza o conteúdo */
 }
+
 .filters {
-    width: 20%;
+    width: 25%; /* Largura dos filtros */
     padding: 1rem;
-    background-color: #f4f4f4;
+    background-color: transparent; /* Filtros com fundo transparente */
+    border: none;
+    border-radius: 8px; /* Bordas arredondadas */
+    margin-right: 1rem; /* Espaçamento à direita */
 }
-.products {
-    width: 80%;
-    padding: 1rem;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+
+.filters h2, .filters h3 {
+    color: var(--texto-claro);
 }
-.product {
-    border: 1px solid #ccc;
-    padding: 1rem;
-    text-align: center;
-}
-.product img {
-    width: 100px;
-    height: 100px;
-}
-.pagination {
-    text-align: center;
+
+.filters input[type="range"] {
+    width: 60%; /* Aumenta a largura do range */
     margin: 1rem 0;
 }
-.pagination button {
-    margin: 0 5px;
-    padding: 0.5rem 1rem;
-}
+
 .price-display {
     font-weight: bold;
     margin-top: 0.5rem;
+    color: var(--primaria-claro);
+}
+
+/* Estilizando os botões dos filtros */
+.filters label {
+    display: block; /* Coloca cada checkbox em uma nova linha */
+    margin: 0.5rem 0; /* Espaçamento entre os labels */
+}
+
+.filters input[type="checkbox"] {
+    margin-right: 0.5rem; /* Espaçamento à direita do checkbox */
+}
+
+.products {
+    flex: 1; /* Permite que a seção de produtos ocupe o restante do espaço */
+    padding: 2rem; /* Aumenta o padding dos produtos */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Aumenta a largura mínima das colunas */
+    gap: 2rem; /* Aumenta o espaçamento entre os produtos */
+}
+
+.product {
+    background-color: var(--card-claro);
+    border: 1px solid var(--borda-claro);
+    border-radius: 8px; /* Bordas arredondadas */
+    padding: 1.5rem; /* Aumenta o padding interno */
+    text-align: left; /* Alinha o texto à esquerda */
+    box-shadow: 0 4px 10px var(--sombra-claro); /* Aumenta a sombra para um efeito mais profundo */
+    transition: transform 0.2s;
+    height: 400px; /* Aumenta a altura fixa para todos os produtos */
+    display: flex; /* Flexbox para alinhar itens */
+    flex-direction: column; /* Coloca os itens em coluna */
+}
+
+.product img {
+    max-width: 100%;
+    height: 240px; /* Aumenta a altura das imagens */
+    object-fit: cover; /* Mantém a proporção da imagem */
+}
+
+.product-info {
+    margin-top: 1.5rem; /* Aumenta o espaçamento entre imagem e texto */
+}
+
+.product-name {
+    font-weight: bold; /* Destaca o nome do produto */
+    font-size: 1.2rem; /* Aumenta o tamanho da fonte do nome do produto */
+}
+
+.product-price {
+    color: var(--primaria-claro); /* Cor para o preço */
+    font-size: 1.1rem; /* Aumenta o tamanho da fonte do preço */
+    margin-top: 0.5rem; /* Aumenta o espaço acima do preço */
+}
+
+.product a {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+}
+
+.product:hover {
+    color: var(--secundaria-claro);
+}
+
+.add-to-cart {
+    margin-top: auto; /* Coloca o botão na parte inferior */
+    background-color: var(--primaria-claro);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem; /* Aumenta o padding do botão */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem; /* Aumenta o tamanho da fonte do botão */
+}
+
+.add-to-cart:hover {
+    background-color: var(--secundaria-claro); /* Efeito de hover para o botão */
+}
+
+.pagination {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.pagination button {
+    margin: 0 5px;
+    padding: 0.5rem 1rem;
+    border: none;
+    background-color: var(--primaria-claro);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.pagination button:hover {
+    background-color: var(--secundaria-claro); /* Efeito de hover */
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .filters {
+        width: 100%; /* Filtros ocupam toda a largura em telas menores */
+        margin-right: 0; /* Remove margem à direita */
+    }
+
+    .products {
+        width: 100%; /* Produtos ocupam toda a largura em telas menores */
+        padding: 1rem; /* Reduz o padding em telas menores */
+    }
+
+    .product {
+        height: auto; /* Permite que a altura se ajuste automaticamente em telas menores */
+    }
+
+    .product img {
+        height: 150px; /* Mantém a altura da imagem em telas menores */
+    }
+}
+
+.back-to-index {
+    padding: 15px 30px;
+    background-color: #1e1e1e;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.5s;
+    border: 2px solid #ffa500;
 }

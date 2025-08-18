@@ -1,51 +1,234 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de Produtos</title>
-    <link rel="stylesheet" href="/app/static/css/products/products.css">
+    <meta name="description" content="Decibell - Fones de ouvido premium. Tecnologia de áudio de alta qualidade, conforto e design sofisticado.">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>Decibell - Fones de Ouvido</title>
+    
+    <!-- Fonte Inter do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/index/global.css">
+    <link rel="stylesheet" href="../../static/css/products/products.css">
 </head>
-<body>
-<header>
-    <h1>Loja de Produtos</h1>
-</header>
+<body class="tema-claro">
+    <!-- Cabeçalho (Header) do Site -->
+    <header class="cabecalho">
+        <div class="cabecalho-conteiner">
+            <!-- Logo/Nome da Loja -->
+            <a href="../admin/admin.html" class="logo">
+                Decibell
+            </a>
 
-<div class="container">
-    <div class="filters">
-        <h2>Filtros</h2>
-        <h3>Preço</h3>
-        <input type="range" min="0" max="10000" value="500" id="priceRange" oninput="updatePriceDisplay()">
-        <div class="price-display" id="priceDisplay">R$ 500</div>
-        <h3>Tipos</h3>
-        <label><input type="checkbox" value="Tipo 1"> Tipo 1</label><br>
-        <label><input type="checkbox" value="Tipo 2"> Tipo 2</label><br>
-        <label><input type="checkbox" value="Tipo 3"> Tipo 3</label><br>
-        <label><input type="checkbox" value="Tipo 4"> Tipo 4</label><br>
-        <h3>Marca</h3>
-        <label><input type="checkbox" value="Marca 1"> Marca 1</label><br>
-        <label><input type="checkbox" value="Marca 2"> Marca 2</label><br>
-        <label><input type="checkbox" value="Marca 3"> Marca 3</label><br>
-        <label><input type="checkbox" value="Marca 4"> Marca 4</label><br>
-        <label><input type="checkbox" value="Marca 5"> Marca 5</label><br>
-        <label><input type="checkbox" value="Marca 6"> Marca 6</label><br>
-        <label><input type="checkbox" value="Marca 7"> Marca 7</label><br>
-        <label><input type="checkbox" value="Marca 8"> Marca 8</label><br>
-    </div>
+            <!-- Utilitários: Lupa, Carrinho e Perfil -->
+            <div class="nav-utilidades">
+                <!-- Contêiner da barra de pesquisa -->
+                <div class="barra-busca-container">
+                    <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
+                </div>
 
-    <div class="products" id="productList">
-        <!-- Produtos serão gerados aqui -->
+                <!-- Ícone de Carrinho (agora um botão para abrir o menu lateral) -->
+              
 
+             <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
+             <i class="fas fa-shopping-cart"></i>
+             <span id="contador-carrinho" class="contador-carrinho">0</span>
+             </button>
+
+                <!-- Menu de Perfil do Usuário -->
+                <div class="perfil-container">
+                    <!-- Botão que muda entre Login e o ícone de perfil -->
+                    <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário ou fazer login">
+                        <!-- O conteúdo deste botão será definido via JavaScript -->
+                    </button>
+                    <div id="dropdown-perfil" class="dropdown-perfil">
+                        <a href="/perfil">Meu Perfil</a>
+                        <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
+                        <button id="btn-logout">Sair</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botão do Menu Mobile (oculto em desktop) -->
+            <button id="botao-menu-mobile" class="botao-menu-mobile">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Menu Mobile - Conteúdo (oculto por padrão) -->
+        <nav id="menu-mobile" class="menu-mobile">
+            <button class="fechar-menu-mobile" aria-label="Fechar menu">
+                <i class="fas fa-times"></i>
+            </button>
+            <a href="#destaque" class="link-nav-mobile">Início</a>
+            <a href="#tipos-fones" class="link-nav-mobile">Estilos</a>
+            <a href="#produtos-destaque" class="link-nav-mobile">Produtos</a>
+            <a href="#depoimentos" class="link-nav-mobile">Depoimentos</a>
+            <a href="#sobre" class="link-nav-mobile">Sobre</a>
+            <a href="#faq" class="link-nav-mobile">FAQ</a>
+            
+            <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">
+                Alternar Tema
+            </button>
+        </nav>
+    </header>
+    
+    <!-- Overlay para o menu lateral -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Menu Lateral do Carrinho (Sidebar) -->
+    <aside id="carrinho-lateral" class="carrinho-lateral">
+        <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">
+            &times;
+        </button>
+        <h2>Seu Carrinho</h2>
+        <ul id="lista-carrinho" class="lista-carrinho">
+            <!-- Itens do carrinho serão adicionados aqui via JS -->
+            <!-- <li class="item-carrinho">...</li> -->
+        </ul>
+        <div class="total-carrinho">
+            <span>Total:</span>
+            <span id="carrinho-total-valor">R$ 0,00</span>
+        </div>
+        <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
+    </aside>
+
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+        <div class="container">
+            <div class="filters">
+                <button class="back-to-index"><a href="../public/index.html">
+                    <i class="fas fa-credit-card"></i>
+                    Voltar para Página principal</a>
+                </button>
+                <h2>Filtros</h2>
+                <h3>Preço</h3>
+                <input type="range" min="0" max="10000" value="500" id="priceRange" oninput="updatePriceDisplay()">
+                <div class="price-display" id="priceDisplay">R$ 1600</div>
+                <h3>Tipos</h3>
+                <label><input type="checkbox" value="Tipo 1"> Tipo 1</label><br>
+                <label><input type="checkbox" value="Tipo 2"> Tipo 2</label><br>
+                <label><input type="checkbox" value="Tipo 3"> Tipo 3</label><br>
+                <label><input type="checkbox" value="Tipo 4"> Tipo 4</label><br>
+                <h3>Marca</h3>
+                <label><input type="checkbox" value="Marca 1"> Marca 1</label><br>
+                <label><input type="checkbox" value="Marca 2"> Marca 2</label><br>
+                <label><input type="checkbox" value="Marca 3"> Marca 3</label><br>
+                <label><input type="checkbox" value="Marca 4"> Marca 4</label><br>
+                <label><input type="checkbox" value="Marca 5"> Marca 5</label><br>
+                <label><input type="checkbox" value="Marca 6"> Marca 6</label><br>
+                <label><input type="checkbox" value="Marca 7"> Marca 7</label><br>
+                <label><input type="checkbox" value="Marca 8"> Marca 8</label><br>
+            </div>
+
+            <div class="products" id="productList">
+                <!-- Produtos serão gerados aqui -->
+
+            </div>
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Paginação será gerada aqui -->
+        </div>
+    </main>
+
+    <!-- Novo Rodapé Elaborado -->
+    <footer class="rodape">
+        <div class="conteiner">
+            <div class="rodape-conteiner">
+                <div class="rodape-coluna">
+                    <a href="#" class="logo">Decibell</a>
+                    <p>A mais alta fidelidade sonora para seus ouvidos.</p>
+                    <div class="rodape-redes-sociais">
+                        <a href="#" aria-label="Siga-nos no Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria
+                        -label="Siga-nos no Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Siga-nos no Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Inscreva-se no Youtube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Navegação</h3>
+                    <ul>
+                        <li><a href="#produtos-destaque">Produtos</a></li>
+                        <li><a href="#tipos-fones">Estilos</a></li>
+                        <li><a href="#sobre">Sobre</a></li>
+                        <li><a href="#depoimentos">Depoimentos</a></li>
+                    </ul>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Ajuda e Suporte</h3>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#">Contato</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                    </ul>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Newsletter</h3>
+                    <p>Receba ofertas e novidades por e-mail.</p>
+                    <form action="#" class="form-newsletter">
+                        <input type="email" placeholder="Seu e-mail" required>
+                        <button type="submit">Assinar</button>
+                    </form>
+                </div>
+            </div>
+            <p class="rodape-copyright">&copy; 2025 Decibell. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Produto -->
+    <div id="modal-produto" class="modal">
+        <div class="conteudo-modal">
+            <span class="fechar-modal">&times;</span>
+            <img src="" alt="" class="modal-imagem">
+            <div class="modal-detalhes">
+                <h3 class="modal-nome-produto"></h3>
+                <p class="modal-descricao-produto"></p>
+                <p class="modal-preco-produto"></p>
+                <button class="botao-add-carrinho-modal">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </div>    
+<div id="modal-login" class="modal">
+    <div class="conteudo-modal-login">
+        <span class="fechar-modal-login">&times;</span>
+        <div class="header-modal">
+            <h2>Entrar na Decibell</h2>
+        </div>
+        <form id="form-login" class="form-login">
+            <div class="input-grupo">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-grupo">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" required>
+            </div>
+            <button type="submit" class="btn-login-modal">Entrar</button>
+            <p class="link-recuperar-senha"><a href="#">Esqueceu a senha?</a></p>
+            <hr>
+            <button type="button" class="btn-login-google">
+                <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
+                Entrar com o Google
+            </button>
+        </form>
+        <div class="footer-modal">
+            <p>Ainda não tem uma conta? <a href="./register.html">Cadastre-se</a></p>
+        </div>
     </div>
 </div>
-
-<div class="pagination" id="pagination">
-    <!-- Paginação será gerada aqui -->
-</div>
-
-<footer>
-    <p>&copy; 2025 Loja de Produtos. Todos os direitos reservados.</p>
-</footer>
-<script src="../../static/js/products.js"></script>
+<script src="../../static/js/index.js"></script>
+<script src="../../static/js/products.js"></script>         
 </body>
 </html>

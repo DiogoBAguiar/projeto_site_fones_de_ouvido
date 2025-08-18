@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>products-details</title>
+    <link rel="stylesheet" href="../../static/css/index/global.css">
+    <link rel="stylesheet" href="../../static/css/products/products-details.css">
+</head>
+<body>
+    <!-- Cabeçalho (Header) do Site -->
+    <header class="cabecalho">
+        <div class="cabecalho-conteiner">
+            <!-- Logo/Nome da Loja -->
+            <a href="../admin/admin.html" class="logo">
+                Decibell
+            </a>
+
+            <!-- Utilitários: Lupa, Carrinho e Perfil -->
+            <div class="nav-utilidades">
+                <!-- Contêiner da barra de pesquisa -->
+                <div class="barra-busca-container">
+                    <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
+                </div>
+
+                <!-- Ícone de Carrinho (agora um botão para abrir o menu lateral) -->
+              
+
+             <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
+             <i class="fas fa-shopping-cart"></i>
+             <span id="contador-carrinho" class="contador-carrinho">0</span>
+             </button>
+
+                <!-- Menu de Perfil do Usuário -->
+                <div class="perfil-container">
+                    <!-- Botão que muda entre Login e o ícone de perfil -->
+                    <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário ou fazer login">
+                        <!-- O conteúdo deste botão será definido via JavaScript -->
+                    </button>
+                    <div id="dropdown-perfil" class="dropdown-perfil">
+                        <a href="/perfil">Meu Perfil</a>
+                        <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
+                        <button id="btn-logout">Sair</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botão do Menu Mobile (oculto em desktop) -->
+            <button id="botao-menu-mobile" class="botao-menu-mobile">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Menu Mobile - Conteúdo (oculto por padrão) -->
+        <nav id="menu-mobile" class="menu-mobile">
+            <button class="fechar-menu-mobile" aria-label="Fechar menu">
+                <i class="fas fa-times"></i>
+            </button>
+            <a href="#destaque" class="link-nav-mobile">Início</a>
+            <a href="#tipos-fones" class="link-nav-mobile">Estilos</a>
+            <a href="#produtos-destaque" class="link-nav-mobile">Produtos</a>
+            <a href="#depoimentos" class="link-nav-mobile">Depoimentos</a>
+            <a href="#sobre" class="link-nav-mobile">Sobre</a>
+            <a href="#faq" class="link-nav-mobile">FAQ</a>
+            
+            <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">
+                Alternar Tema
+            </button>
+        </nav>
+    </header>
+    
+    <!-- Overlay para o menu lateral -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Menu Lateral do Carrinho (Sidebar) -->
+    <aside id="carrinho-lateral" class="carrinho-lateral">
+        <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">
+            &times;
+        </button>
+        <h2>Seu Carrinho</h2>
+        <ul id="lista-carrinho" class="lista-carrinho">
+            <!-- Itens do carrinho serão adicionados aqui via JS -->
+            <!-- <li class="item-carrinho">...</li> -->
+        </ul>
+        <div class="total-carrinho">
+            <span>Total:</span>
+            <span id="carrinho-total-valor">R$ 0,00</span>
+        </div>
+        <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
+    </aside>
+
+    <main class="main-container">
+        <div class="product-details-container">
+            <div class="product-details">
+                <div class="product-gallery">
+                    <img src="https://github.com/matheusbattisti/pagina_de_produto/blob/main/img/fone_destaque.png?raw=true" alt="Fone bluethooth">
+                    <div class="gallery-thumbnails">
+                        <img src="https://github.com/matheusbattisti/pagina_de_produto/blob/main/img/fone1.png?raw=true" alt="fone1">
+                        <img src="https://github.com/matheusbattisti/pagina_de_produto/blob/main/img/fone2.png?raw=true" alt="fone2">
+                        <img src="https://github.com/matheusbattisti/pagina_de_produto/blob/main/img/fone3.png?raw=true" alt="fone3">
+                    </div>
+                </div>
+                <div class="product-info">
+                    <p class="product-path">
+                        <i class="fas fa-chevron-right"></i> Supra-auricular / bluethooth
+                    </p>
+                    <h2>Fone de Ouvido bluethooth - Preto</h2>
+                    <p class="product-code">Código do Produto</p>
+                    <p class="product-price">R$ 199,99</p>
+                    <p class="rating">★★★★★ 135 avaliações</p>
+                    <div class="product-options">
+                        <label for="color">Cor:</label>
+                        <select id="color" name="color">
+                            <option value="black">Preto</option>
+                            <option value="white">Branco</option>
+                            <option value="gray">Cinza</option>
+                        </select>
+                        <label for="quantity">Quantidade:</label>
+                        <input type="number" id="quantity" name="quantity" min="1" max="10" value="1">
+                    </div>
+                    <div class="buttons">
+                        <button class="add-to-cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            Adicionar ao Carrinho
+                        </button>
+                        <button class="back-to-products"><a href="../public/products.html">
+                            <i class="fas fa-credit-card"></i>
+                            Voltar para Produtos</a>
+                        </button>
+                    </div>
+                    <p class="delivery">
+                        <i class="fas fa-truck"></i>
+                        Entrega em até 15 dias úteis
+                    </p>
+                </div>
+            </div>
+            <p class="product-description">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad voluptatum, ab fuga, ipsa adipisci amet repellendus nulla est ut possimus tempore laborum praesentium sed laboriosam, nam nobis similique a. Magni!
+            </p>
+            <div class="product-specs">
+                <ul class="tabs">
+                    <li><i class="fas fa-info-circle"></i>Detalhes</li>
+                    <li><i class="fas fa-undo"></i>devolução</li>
+                    <li><i class="fas fa-shipping-fast"></i>Entrega</li>
+                </ul>
+                <div class="specs-content">
+                    <div>
+                        <p><strong>SKU:</strong>AC12357B</p>
+                        <p><strong>Material:</strong>Plástico ABS</p>
+                        <p><strong>Dimensões:</strong>20 x 15 x 5 cm</p>
+                        <p><strong>Garantia:</strong>6 meses</p>
+                        <p><strong>Tempo de bateria:</strong>Até 20 horas</p>
+                        <p><strong>Conectividade:</strong>Bluetooth 5.0</p>
+                    </div>
+                    <div style="display: none;">
+                        <p><strong>Política de Devolução:</strong></p>
+                        <p>Você pode devolver o produto em até 30 dias após a compra. O item deve estar em sua embalagem original e sem sinais de uso.</p>
+                        <p><strong>Processo de Devolução:</strong> Para iniciar a devolução, entre em contato com nosso suporte ao cliente.</p>
+                    </div>
+                    <div style="display: none;">
+                        <p><strong>Prazo de Entrega:</strong></p>
+                        <p>As entregas são realizadas em até 15 dias úteis após a confirmação do pagamento.</p>
+                        <p><strong>Frete:</strong> O frete é grátis para compras acima de R$ 299,00. Para pedidos abaixo deste valor, será cobrada uma taxa de entrega.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../static/js/products.js"></script>
+    <script src="../../static/js/index.js"></script>
+    <script src="../../static/js/products-details.js"></script>
+</body>
+</html>
