@@ -1,167 +1,206 @@
-/* Estilizando a main usando variáveis */
+/* --- Melhorias no Layout Principal --- */
 .conteudo-principal {
+    padding: 2rem 0; /* padding horizontal zero, o .container já tem a largura máxima */
     background-color: var(--fundo-claro);
     color: var(--texto-claro);
-    padding: 2rem;
-    padding-top: 4rem; /* Espaço acima para não ficar encoberto pelo header */
+    min-height: 80vh; /* Garante que a página tenha uma altura mínima */
+    margin-top: 50px;
 }
 
 .container {
-    display: flex; /* Mantém os filtros e produtos em linha */
-    max-width: 100%; /* Ajustado para ocupar 100% da largura */
-    margin: 0 auto; /* Centraliza o conteúdo */
+    display: flex;
+    gap: 30px; /* Adiciona espaçamento entre filtros e produtos */
+    max-width: 1400px; /* Limita a largura máxima do container */
+    width: 90%;
+    margin: 0 auto;
 }
 
+/* --- Melhorias nos Filtros (Sidebar) --- */
 .filters {
-    width: 25%; /* Largura dos filtros */
-    padding: 1rem;
-    background-color: transparent; /* Filtros com fundo transparente */
-    border: none;
-    border-radius: 8px; /* Bordas arredondadas */
-    margin-right: 1rem; /* Espaçamento à direita */
+    flex-basis: 300px; /* Define uma largura base fixa para os filtros */
+    flex-shrink: 0; /* Impede que os filtros encolham em telas maiores */
+    padding: 25px;
+    background-color: var(--card-claro); /* Usa a cor de fundo do card para os filtros */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--sombra-claro); /* Adiciona sombra para destaque */
 }
 
 .filters h2, .filters h3 {
-    color: var(--texto-claro);
-}
-
-.filters input[type="range"] {
-    width: 60%; /* Aumenta a largura do range */
-    margin: 1rem 0;
-}
-
-.price-display {
-    font-weight: bold;
-    margin-top: 0.5rem;
+    border-bottom: 2px solid var(--borda-claro);
+    padding-bottom: 10px;
+    margin-top: 25px;
+    margin-bottom: 15px;
     color: var(--primaria-claro);
 }
 
-/* Estilizando os botões dos filtros */
+.filters input[type="range"] {
+    width: 100%; /* Ocupa 100% da largura do contêiner de filtros */
+    margin: 15px 0;
+}
+
+.price-display {
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--secundaria-claro);
+}
+
 .filters label {
-    display: block; /* Coloca cada checkbox em uma nova linha */
-    margin: 0.5rem 0; /* Espaçamento entre os labels */
+    display: block;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
 }
 
 .filters input[type="checkbox"] {
-    margin-right: 0.5rem; /* Espaçamento à direita do checkbox */
+    margin-right: 10px;
 }
 
+/* --- Melhorias na Lista de Produtos --- */
 .products {
-    flex: 1; /* Permite que a seção de produtos ocupe o restante do espaço */
-    padding: 2rem; /* Aumenta o padding dos produtos */
+    flex-grow: 1; /* Permite que os produtos ocupem o espaço restante */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Aumenta a largura mínima das colunas */
-    gap: 2rem; /* Aumenta o espaçamento entre os produtos */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Usa auto-fit para preencher o espaço */
+    gap: 20px; /* Espaçamento entre os cards */
+    padding: 0; /* Remove padding duplicado */
 }
 
 .product {
     background-color: var(--card-claro);
-    border: 1px solid var(--borda-claro);
-    border-radius: 8px; /* Bordas arredondadas */
-    padding: 1.5rem; /* Aumenta o padding interno */
-    text-align: left; /* Alinha o texto à esquerda */
-    box-shadow: 0 4px 10px var(--sombra-claro); /* Aumenta a sombra para um efeito mais profundo */
-    transition: transform 0.2s;
-    height: 400px; /* Aumenta a altura fixa para todos os produtos */
-    display: flex; /* Flexbox para alinhar itens */
-    flex-direction: column; /* Coloca os itens em coluna */
-}
-
-.product img {
-    max-width: 100%;
-    height: 240px; /* Aumenta a altura das imagens */
-    object-fit: cover; /* Mantém a proporção da imagem */
-}
-
-.product-info {
-    margin-top: 1.5rem; /* Aumenta o espaçamento entre imagem e texto */
-}
-
-.product-name {
-    font-weight: bold; /* Destaca o nome do produto */
-    font-size: 1.2rem; /* Aumenta o tamanho da fonte do nome do produto */
-}
-
-.product-price {
-    color: var(--primaria-claro); /* Cor para o preço */
-    font-size: 1.1rem; /* Aumenta o tamanho da fonte do preço */
-    margin-top: 0.5rem; /* Aumenta o espaço acima do preço */
+    border-radius: 12px; /* Aumenta a borda para um visual mais moderno */
+    box-shadow: 0 4px 12px var(--sombra-claro);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transições mais suaves */
+    height: auto; /* Permite que a altura se ajuste ao conteúdo */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .product a {
-    display: flex;
-    flex-direction: column;
     text-decoration: none;
     color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .product:hover {
-    color: var(--secundaria-claro);
+    transform: translateY(-5px); /* Efeito de elevação sutil */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* Sombra mais intensa no hover */
+}
+
+.product img {
+    width: 100%;
+    height: 200px; /* Altura fixa para as imagens */
+    object-fit: contain; /* Ajusta a imagem sem cortá-la */
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.product-info {
+    flex-grow: 1; /* Permite que as informações ocupem o espaço disponível */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.product-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primaria-claro);
+    margin: 0 0 5px;
+}
+
+.product-price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--cor-link);
+    margin: 10px 0 15px;
 }
 
 .add-to-cart {
-    margin-top: auto; /* Coloca o botão na parte inferior */
-    background-color: var(--primaria-claro);
+    margin-top: auto;
+    background-color: var(--secundaria-claro); /* Usa uma cor mais escura */
     color: white;
     border: none;
-    padding: 0.7rem 1.2rem; /* Aumenta o padding do botão */
-    border-radius: 5px;
+    padding: 12px 25px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s;
-    font-size: 1rem; /* Aumenta o tamanho da fonte do botão */
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 .add-to-cart:hover {
-    background-color: var(--secundaria-claro); /* Efeito de hover para o botão */
+    background-color: var(--primaria-claro);
 }
 
+/* --- Paginação --- */
 .pagination {
-    text-align: center;
-    margin: 2rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 30px 0;
 }
 
 .pagination button {
-    margin: 0 5px;
-    padding: 0.5rem 1rem;
-    border: none;
-    background-color: var(--primaria-claro);
-    color: white;
-    border-radius: 5px;
+    background-color: var(--card-claro);
+    color: var(--secundaria-claro);
+    border: 1px solid var(--borda-claro);
+    padding: 10px 15px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
 }
 
-.pagination button:hover {
-    background-color: var(--secundaria-claro); /* Efeito de hover */
+.pagination button:hover, .pagination button.active {
+    background-color: var(--secundaria-claro);
+    color: #fff;
+    border-color: var(--secundaria-claro);
 }
 
-/* Responsividade */
+/* --- Botão "Voltar para Página principal" --- */
+.back-to-index {
+    display: inline-block;
+    padding: 12px 25px;
+    margin-bottom: 20px;
+    background: var(--gradiente-escuro); /* Usa gradiente para um visual mais sofisticado */
+    color: white;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    transition: background 0.5s ease;
+    text-align: center;
+    font-weight: 600;
+}
+
+.back-to-index:hover {
+    background: var(--gradiente-escuro-hover); /* Efeito de hover no gradiente */
+}
+
+.back-to-index a {
+    color: inherit;
+}
+
+
+/* --- Responsividade --- */
 @media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        gap: 20px; /* Reduz o espaçamento entre os elementos */
+    }
+
     .filters {
-        width: 100%; /* Filtros ocupam toda a largura em telas menores */
-        margin-right: 0; /* Remove margem à direita */
+        flex-basis: auto; /* Permite que a largura dos filtros se ajuste */
+        width: 100%;
+        margin-right: 0;
     }
 
     .products {
-        width: 100%; /* Produtos ocupam toda a largura em telas menores */
-        padding: 1rem; /* Reduz o padding em telas menores */
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Ajusta o grid para telas menores */
     }
-
-    .product {
-        height: auto; /* Permite que a altura se ajuste automaticamente em telas menores */
-    }
-
-    .product img {
-        height: 150px; /* Mantém a altura da imagem em telas menores */
-    }
-}
-
-.back-to-index {
-    padding: 15px 30px;
-    background-color: #1e1e1e;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: 0.5s;
-    border: 2px solid #ffa500;
 }
