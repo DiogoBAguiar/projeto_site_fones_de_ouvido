@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterTypeSelect = document.getElementById('filter-type');
     const activeFiltersList = document.getElementById('active-filters-list');
     const modalMessage = document.getElementById('modal-message');
+    const productImageInput = document.getElementById('product-image');
+    const imagePreviewsContainer = document.getElementById('product-image-previews-container');
 
     // Funções de renderização
     /**
@@ -167,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function fetchProductsAndUsers() {
+    async function fetchProductsAndUsersAndBrands() {
         try {
             const productsResponse = await fetch(API_PRODUCTS_URL);
             const productsData = await productsResponse.json();
@@ -205,67 +207,38 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
         }
     }
-
-    // Lida com a submissão do formulário de adicionar produto
-    addProductForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData();
-        const productData = {
-            name: document.getElementById('product-name').value,
-            price: parseFloat(document.getElementById('product-price').value),
-            description: document.getElementById('product-description').value,
-            status: document.getElementById('product-status').value,
-            brand: 'Decibell' // Exemplo: Em um projeto real, isso viria de um input
-        };
-        formData.append('product_data', JSON.stringify(productData));
-        
-        const images = document.getElementById('product-image').files;
-        for (let i = 0; i < images.length; i++) {
-            formData.append('images', images[i]);
-        }
-        
-        try {
-            const response = await fetch(API_PRODUCTS_URL, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                exibirMensagem(result.message, 'success');
-                addProductForm.reset();
-                fetchProductsAndUsers();
-            } else {
-                exibirMensagem(result.error, 'danger');
-            }
-        } catch (error) {
-            exibirMensagem('Erro de conexão ao tentar adicionar o produto.', 'danger');
-            console.error(error);
-        }
-    });
-
-    // Lida com a exclusão de produtos
-    productsTbody.addEventListener('click', async (e) => {
-        const targetBtn = e.target;
-        if (targetBtn.classList.contains('delete')) {
-            const productId = targetBtn.dataset.itemId;
-            const productName = targetBtn.dataset.itemName;
-            if (confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
+    
+    // Funções de feedback e utilitárias
+    function exibirMensagem(message, type = 'info') {
+        if (!modalMessage) return;
+        modalMessage.textContent = message;
+        modalMessage.className = `modal-message ${type}`;
+        modalMessage.style.display = 'block';
+        setTimeout(() => {
+            modalMessage.style.display = 'none';
+        }, 3000);
+    }
+    
+    // Adiciona o event listener para a exclusão de filtros
+    activeFiltersList.addEventListener('click', async (e) => {
+        const targetBtn = e.target.closest('.remove-btn');
+        if (targetBtn) {
+            const filterId = targetBtn.dataset.filterId;
+            const filterName = targetBtn.dataset.filterName;
+            if (confirm(`Tem certeza que deseja excluir o filtro "${filterName}"?`)) {
                 try {
-                    const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
+                    const response = await fetch(`${API_FILTERS_URL}/${filterId}`, {
                         method: 'DELETE'
                     });
                     const result = await response.json();
                     if (response.ok) {
                         exibirMensagem(result.message, 'success');
-                        fetchProductsAndUsers();
+                        fetchAndRenderFilters();
                     } else {
                         exibirMensagem(result.error, 'danger');
                     }
                 } catch (error) {
-                    exibirMensagem('Erro de conexão ao tentar excluir o produto.', 'danger');
+                    exibirMensagem('Erro de conexão ao tentar excluir o filtro.', 'danger');
                     console.error(error);
                 }
             }
@@ -300,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 exibirMensagem(result.message, 'success');
                 manageFiltersForm.reset();
                 fetchAndRenderFilters(); // Atualiza a lista de filtros
+                fetchProductsAndUsersAndBrands(); // Atualiza a tabela de marcas
             } else {
                 exibirMensagem(result.error, 'danger');
             }
@@ -308,48 +282,105 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
         }
     });
+    
+    // Lida com a submissão do formulário de adicionar produto
+    addProductForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        const productData = {
+            name: document.getElementById('product-name').value,
+            price: parseFloat(document.getElementById('product-price').value),
+            description: document.getElementById('product-description').value,
+            status: document.getElementById('product-status').value,
+            brand: document.getElementById('product-brand').value
+        };
 
-    // Lida com a exclusão de filtros
-    activeFiltersList.addEventListener('click', async (e) => {
-        const targetBtn = e.target.closest('.remove-btn');
-        if (targetBtn) {
-            const filterId = targetBtn.dataset.filterId;
-            const filterName = targetBtn.dataset.filterName;
-            if (confirm(`Tem certeza que deseja excluir o filtro "${filterName}"?`)) {
+        formData.append('product_data', JSON.stringify(productData));
+        
+        const images = document.getElementById('product-image').files;
+        for (let i = 0; i < images.length; i++) {
+            formData.append('images', images[i]);
+        }
+        
+        try {
+            const response = await fetch(API_PRODUCTS_URL, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                exibirMensagem(result.message, 'success');
+                addProductForm.reset();
+                // Opcional: limpa as miniaturas de imagem
+                if (imagePreviewsContainer) {
+                    imagePreviewsContainer.innerHTML = '';
+                    imagePreviewsContainer.classList.add('hidden');
+                }
+                fetchProductsAndUsersAndBrands(); // Atualiza todas as tabelas
+            } else {
+                exibirMensagem(result.error, 'danger');
+            }
+        } catch (error) {
+            exibirMensagem('Erro de conexão ao tentar adicionar o produto.', 'danger');
+            console.error(error);
+        }
+    });
+    
+    // Lida com a exclusão de produtos
+    productsTbody.addEventListener('click', async (e) => {
+        const targetBtn = e.target;
+        if (targetBtn.classList.contains('delete')) {
+            const productId = targetBtn.dataset.itemId;
+            const productName = targetBtn.dataset.itemName;
+            if (confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
                 try {
-                    const response = await fetch(`${API_FILTERS_URL}/${filterId}`, {
+                    const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
                         method: 'DELETE'
                     });
                     const result = await response.json();
                     if (response.ok) {
                         exibirMensagem(result.message, 'success');
-                        fetchAndRenderFilters();
+                        fetchProductsAndUsersAndBrands();
                     } else {
                         exibirMensagem(result.error, 'danger');
                     }
                 } catch (error) {
-                    exibirMensagem('Erro de conexão ao tentar excluir o filtro.', 'danger');
+                    exibirMensagem('Erro de conexão ao tentar excluir o produto.', 'danger');
                     console.error(error);
                 }
             }
         }
     });
-
-    // Funções de feedback e utilitárias
-    function exibirMensagem(message, type = 'info') {
-        if (!modalMessage) return;
-        modalMessage.textContent = message;
-        modalMessage.className = `modal-message ${type}`;
-        modalMessage.style.display = 'block';
-        setTimeout(() => {
-            modalMessage.style.display = 'none';
-        }, 3000);
+    
+    // Lidar com a pré-visualização de imagens
+    if (productImageInput) {
+        productImageInput.addEventListener('change', (e) => {
+            imagePreviewsContainer.innerHTML = '';
+            const files = e.target.files;
+            if (files.length > 0) {
+                imagePreviewsContainer.classList.remove('hidden');
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        imagePreviewsContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                imagePreviewsContainer.classList.add('hidden');
+            }
+        });
     }
 
     // Inicialização do Dashboard
     function initDashboard() {
         fetchDashboardData();
-        fetchProductsAndUsers();
+        fetchProductsAndUsersAndBrands();
         fetchAndRenderFilters();
     }
 
