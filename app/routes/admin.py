@@ -6,6 +6,7 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from app import db
 from app.models.product import Product
 from app.models.user import User
+from app.models.filter import Filter
 from flask_login import login_required, current_user, login_user, logout_user
 import json
 import os
@@ -72,38 +73,7 @@ def read_csv_data(filepath, time_range):
         return []
 
 # ==============================================================================
-# BLUEPRINT DA API DO DASHBOARD
-# ==============================================================================
-dashboard_api_bp = Blueprint('dashboard_api', __name__, url_prefix='/api/dashboard')
-
-@dashboard_api_bp.route('/', methods=['GET'])
-@login_required
-def get_dashboard_data():
-    """
-    Rota de API para obter os dados do dashboard com base no timeRange.
-    Os dados são lidos dos arquivos CSV.
-    """
-    if current_user.role != 'admin':
-        return jsonify({"error": "Acesso não autorizado."}), 403
-    
-    time_range = request.args.get('timeRange', '30d')
-    
-    # Lógica para ler os arquivos CSV e montar a resposta
-    kpis_data = read_csv_data('kpis.csv', time_range)
-    analytics_data = read_csv_data('analytics.csv', time_range)
-    recent_sales_data = read_csv_data('recent_sales.csv', time_range)
-
-    # Converte os dados para o formato esperado pelo front-end
-    dashboard_data = {
-        "kpis": kpis_data,
-        "analytics": analytics_data,
-        "recentSales": recent_sales_data
-    }
-    
-    return jsonify(dashboard_data)
-
-# ==============================================================================
-# BLUEPRINT DA API DE PRODUTOS, MARCAS E USUÁRIOS
+# BLUEPRINT DA API DE ADMINISTRAÇÃO
 # ==============================================================================
 admin_api_bp = Blueprint('admin_api', __name__, url_prefix='/api/admin')
 
@@ -231,6 +201,53 @@ def get_brands():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# ==============================================================================
+# BLUEPRINT DA API DO DASHBOARD
+# ==============================================================================
+dashboard_api_bp = Blueprint('dashboard_api', __name__, url_prefix='/api/dashboard')
+
+@dashboard_api_bp.route('/', methods=['GET'])
+@login_required
+def get_dashboard_data():
+    """
+    Rota de API para obter os dados do dashboard com base no timeRange.
+    Os dados são lidos dos arquivos CSV.
+    """
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+    
+    time_range = request.args.get('timeRange', '30d')
+    
+    kpis_data = read_csv_data('kpis.csv', time_range)
+    analytics_data = read_csv_data('analytics.csv', time_range)
+    recent_sales_data = read_csv_data('recent_sales.csv', time_range)
+
+    dashboard_data = {
+        "kpis": kpis_data,
+        "analytics": analytics_data,
+        "recentSales": recent_sales_data
+    }
+    
+    return jsonify(dashboard_data)
+
+# ==============================================================================
+# API PARA GERENCIAMENTO DE FILTROS (Novo)
+# ==============================================================================
+
+@admin_api_bp.route('/filters', methods=['GET'])
+@login_required
+def get_filters():
+    """Rota de API para obter todos os filtros ativos."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+    try:
+        filters = Filter.query.all()
+        filters_list = [{'id': f.id, 'name': f.name, 'type': f.type} for f in filters]
+        return jsonify(filters_list)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @admin_api_bp.route('/filters', methods=['POST'])
 @login_required
 def add_filter():
@@ -240,9 +257,38 @@ def add_filter():
         
     try:
         filter_data = request.get_json()
-        if not filter_data or 'type' not in filter_data or 'name' not in filter_data:
+        name = filter_data.get('name')
+        type = filter_data.get('type')
+        
+        if not name or not type:
             return jsonify({"error": "Dados do filtro ausentes."}), 400
 
-        return jsonify({"message": "Filtro adicionado com sucesso!", "filter": filter_data}), 201
+        # Verifica se o filtro já existe
+        existing_filter = Filter.query.filter_by(name=name).first()
+        if existing_filter:
+            return jsonify({"error": "Este filtro já existe."}), 409
+            
+        new_filter = Filter(name=name, type=type)
+        db.session.add(new_filter)
+        db.session.commit()
+
+        return jsonify({"message": "Filtro adicionado com sucesso!", "filter": {'id': new_filter.id, 'name': new_filter.name, 'type': new_filter.type}}), 201
     except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@admin_api_bp.route('/filters/<int:filter_id>', methods=['DELETE'])
+@login_required
+def remove_filter(filter_id):
+    """Rota de API para remover um filtro pelo ID."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+        
+    try:
+        filter_to_remove = Filter.query.get_or_404(filter_id)
+        db.session.delete(filter_to_remove)
+        db.session.commit()
+        return jsonify({"message": "Filtro removido com sucesso!"}), 200
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
