@@ -1,14 +1,15 @@
 // admin.js
 // Este script lida com a lógica do painel de administração.
-// Refatorado para buscar dados de forma dinâmica dos endpoints da API.
+// Refatorado para buscar dados de forma dinâmica de todos os endpoints da API.
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Endpoints da API para o dashboard e produtos
+    // Endpoints da API para o dashboard e painel de administração
     const API_DASHBOARD_URL = window.location.origin + '/api/dashboard/';
     const API_PRODUCTS_URL = window.location.origin + '/api/admin/products';
     const API_USERS_URL = window.location.origin + '/api/admin/users';
     const API_BRANDS_URL = window.location.origin + '/api/admin/brands';
+    const API_FILTERS_URL = window.location.origin + '/api/admin/filters';
     
     // Seletores de elementos do DOM
     const kpiCardsContainer = document.getElementById('kpi-cards');
@@ -18,11 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const brandsTbody = document.getElementById('brands-tbody');
     const usersTbody = document.getElementById('users-tbody');
     const addProductForm = document.getElementById('add-product-form');
-    const modalMessage = document.getElementById('modal-message');
     const manageFiltersForm = document.getElementById('manage-filters-form');
     const filterNameInput = document.getElementById('filter-name');
     const filterTypeSelect = document.getElementById('filter-type');
     const activeFiltersList = document.getElementById('active-filters-list');
+    const modalMessage = document.getElementById('modal-message');
 
     // Funções de renderização
     /**
@@ -141,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             filterTag.classList.add('selected-filter-tag');
             filterTag.innerHTML = `
                 <span>${filter.name}</span>
-                <button class="remove-btn" data-filter-name="${filter.name}">
+                <button class="remove-btn" data-filter-id="${filter.id}" data-filter-name="${filter.name}">
                     <i class="fas fa-times"></i>
                 </button>
             `;
@@ -185,9 +186,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (brandsResponse.ok) {
                 renderBrandsTable(brandsData);
             }
-
         } catch (error) {
             exibirMensagem(`Não foi possível carregar as tabelas: ${error.message}`, 'danger');
+            console.error(error);
+        }
+    }
+
+    async function fetchAndRenderFilters() {
+        try {
+            const response = await fetch(API_FILTERS_URL);
+            if (!response.ok) {
+                throw new Error('Erro ao buscar filtros.');
+            }
+            const filters = await response.json();
+            renderActiveFilters(filters);
+        } catch (error) {
+            exibirMensagem(`Não foi possível carregar os filtros: ${error.message}`, 'danger');
             console.error(error);
         }
     }
@@ -201,7 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name: document.getElementById('product-name').value,
             price: parseFloat(document.getElementById('product-price').value),
             description: document.getElementById('product-description').value,
-            status: document.getElementById('product-status').value
+            status: document.getElementById('product-status').value,
+            brand: 'Decibell' // Exemplo: Em um projeto real, isso viria de um input
         };
         formData.append('product_data', JSON.stringify(productData));
         
@@ -256,8 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-    
-    // Lida com o formulário de adicionar filtro
+
+    // Lida com a submissão do formulário de adicionar filtro
     manageFiltersForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const filterData = {
@@ -271,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`${window.location.origin}/api/admin/filters`, {
+            const response = await fetch(API_FILTERS_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -284,16 +299,39 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 exibirMensagem(result.message, 'success');
                 manageFiltersForm.reset();
-                // A lista de filtros ativos precisa ser recarregada
-                // A lógica abaixo é um placeholder, pois a API não salva os dados no banco de dados.
-                // Em um projeto real, você chamaria uma função como fetchFilters() aqui.
-                renderActiveFilters([{name: filterData.name, type: filterData.type}]);
+                fetchAndRenderFilters(); // Atualiza a lista de filtros
             } else {
                 exibirMensagem(result.error, 'danger');
             }
         } catch (error) {
             exibirMensagem('Erro de conexão ao tentar adicionar o filtro.', 'danger');
             console.error(error);
+        }
+    });
+
+    // Lida com a exclusão de filtros
+    activeFiltersList.addEventListener('click', async (e) => {
+        const targetBtn = e.target.closest('.remove-btn');
+        if (targetBtn) {
+            const filterId = targetBtn.dataset.filterId;
+            const filterName = targetBtn.dataset.filterName;
+            if (confirm(`Tem certeza que deseja excluir o filtro "${filterName}"?`)) {
+                try {
+                    const response = await fetch(`${API_FILTERS_URL}/${filterId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        exibirMensagem(result.message, 'success');
+                        fetchAndRenderFilters();
+                    } else {
+                        exibirMensagem(result.error, 'danger');
+                    }
+                } catch (error) {
+                    exibirMensagem('Erro de conexão ao tentar excluir o filtro.', 'danger');
+                    console.error(error);
+                }
+            }
         }
     });
 
@@ -312,9 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initDashboard() {
         fetchDashboardData();
         fetchProductsAndUsers();
-        // A lista de filtros ativos precisa ser populada dinamicamente,
-        // mas a API atual não suporta isso. A função abaixo é um placeholder.
-        renderActiveFilters([]); 
+        fetchAndRenderFilters();
     }
 
     // Adiciona listeners para os botões de tabs
