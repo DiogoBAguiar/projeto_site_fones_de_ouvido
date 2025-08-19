@@ -10,6 +10,8 @@ let selectedBrands = [];
 let allAvailableBrands = [];
 let allAvailableTypes = [];
 
+
+
 // Variável global para armazenar os produtos do backend
 let products = [];
 const API_PRODUCTS_URL = window.location.origin + "/api/products";
