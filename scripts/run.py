@@ -114,4 +114,5 @@ def index():
 
 # Se rodar diretamente este arquivo, inicia o servidor.
 if __name__ == "__main__":
+
     app.run(debug=True)
