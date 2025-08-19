@@ -1,12 +1,14 @@
 // admin.js
 // Este script lida com a lógica do painel de administração.
-// Foi refatorado para buscar dados de forma dinâmica dos endpoints da API.
+// Refatorado para buscar dados de forma dinâmica dos endpoints da API.
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // Endpoints da API para o dashboard e produtos
     const API_DASHBOARD_URL = window.location.origin + '/api/dashboard/';
-    const API_PRODUCTS_URL = window.location.origin + '/api/produtos/';
+    const API_PRODUCTS_URL = window.location.origin + '/api/admin/products';
+    const API_USERS_URL = window.location.origin + '/api/admin/users';
+    const API_BRANDS_URL = window.location.origin + '/api/admin/brands';
     
     // Seletores de elementos do DOM
     const kpiCardsContainer = document.getElementById('kpi-cards');
@@ -17,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const usersTbody = document.getElementById('users-tbody');
     const addProductForm = document.getElementById('add-product-form');
     const modalMessage = document.getElementById('modal-message');
+    const manageFiltersForm = document.getElementById('manage-filters-form');
+    const filterNameInput = document.getElementById('filter-name');
+    const filterTypeSelect = document.getElementById('filter-type');
+    const activeFiltersList = document.getElementById('active-filters-list');
 
     // Funções de renderização
     /**
@@ -98,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${brand.name}</td>
                     <td>
                         <div class="table-actions">
-                            <button class="table-action-btn edit" data-item-id="${brand.id}" data-item-name="${brand.name}">Editar</button>
-                            <button class="table-action-btn delete" data-item-id="${brand.id}" data-item-name="${brand.name}">Excluir</button>
+                            <button class="table-action-btn edit" data-item-name="${brand.name}">Editar</button>
+                            <button class="table-action-btn delete" data-item-name="${brand.name}">Excluir</button>
                         </div>
                     </td>
                 </tr>
@@ -123,6 +129,25 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
     }
+    
+    /**
+     * Renderiza os filtros ativos.
+     * @param {Array<Object>} filters - Um array de objetos de filtros.
+     */
+    function renderActiveFilters(filters) {
+        activeFiltersList.innerHTML = '';
+        filters.forEach(filter => {
+            const filterTag = document.createElement('div');
+            filterTag.classList.add('selected-filter-tag');
+            filterTag.innerHTML = `
+                <span>${filter.name}</span>
+                <button class="remove-btn" data-filter-name="${filter.name}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            activeFiltersList.appendChild(filterTag);
+        });
+    }
 
     // Lógica para carregar os dados das APIs
     async function fetchDashboardData(timeRange = '30d') {
@@ -135,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             renderKPIs(data.kpis);
             renderSalesTable(data.recentSales);
-            // TODO: Adicionar lógica para renderizar o gráfico com os dados de `data.analytics`
         } catch (error) {
             exibirMensagem(`Não foi possível carregar os dados do dashboard: ${error.message}`, 'danger');
             console.error(error);
@@ -149,21 +173,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (productsResponse.ok) {
                 renderProductsTable(productsData);
             }
+            
+            const usersResponse = await fetch(API_USERS_URL);
+            const usersData = await usersResponse.json();
+            if (usersResponse.ok) {
+                renderUsersTable(usersData);
+            }
 
-            // Mock de dados de usuários e marcas para a demonstração
-            // Em uma aplicação real, estes dados viriam de uma API
-            const mockUsers = [
-                { username: 'Diogo Aguiar', email: 'diogo@example.com', date_joined: '15/06/2025' },
-                { username: 'Maria Santos', email: 'maria@example.com', date_joined: '10/06/2025' }
-            ];
-            const mockBrands = [
-                { id: 1, name: 'Decibell' },
-                { id: 2, name: 'Sony' },
-                { id: 3, name: 'JBL' }
-            ];
+            const brandsResponse = await fetch(API_BRANDS_URL);
+            const brandsData = await brandsResponse.json();
+            if (brandsResponse.ok) {
+                renderBrandsTable(brandsData);
+            }
 
-            renderUsersTable(mockUsers);
-            renderBrandsTable(mockBrands);
         } catch (error) {
             exibirMensagem(`Não foi possível carregar as tabelas: ${error.message}`, 'danger');
             console.error(error);
@@ -183,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         formData.append('product_data', JSON.stringify(productData));
         
-        // Adiciona as imagens ao FormData
         const images = document.getElementById('product-image').files;
         for (let i = 0; i < images.length; i++) {
             formData.append('images', images[i]);
@@ -218,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const productName = targetBtn.dataset.itemName;
             if (confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
                 try {
-                    const response = await fetch(`${API_PRODUCTS_URL}${productId}`, {
+                    const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
                         method: 'DELETE'
                     });
                     const result = await response.json();
@@ -236,12 +257,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // Lida com o formulário de adicionar filtro
+    manageFiltersForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const filterData = {
+            name: filterNameInput.value.trim(),
+            type: filterTypeSelect.value
+        };
+        
+        if (!filterData.name) {
+            exibirMensagem('O nome do filtro não pode estar vazio.', 'danger');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${window.location.origin}/api/admin/filters`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(filterData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                exibirMensagem(result.message, 'success');
+                manageFiltersForm.reset();
+                // A lista de filtros ativos precisa ser recarregada
+                // A lógica abaixo é um placeholder, pois a API não salva os dados no banco de dados.
+                // Em um projeto real, você chamaria uma função como fetchFilters() aqui.
+                renderActiveFilters([{name: filterData.name, type: filterData.type}]);
+            } else {
+                exibirMensagem(result.error, 'danger');
+            }
+        } catch (error) {
+            exibirMensagem('Erro de conexão ao tentar adicionar o filtro.', 'danger');
+            console.error(error);
+        }
+    });
+
     // Funções de feedback e utilitárias
-    /**
-     * Exibe uma mensagem de feedback para o usuário.
-     * @param {string} message - A mensagem a ser exibida.
-     * @param {string} type - O tipo da mensagem ('success', 'info', 'danger').
-     */
     function exibirMensagem(message, type = 'info') {
         if (!modalMessage) return;
         modalMessage.textContent = message;
@@ -254,10 +310,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicialização do Dashboard
     function initDashboard() {
-        // Carrega os dados iniciais (30 dias)
         fetchDashboardData();
-        // Carrega as tabelas de produtos, marcas e usuários
         fetchProductsAndUsers();
+        // A lista de filtros ativos precisa ser populada dinamicamente,
+        // mas a API atual não suporta isso. A função abaixo é um placeholder.
+        renderActiveFilters([]); 
     }
 
     // Adiciona listeners para os botões de tabs
@@ -269,6 +326,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Inicia o dashboard ao carregar a página
     initDashboard();
 });
