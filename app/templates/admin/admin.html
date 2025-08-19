@@ -38,6 +38,7 @@
             </div>
 
             <div class="bottom-sections">
+                <!-- Adicionar e Gerenciar Produtos/Filtros -->
                 <div class="left-sections">
                     <div class="card">
                         <h3>Adicionar Produto</h3>
@@ -45,29 +46,41 @@
                             <!-- Visualização da imagem selecionada -->
                             <div id="product-image-previews-container" class="product-image-previews-container hidden"></div>
 
-                            <input type="text" id="product-name" placeholder="Nome do Produto" required>
-                            <input type="text" id="product-brand" placeholder="Marca" required>
-                            <input type="number" id="product-price" placeholder="Preço" step="0.01" required>
-                            <textarea id="product-description" placeholder="Descrição do Produto" required></textarea>
-                            <input type="text" id="product-status" placeholder="Status (Ex: 'Em estoque')" required>
+                            <input type="text" id="product-name" name="name" placeholder="Nome do Produto" required>
+                            <input type="text" id="product-brand" name="brand" placeholder="Marca" required>
+                            <input type="number" id="product-price" name="price" placeholder="Preço" step="0.01" required>
+                            <textarea id="product-description" name="description" placeholder="Descrição do Produto" required></textarea>
+                            <input type="text" id="product-status" name="status" placeholder="Status (Ex: 'Em estoque')" required>
                             
                             <label for="product-image" class="file-upload-label">
                                 <i class="fas fa-camera"></i>
-                                <span>Selecionar Imagens</span>
+                                <span>Selecionar Imagens (máx. 15)</span>
                             </label>
-                            <input type="file" id="product-image" class="hidden" multiple accept="image/*">
+                            <input type="file" id="product-image" name="images" class="hidden" multiple accept="image/*">
                             <button type="submit">Adicionar Produto</button>
                         </form>
                     </div>
                 </div>
+
+                <!-- A seção "Gerenciar Filtros" duplicada foi removida. -->
             </div>
+            
             <div id="gerenciar-filtros" class="card">
                 <h3>Gerenciar Filtros</h3>
                 <form id="manage-filters-form">
+                    <label for="filter-type">Tipo de Filtro:</label>
+                    <select id="filter-type" name="filter-type" class="mb-4 p-2 border rounded">
+                        <option value="brand">Marca</option>
+                        <option value="type">Tipo de Fone</option>
+                        <!-- Adicione mais tipos de filtro conforme necessário -->
+                    </select>
                     <input type="text" id="filter-name" placeholder="Nome do Filtro (Ex: 'Acessórios')" required>
                     <button type="button" id="add-filter-btn" class="add-filter-btn">Adicionar Filtro</button>
-                    <button type="button" id="remove-filter-btn" class="remove-filter-btn">Remover Filtro</button>
                 </form>
+                <div class="mt-4">
+                    <h4 class="font-semibold">Filtros Ativos:</h4>
+                    <ul id="active-filters-list" class="list-disc ml-4"></ul>
+                </div>
             </div>
             
             <div class="tables-container">

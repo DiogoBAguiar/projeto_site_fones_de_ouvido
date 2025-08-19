@@ -1,4 +1,4 @@
-// Este código foi corrigido para se comunicar com a nova API do Flask para o Dashboard.
+// Este código foi corrigido para se comunicar com a nova API do Flask para o Dashboard e produtos.
 
 // ==============================================================================
 // FUNÇÕES DE MANIPULAÇÃO DE DADOS
@@ -26,6 +26,8 @@ const icons = {
 
 // Variável para armazenar os dados de produtos.
 let products = [];
+// Variável para armazenar os filtros ativos
+let activeFilters = [];
 
 // ==============================================================================
 // FUNÇÕES DE RENDERIZAÇÃO
@@ -172,47 +174,20 @@ const renderProductTable = () => {
 };
 
 /**
- * Renderiza a tabela de marcas mockadas.
+ * Renderiza a lista de filtros ativos.
  */
-const renderBrandTable = () => {
-    const tableContainer = document.getElementById('brands-table');
-    tableContainer.innerHTML = `
-        <h3 class="text-lg font-semibold mb-4">Marcas</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Marca</th>
-                    <th>Produtos</th>
-                    <th>Receita</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Conteúdo mockado removido -->
-            </tbody>
-        </table>
-    `;
-};
-
-/**
- * Renderiza a tabela de usuários mockados.
- */
-const renderUserTable = () => {
-    const tableContainer = document.getElementById('users-table');
-    tableContainer.innerHTML = `
-        <h3 class="text-lg font-semibold mb-4">Usuários</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Email</th>
-                    <th>Compras</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Conteúdo mockado removido -->
-            </tbody>
-        </table>
-    `;
+const renderActiveFilters = () => {
+    const filterList = document.getElementById('active-filters-list');
+    filterList.innerHTML = '';
+    if (activeFilters.length === 0) {
+        filterList.innerHTML = '<p class="text-gray-500">Nenhum filtro ativo.</p>';
+        return;
+    }
+    activeFilters.forEach(filter => {
+        const li = document.createElement('li');
+        li.textContent = `${filter.type}: ${filter.name}`;
+        filterList.appendChild(li);
+    });
 };
 
 
@@ -284,6 +259,29 @@ window.removeProduct = async (productId) => {
 };
 
 /**
+ * Adiciona um novo filtro ao backend.
+ */
+const addFilter = async (filterData) => {
+    try {
+        // Envia o filtro para o backend
+        const response = await fetch(`${API_DASHBOARD_URL}/filters`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(filterData)
+        });
+        if (!response.ok) throw new Error("Erro ao adicionar filtro.");
+        
+        const newFilter = await response.json();
+        // Acessa a propriedade 'filter' do objeto retornado
+        activeFilters.push(newFilter.filter);
+        renderActiveFilters();
+        console.log("Filtro adicionado com sucesso!");
+    } catch (error) {
+        console.error("Erro:", error);
+    }
+};
+
+/**
  * Função principal para carregar os dados do painel de controle.
  */
 const loadDashboard = async (timeRange) => {
@@ -326,6 +324,11 @@ const setupEventListeners = () => {
         const imagesInput = document.getElementById('product-image');
         const images = Array.from(imagesInput.files);
         
+        if (images.length > 15) {
+            alert('Você só pode fazer upload de no máximo 15 imagens.');
+            return;
+        }
+
         const newProduct = {
             name: document.getElementById('product-name').value,
             brand: document.getElementById('product-brand').value,
@@ -349,7 +352,7 @@ const setupEventListeners = () => {
         
         if (files.length > 0) {
             previewsContainer.classList.remove('hidden');
-            Array.from(files).forEach(file => {
+            Array.from(files).slice(0, 15).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = document.createElement('img');
@@ -362,6 +365,18 @@ const setupEventListeners = () => {
             });
         }
     });
+
+    document.getElementById('add-filter-btn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const filterType = document.getElementById('filter-type').value;
+        const filterName = document.getElementById('filter-name').value;
+        if (filterType && filterName) {
+            await addFilter({ type: filterType, name: filterName });
+            document.getElementById('filter-name').value = '';
+        } else {
+            alert('Por favor, preencha o tipo e o nome do filtro.');
+        }
+    });
 };
 
 /**
@@ -371,8 +386,7 @@ const initialize = async () => {
     const initialTimeRange = document.querySelector('.tab-trigger.active').getAttribute('data-value');
     await loadDashboard(initialTimeRange);
     fetchAndRenderProducts();
-    renderBrandTable();
-    renderUserTable();
+    renderActiveFilters(); // Renderiza os filtros ativos
     setupEventListeners();
 };
 

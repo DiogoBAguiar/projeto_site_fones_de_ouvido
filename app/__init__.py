@@ -31,15 +31,15 @@ def create_app(config_class=Config):
     from app.models import user, product, review
 
     # Importa os Blueprints de cada arquivo de rota.
-    # Corrigido para importar os dois novos Blueprints
     from app.routes.public import public_bp
     from app.routes.user import user_bp
-    from app.routes.admin import admin_page_bp, admin_api_bp
+    from app.routes.admin import admin_page_bp, admin_api_bp, dashboard_api_bp
     
     # Registra os Blueprints na aplicação.
     app.register_blueprint(public_bp)
     app.register_blueprint(user_bp, url_prefix='/user')
     app.register_blueprint(admin_page_bp)
     app.register_blueprint(admin_api_bp)
+    app.register_blueprint(dashboard_api_bp)
     
     return app
