@@ -1,22 +1,4 @@
-const products = [
-    { id: 1, name: "Produto 1", price: "R$ 100", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/S%C5%82uchawki_referencyjne_K-701_firmy_AKG.jpg/250px-S%C5%82uchawki_referencyjne_K-701_firmy_AKG.jpg", type: "Tipo 1", brand: "Marca 1" },
-    { id: 2, name: "Produto 2", price: "R$ 200", img: "https://via.placeholder.com/100", type: "Tipo 2", brand: "Marca 2" },
-    { id: 3, name: "Produto 3", price: "R$ 300", img: "https://via.placeholder.com/100", type: "Tipo 3", brand: "Marca 3" },
-    { id: 4, name: "Produto 4", price: "R$ 400", img: "https://via.placeholder.com/100", type: "Tipo 4", brand: "Marca 4" },
-    { id: 5, name: "Produto 5", price: "R$ 500", img: "https://via.placeholder.com/100", type: "Tipo 1", brand: "Marca 5" },
-    { id: 6, name: "Produto 6", price: "R$ 600", img: "https://via.placeholder.com/100", type: "Tipo 2", brand: "Marca 6" },
-    { id: 7, name: "Produto 7", price: "R$ 700", img: "https://via.placeholder.com/100", type: "Tipo 3", brand: "Marca 7" },
-    { id: 8, name: "Produto 8", price: "R$ 800", img: "https://via.placeholder.com/100", type: "Tipo 4", brand: "Marca 8" },
-    { id: 9, name: "Produto 9", price: "R$ 900", img: "https://via.placeholder.com/100", type: "Tipo 1", brand: "Marca 1" },
-    { id: 10, name: "Produto 10", price: "R$ 1000", img: "https://via.placeholder.com/100", type: "Tipo 2", brand: "Marca 2" },
-    { id: 11, name: "Produto 11", price: "R$ 1100", img: "https://via.placeholder.com/100", type: "Tipo 3", brand: "Marca 3" },
-    { id: 12, name: "Produto 12", price: "R$ 1200", img: "https://via.placeholder.com/100", type: "Tipo 4", brand: "Marca 4" },
-    { id: 13, name: "Produto 13", price: "R$ 1300", img: "https://via.placeholder.com/100", type: "Tipo 1", brand: "Marca 5" },
-    { id: 14, name: "Produto 14", price: "R$ 1400", img: "https://via.placeholder.com/100", type: "Tipo 2", brand: "Marca 6" },
-    { id: 15, name: "Produto 15", price: "R$ 1500", img: "https://via.placeholder.com/100", type: "Tipo 3", brand: "Marca 7" },
-    { id: 16, name: "Produto 16", price: "R$ 1600", img: "https://via.placeholder.com/100", type: "Tipo 4", brand: "Marca 8" },
-    // Adicione mais produtos conforme necessário
-];
+// Este código foi corrigido para buscar os produtos da API do Flask.
 
 let currentPage = 1;
 const productsPerPage = 12;
@@ -24,11 +6,38 @@ let selectedPrice = 10000; // Preço máximo padrão
 let selectedTypes = [];
 let selectedBrands = [];
 
+// Variável global para armazenar os produtos do backend
+let products = [];
+const API_PRODUCTS_URL = window.location.origin + "/products";
+
+/**
+ * Busca os produtos da API e renderiza a lista.
+ */
+async function fetchProducts() {
+    try {
+        const response = await fetch(API_PRODUCTS_URL);
+        if (!response.ok) {
+            throw new Error('Erro ao buscar produtos da API.');
+        }
+        products = await response.json();
+        updateProductList();
+    } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+        const productList = document.getElementById('productList');
+        productList.innerHTML = `<p class="text-center text-gray-500">Não foi possível carregar os produtos. Tente novamente mais tarde.</p>`;
+    }
+}
+
 function displayProducts(page, filteredProducts = products) {
     const startIndex = (page - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
     const productList = document.getElementById('productList');
     productList.innerHTML = '';
+
+    if (filteredProducts.length === 0) {
+        productList.innerHTML = `<p class="text-center text-gray-500">Nenhum produto encontrado com os filtros aplicados.</p>`;
+        return;
+    }
 
     filteredProducts.slice(startIndex, endIndex).forEach(product => {
         const productDiv = document.createElement('div');
@@ -36,12 +45,12 @@ function displayProducts(page, filteredProducts = products) {
         
         // Cria o link que envolve o conteúdo do produto
         const link = document.createElement('a');
-        link.href = `/products-details?id=${product.id}`; // Altere para o link desejado
+        link.href = `/products-details?id=${product.id}`;
         link.innerHTML = `
-            <img src="${product.img}" alt="${product.name}">
+            <img src="${product.images[0] || 'https://via.placeholder.com/100'}" alt="${product.name}">
             <div class="product-info">
                 <div class="product-name">${product.name}</div>
-                <div class="product-price">${product.price}</div>
+                <div class="product-price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
             </div>
         `;
         
@@ -54,7 +63,8 @@ function displayProducts(page, filteredProducts = products) {
         button.innerText = "Adicionar ao Carrinho";
         button.onclick = (event) => {
             event.stopPropagation(); // Impede que o clique no botão ative o link
-            // Adicione a lógica para adicionar ao carrinho aqui
+            // TODO: Implementar lógica para adicionar ao carrinho aqui
+            // A sua lógica atual está no index.js, precisa ser integrada aqui.
         };
         
         productDiv.appendChild(button);
@@ -88,8 +98,10 @@ function updatePriceDisplay() {
 
 function updateProductList() {
     const filteredProducts = products.filter(product => {
-        const price = parseFloat(product.price.replace('R$ ', '').replace('.', '').replace(',', '.'));
+        const price = product.price;
         const matchesPrice = price <= selectedPrice;
+        // As lógicas de tipo e marca dependem de como você as armazena no banco de dados.
+        // A lógica abaixo é baseada nos dados mockados originais.
         const matchesType = selectedTypes.length === 0 || selectedTypes.includes(product.type);
         const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
         return matchesPrice && matchesType && matchesBrand;
@@ -118,6 +130,7 @@ document.querySelectorAll('.filters input[type="checkbox"]').forEach(checkbox =>
     });
 });
 
-displayProducts(currentPage);
-displayPagination();
-updatePriceDisplay(); // Inicializa o preço exibido
+document.addEventListener('DOMContentLoaded', () => {
+    fetchProducts();
+    updatePriceDisplay(); // Inicializa o preço exibido
+});

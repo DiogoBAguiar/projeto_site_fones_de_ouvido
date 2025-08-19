@@ -1,87 +1,87 @@
-# routes/admin.py
+# app/routes/admin.py
 # Este arquivo é um Blueprint que agrupa todas as rotas
 # de gerenciamento de produtos da sua aplicação.
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
+from app import db
+from app.models.product import Product
 import json
 import os
-import pandas as pd
 
-# Define o caminho do arquivo de dados e as funções de lógica de negócio
-# para que o Blueprint possa acessá-las.
-# Em projetos maiores, essas funções de lógica de negócio seriam movidas
-# para um arquivo de "serviços" separado para maior modularidade.
-DATA_FOLDER = '../../banco_de_dados/produtos/'
-PRODUCTS_CSV = os.path.join(DATA_FOLDER, 'products.csv')
+# Define o caminho para a pasta de uploads
+UPLOAD_FOLDER = 'app/static/uploads'
 
-def read_products_from_csv():
-    """Lê os produtos do arquivo CSV e retorna como uma lista de dicionários."""
-    if not os.path.exists(PRODUCTS_CSV):
-        return []
-    df = pd.read_csv(PRODUCTS_CSV)
-    df['images'] = df['images'].apply(eval)
-    return df.to_dict('records')
+# ==============================================================================
+# BLUEPRINT DA PÁGINA DE ADMINISTRAÇÃO
+# ==============================================================================
+# Este Blueprint lida apenas com a rota que serve a página HTML.
+admin_page_bp = Blueprint('admin_page', __name__, url_prefix='/admin')
 
-def write_products_to_csv(products):
-    """Escreve uma lista de produtos no arquivo CSV."""
-    df = pd.DataFrame(products)
-    df.to_csv(PRODUCTS_CSV, index=False)
+@admin_page_bp.route('/')
+def admin():
+    """Rota para a página de administrador."""
+    return render_template('admin/admin.html')
 
-def add_product_logic(product_data, image_files):
-    """Lógica para adicionar um produto e salvar suas imagens."""
-    product_id = product_data['id']
-    image_folder = os.path.join(DATA_FOLDER, product_id)
-    os.makedirs(image_folder, exist_ok=True)
-    
-    image_paths = []
-    for image in image_files:
-        image_path = os.path.join(image_folder, image.filename)
-        image.save(image_path)
-        image_paths.append(f'/{image_path}')
+# ==============================================================================
+# BLUEPRINT DA API DE PRODUTOS
+# ==============================================================================
+# Este Blueprint lida com os endpoints da API para gerenciar produtos.
+admin_api_bp = Blueprint('admin_api', __name__, url_prefix='/api/produtos')
 
-    product_data['images'] = image_paths
-    products = read_products_from_csv()
-    products.append(product_data)
-    write_products_to_csv(products)
-    
-    return product_data
-
-def remove_product_logic(product_id):
-    """Lógica para remover um produto e sua pasta de imagens."""
-    products = read_products_from_csv()
-    products = [p for p in products if p['id'] != product_id]
-    write_products_to_csv(products)
-    
-    image_folder = os.path.join(DATA_FOLDER, product_id)
-    if os.path.exists(image_folder):
-        for file_name in os.listdir(image_folder):
-            os.remove(os.path.join(image_folder, file_name))
-        os.rmdir(image_folder)
-
-# Cria o Blueprint
-admin_bp = Blueprint('admin', __name__, url_prefix='/api/produtos')
-
-@admin_bp.route('/', methods=['GET'])
+@admin_api_bp.route('/', methods=['GET'])
 def get_products():
-    """Rota para obter todos os produtos."""
-    products = read_products_from_csv()
-    return jsonify(products)
+    """Rota de API para obter todos os produtos do banco de dados."""
+    try:
+        products = Product.query.all()
+        products_list = []
+        for product in products:
+            products_list.append({
+                'id': product.id,
+                'name': product.name,
+                'brand': product.brand,
+                'price': product.price,
+                'status': product.status,
+                'images': product.get_images()
+            })
+        return jsonify(products_list)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@admin_bp.route('/', methods=['POST'])
+@admin_api_bp.route('/', methods=['POST'])
 def add_product():
-    """Rota para adicionar um novo produto."""
+    """Rota de API para adicionar um novo produto."""
     try:
         product_data = json.loads(request.form['product_data'])
-        new_product = add_product_logic(product_data, request.files.getlist('images'))
-        return jsonify({"message": "Produto adicionado com sucesso!", "product": new_product}), 201
+        images = request.files.getlist('images')
+
+        # Lógica de criação e salvamento do produto...
+        new_product = Product(
+            name=product_data['name'],
+            brand=product_data['brand'],
+            price=product_data['price'],
+            status=product_data['status'],
+            images=json.dumps(image_paths),
+            seller_id=1 # TODO: Lógica para pegar o ID do usuário logado
+        )
+
+        db.session.add(new_product)
+        db.session.commit()
+
+        return jsonify({"message": "Produto adicionado com sucesso!", "product": product_data}), 201
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 400
 
-@admin_bp.route('/<string:product_id>', methods=['DELETE'])
+@admin_api_bp.route('/<int:product_id>', methods=['DELETE'])
 def remove_product(product_id):
-    """Rota para remover um produto pelo ID."""
+    """Rota de API para remover um produto pelo ID."""
     try:
-        remove_product_logic(product_id)
+        product_to_remove = Product.query.get_or_404(product_id)
+        
+        db.session.delete(product_to_remove)
+        db.session.commit()
+
         return jsonify({"message": "Produto removido com sucesso!"}), 200
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 400

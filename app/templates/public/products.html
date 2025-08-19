@@ -13,15 +13,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../static/css/index/global.css">
-    <link rel="stylesheet" href="../../static/css/products/products.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/products/products.css') }}">
 </head>
 <body class="tema-claro">
     <!-- Cabeçalho (Header) do Site -->
     <header class="cabecalho">
         <div class="cabecalho-conteiner">
             <!-- Logo/Nome da Loja -->
-            <a href="../admin/admin.html" class="logo">
+            <a href="{{ url_for('public.home') }}" class="logo">
                 Decibell
             </a>
 
@@ -36,12 +36,10 @@
                 </div>
 
                 <!-- Ícone de Carrinho (agora um botão para abrir o menu lateral) -->
-              
-
-             <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
-             <i class="fas fa-shopping-cart"></i>
-             <span id="contador-carrinho" class="contador-carrinho">0</span>
-             </button>
+                <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="contador-carrinho" class="contador-carrinho">0</span>
+                </button>
 
                 <!-- Menu de Perfil do Usuário -->
                 <div class="perfil-container">
@@ -50,7 +48,7 @@
                         <!-- O conteúdo deste botão será definido via JavaScript -->
                     </button>
                     <div id="dropdown-perfil" class="dropdown-perfil">
-                        <a href="/perfil">Meu Perfil</a>
+                        <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
                         <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
                         <button id="btn-logout">Sair</button>
                     </div>
@@ -106,33 +104,26 @@
     <main class="conteudo-principal">
         <div class="container">
             <div class="filters">
-                <button class="back-to-index"><a href="/index">
+                <button class="back-to-index"><a href="{{ url_for('public.home') }}">
                     <i class="fas fa-credit-card"></i>
                     Voltar para Página principal</a>
                 </button>
                 <h2>Filtros</h2>
                 <h3>Preço</h3>
-                <input type="range" min="0" max="10000" value="500" id="priceRange" oninput="updatePriceDisplay()">
+                <input type="range" min="0" max="10000" value="500" id="priceRange">
                 <div class="price-display" id="priceDisplay">R$ 1600</div>
                 <h3>Tipos</h3>
-                <label><input type="checkbox" value="Tipo 1"> Tipo 1</label><br>
-                <label><input type="checkbox" value="Tipo 2"> Tipo 2</label><br>
-                <label><input type="checkbox" value="Tipo 3"> Tipo 3</label><br>
-                <label><input type="checkbox" value="Tipo 4"> Tipo 4</label><br>
+                {% for p in products %}
+                    <label><input type="checkbox" value="{{ p.type }}"> {{ p.type }}</label><br>
+                {% endfor %}
                 <h3>Marca</h3>
-                <label><input type="checkbox" value="Marca 1"> Marca 1</label><br>
-                <label><input type="checkbox" value="Marca 2"> Marca 2</label><br>
-                <label><input type="checkbox" value="Marca 3"> Marca 3</label><br>
-                <label><input type="checkbox" value="Marca 4"> Marca 4</label><br>
-                <label><input type="checkbox" value="Marca 5"> Marca 5</label><br>
-                <label><input type="checkbox" value="Marca 6"> Marca 6</label><br>
-                <label><input type="checkbox" value="Marca 7"> Marca 7</label><br>
-                <label><input type="checkbox" value="Marca 8"> Marca 8</label><br>
+                {% for p in products %}
+                    <label><input type="checkbox" value="{{ p.brand }}"> {{ p.brand }}</label><br>
+                {% endfor %}
             </div>
 
             <div class="products" id="productList">
                 <!-- Produtos serão gerados aqui -->
-
             </div>
         </div>
 
@@ -146,7 +137,7 @@
         <div class="conteiner">
             <div class="rodape-conteiner">
                 <div class="rodape-coluna">
-                    <a href="#" class="logo">Decibell</a>
+                    <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
                     <p>A mais alta fidelidade sonora para seus ouvidos.</p>
                     <div class="rodape-redes-sociais">
                         <a href="#" aria-label="Siga-nos no Twitter"><i class="fab fa-twitter"></i></a>
@@ -224,11 +215,11 @@
             </button>
         </form>
         <div class="footer-modal">
-            <p>Ainda não tem uma conta? <a href="./register">Cadastre-se</a></p>
+            <p>Ainda não tem uma conta? <a href="{{ url_for('public.register') }}">Cadastre-se</a></p>
         </div>
     </div>
 </div>
-<script src="../../static/js/index.js"></script>
-<script src="../../static/js/products.js"></script>         
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
 </body>
 </html>

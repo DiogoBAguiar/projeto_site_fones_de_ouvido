@@ -13,14 +13,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../static/css/index/global.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body class="tema-claro">
     <!-- Cabeçalho (Header) do Site -->
     <header class="cabecalho">
         <div class="cabecalho-conteiner">
             <!-- Logo/Nome da Loja -->
-            <a href="/admin" class="logo">
+            <a href="{{ url_for('public.home') }}" class="logo">
                 Decibell
             </a>
 
@@ -35,12 +35,10 @@
                 </div>
 
                 <!-- Ícone de Carrinho (agora um botão para abrir o menu lateral) -->
-              
-
-             <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
-             <i class="fas fa-shopping-cart"></i>
-             <span id="contador-carrinho" class="contador-carrinho">0</span>
-             </button>
+                <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="contador-carrinho" class="contador-carrinho">0</span>
+                </button>
 
                 <!-- Menu de Perfil do Usuário -->
                 <div class="perfil-container">
@@ -49,7 +47,7 @@
                         <!-- O conteúdo deste botão será definido via JavaScript -->
                     </button>
                     <div id="dropdown-perfil" class="dropdown-perfil">
-                        <a href="/perfil">Meu Perfil</a>
+                        <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
                         <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
                         <button id="btn-logout">Sair</button>
                     </div>
@@ -111,7 +109,7 @@
             <p class="subtitulo-destaque">
                 Descubra a coleção de áudio que redefine a excelência.
             </p>
-            <a href="./products" class="botao-destaque">
+            <a href="{{ url_for('public.products') }}" class="botao-destaque">
                 Explorar Produtos
             </a>
         </section>
@@ -143,22 +141,22 @@
                 <h2 class="titulo-tipos-fones">Do imersivo ao portátil, encontre o fone de ouvido que se adapta perfeitamente à sua vida.</h2>
                 <div class="grade-tipos-fones">
                     <!-- Fone Supra-auricular -->
-                    <a href="/produtos?tipo=supra-auricular" class="cartao-tipo">
+                    <a href="{{ url_for('public.products', tipo='supra-auricular') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/94a3b8/ffffff?text=Supra-auricular" alt="Fone de ouvido supra-auricular" class="imagem-tipo">
                         <h3 class="nome-tipo">Supra-auricular</h3>
                     </a>
                     <!-- Fone Circumaural -->
-                    <a href="/produtos?tipo=circumaural" class="cartao-tipo">
+                    <a href="{{ url_for('public.products', tipo='circumaural') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/64748b/ffffff?text=Circumaural" alt="Fone de ouvido circumaural" class="imagem-tipo">
                         <h3 class="nome-tipo">Circumaural</h3>
                     </a>
                     <!-- Fone Intra-auricular -->
-                    <a href="/produtos?tipo=intra-auricular" class="cartao-tipo">
+                    <a href="{{ url_for('public.products', tipo='intra-auricular') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/475569/ffffff?text=Intra-auricular" alt="Fone de ouvido intra-auricular" class="imagem-tipo">
                         <h3 class="nome-tipo">Intra-auricular</h3>
                     </a>
                     <!-- Fone Sem fio -->
-                    <a href="/produtos?tipo=sem-fio" class="cartao-tipo">
+                    <a href="{{ url_for('public.products', tipo='sem-fio') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/334155/ffffff?text=Sem+fio" alt="Fone de ouvido sem fio" class="imagem-tipo">
                         <h3 class="nome-tipo">Sem fio</h3>
                     </a>
@@ -170,50 +168,7 @@
         <section id="produtos-destaque" class="secao secao-produtos-destaque oculta">
             <h2 class="titulo-secao">Produtos em Destaque</h2>
             <div class="grade-produtos">
-                <div class="cartao-produto" data-produto-id="fone-x-pro">
-                    <img src="https://placehold.co/600x400/1a1a1a/FFFFFF?text=Fone+X+Pro" alt="Fone de Ouvido X Pro" class="imagem-produto">
-                    <div class="info-produto">
-                        <h3 class="nome-produto">Fone X Pro</h3>
-                        <p class="descricao-produto">Conforto e potência.</p>
-                        <p class="preco-produto" data-preco="599.90">R$ 599,90</p>
-                        <button class="botao-add-carrinho" aria-label="Adicionar Fone X Pro ao carrinho" data-produto-id="fone-x-pro">
-                            Adicionar ao Carrinho
-                        </button>
-                    </div>
-                </div>
-                <div class="cartao-produto" data-produto-id="fone-z-lite">
-                    <img src="https://placehold.co/600x400/333333/FFFFFF?text=Fone+Z+Lite" alt="Fone de Ouvido Z Lite" class="imagem-produto">
-                    <div class="info-produto">
-                        <h3 class="nome-produto">Fone Z Lite</h3>
-                        <p class="descricao-produto">Leve e elegante.</p>
-                        <p class="preco-produto" data-preco="299.90">R$ 299,90</p>
-                        <button class="botao-add-carrinho" aria-label="Adicionar Fone Z Lite ao carrinho" data-produto-id="fone-z-lite">
-                            Adicionar ao Carrinho
-                        </button>
-                    </div>
-                </div>
-                <div class="cartao-produto" data-produto-id="fone-y-studio">
-                    <img src="https://placehold.co/600x400/4d4d4d/FFFFFF?text=Fone+Y+Studio" alt="Fone de Ouvido Y Studio" class="imagem-produto">
-                    <div class="info-produto">
-                        <h3 class="nome-produto">Fone Y Studio</h3>
-                        <p class="descricao-produto">Para profissionais de áudio.</p>
-                        <p class="preco-produto" data-preco="899.90">R$ 899,90</p>
-                        <button class="botao-add-carrinho" aria-label="Adicionar Fone Y Studio ao carrinho" data-produto-id="fone-y-studio">
-                            Adicionar ao Carrinho
-                        </button>
-                    </div>
-                </div>
-                <div class="cartao-produto" data-produto-id="fone-w-play">
-                    <img src="https://placehold.co/600x400/666666/FFFFFF?text=Fone+W+Play" alt="Fone de Ouvido W Play" class="imagem-produto">
-                    <div class="info-produto">
-                        <h3 class="nome-produto">Fone W Play</h3>
-                        <p class="descricao-produto">O parceiro do seu jogo.</p>
-                        <p class="preco-produto" data-preco="499.90">R$ 499,90</p>
-                        <button class="botao-add-carrinho" aria-label="Adicionar Fone W Play ao carrinho" data-produto-id="fone-w-play">
-                            Adicionar ao Carrinho
-                        </button>
-                    </div>
-                </div>
+                <!-- Agora, os produtos serão injetados aqui via JavaScript. -->
             </div>
         </section>
 
@@ -312,7 +267,7 @@
         <div class="conteiner">
             <div class="rodape-conteiner">
                 <div class="rodape-coluna">
-                    <a href="#" class="logo">Decibell</a>
+                    <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
                     <p>A mais alta fidelidade sonora para seus ouvidos.</p>
                     <div class="rodape-redes-sociais">
                         <a href="#" aria-label="Siga-nos no Twitter"><i class="fab fa-twitter"></i></a>
@@ -390,10 +345,11 @@
             </button>
         </form>
         <div class="footer-modal">
-            <p>Ainda não tem uma conta? <a href="./register.html">Cadastre-se</a></p>
+            <p>Ainda não tem uma conta? <a href="{{ url_for('public.register') }}">Cadastre-se</a></p>
         </div>
     </div>
 </div>
-<script src="../../static/js/index.js"></script>         
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
 </body>
 </html>

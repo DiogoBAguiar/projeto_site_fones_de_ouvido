@@ -1,5 +1,4 @@
-// Este código foi corrigido para garantir que a API_URL aponte
-// para a rota correta do servidor.
+// Este código foi corrigido para se comunicar com a nova API do Flask para o Dashboard.
 
 // ==============================================================================
 // FUNÇÕES DE MANIPULAÇÃO DE DADOS
@@ -13,119 +12,9 @@
  */
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// URLs dos arquivos CSV para os dados do painel de controle.
-// Estes caminhos são relativos ao arquivo HTML e são usados para buscar os dados.
-const CSV_URLS = {
-    kpis: '../../../banco_de_dados/painel_de_administracao/kpis.csv',
-    analytics: '../../../banco_de_dados/painel_de_administracao/analytics.csv',
-    recentSales: '../../../banco_de_dados/painel_de_administracao/recent_sales.csv'
-};
-
-/**
- * Busca e parseia (analisa) um arquivo CSV usando a biblioteca PapaParse.
- * Esta função é a chave para ler os dados dos arquivos.
- * @param {string} url - A URL do arquivo CSV.
- * @returns {Promise<Array<object>>} Uma Promise que resolve com os dados do CSV em formato de array de objetos.
- */
-const fetchAndParseCsv = async (url) => {
-    return new Promise((resolve, reject) => {
-        Papa.parse(url, {
-            download: true,   // Permite que o PapaParse baixe o arquivo da URL.
-            header: true,     // Usa a primeira linha do CSV como chaves para os objetos.
-            dynamicTyping: true, // Converte automaticamente strings para números ou booleanos.
-            complete: (results) => {
-                resolve(results.data);
-            },
-            error: (error) => {
-                console.error(`Erro ao parsear CSV de ${url}:`, error);
-                reject(error);
-            }
-        });
-    });
-};
-
-/**
- * Reestrutura os dados de KPI (que vêm de um CSV plano) em um objeto aninhado.
- * @param {Array<object>} kpiData - Array de dados de KPI brutos do CSV.
- * @returns {object} Dados de KPI agrupados por timeRange.
- */
-const groupKpiData = (kpiData) => {
-    const groupedData = {};
-    kpiData.forEach(item => {
-        const { timeRange, metric, ...rest } = item;
-        if (!groupedData[timeRange]) {
-            groupedData[timeRange] = {};
-        }
-        groupedData[timeRange][metric] = {
-            value: rest.value,
-            change: rest.change,
-            changeType: rest.changeType,
-            description: rest.description
-        };
-    });
-    return groupedData;
-};
-
-/**
- * Agrupa os dados de Analytics e Vendas Recentes por timeRange.
- * @param {Array<object>} data - Array de dados brutos do CSV.
- * @returns {object} Dados agrupados por timeRange.
- */
-const groupArrayData = (data) => {
-    const groupedData = {};
-    data.forEach(item => {
-        const { timeRange, ...rest } = item;
-        if (!groupedData[timeRange]) {
-            groupedData[timeRange] = [];
-        }
-        groupedData[timeRange].push(rest);
-    });
-    return groupedData;
-};
-
-/**
- * Agora, esta função é a principal para buscar os dados do painel de controle.
- * Ela busca e processa todos os CSVs e retorna a estrutura de dados completa.
- * @returns {Promise<object>} Um objeto contendo todos os dados do painel de controle.
- */
-const getDashboardData = async () => {
-    await delay(500); // Simula o tempo de carregamento da API
-    
-    // Busca e parseia todos os arquivos CSV em paralelo para maior eficiência.
-    const [kpis, analytics, recentSales] = await Promise.all([
-        fetchAndParseCsv(CSV_URLS.kpis),
-        fetchAndParseCsv(CSV_URLS.analytics),
-        fetchAndParseCsv(CSV_URLS.recentSales)
-    ]);
-
-    // Reestrutura os dados no formato que as funções de renderização esperam.
-    const kpisByTimeRange = groupKpiData(kpis);
-    const analyticsByTimeRange = groupArrayData(analytics);
-    const recentSalesByTimeRange = groupArrayData(recentSales);
-
-    const dashboardData = {};
-    for (const timeRange in kpisByTimeRange) {
-        dashboardData[timeRange] = {
-            ...kpisByTimeRange[timeRange],
-            analytics: analyticsByTimeRange[timeRange] || [], // Garante que é um array, mesmo se vazio
-            recentSales: recentSalesByTimeRange[timeRange] || [] // Garante que é um array, mesmo se vazio
-        };
-    }
-    
-    return dashboardData;
-};
-
-// Dados mock para as tabelas de Marcas e Usuários.
-const mockBrands = [
-    { id: 1, name: "Decibell", products: 12, revenue: "R$ 15.000" },
-    { id: 2, name: "AudioTech", products: 8, revenue: "R$ 9.500" },
-    { id: 3, name: "SoundWave", products: 20, revenue: "R$ 22.000" },
-];
-const mockUsers = [
-    { id: 1, name: "Diogo Martins", email: "diogo.martins@email.com", purchases: 5 },
-    { id: 2, name: "Maria Clara", email: "maria.clara@email.com", purchases: 2 },
-    { id: 3, name: "João Silva", email: "joao.silva@email.com", purchases: 1 },
-];
+// Endpoints da nova API do Dashboard
+const API_DASHBOARD_URL = window.location.origin + "/api/dashboard";
+const API_PRODUCTS_URL = window.location.origin + "/api/produtos";
 
 // Objeto que armazena os ícones em formato SVG puro.
 const icons = {
@@ -137,9 +26,10 @@ const icons = {
 
 // Variável para armazenar os dados de produtos.
 let products = [];
-// URL base da API para gerenciar produtos.
-// Esta é a rota que o servidor Flask está esperando.
-const API_URL = window.location.origin + "/api/produtos";
+
+// ==============================================================================
+// FUNÇÕES DE RENDERIZAÇÃO
+// ==============================================================================
 
 /**
  * Renderiza os cartões de KPI (Indicadores de Desempenho) com os dados fornecidos.
@@ -151,7 +41,7 @@ const renderKpiCards = (data) => {
         <div class="card kpi-card">
             <div class="header">
                 <h3>Receita Total</h3>
-                <div class="h-4 w-4 text-gray-500">${data.totalRevenue.value}</div>
+                <div class="h-4 w-4 text-gray-500">${icons.DollarSign}</div>
             </div>
             <div class="value">${data.totalRevenue.value}</div>
             <p class="${data.totalRevenue.changeType === 'increase' ? 'change-increase' : 'change-decrease'}">
@@ -228,7 +118,7 @@ const renderRecentSales = (sales) => {
         <div class="sales-list">
             ${sales.map(sale => `
                 <div class="sale-item">
-                    <div class="icon">${icons.Users}</div>
+                    <div class="icon">${icons.CreditCard}</div>
                     <div class="info">
                         <p>Novo cliente</p>
                         <p>${sale.email}</p>
@@ -246,6 +136,7 @@ const renderRecentSales = (sales) => {
 const renderProductTable = () => {
     const tableContainer = document.getElementById('products-table');
     tableContainer.innerHTML = `
+        <h3>Tabela de Produtos</h3>
         <table>
             <thead>
                 <tr>
@@ -263,12 +154,12 @@ const renderProductTable = () => {
                     <tr>
                         <td>
                             <div class="product-thumbnail-container">
-                                ${product.images.map(image => `<img src="${image}" alt="${product.nome}" class="product-thumbnail">`).join('')}
+                                ${product.images.map(image => `<img src="${image}" alt="${product.name}" class="product-thumbnail">`).join('')}
                             </div>
                         </td>
                         <td>${product.id}</td>
-                        <td>${product.nome}</td>
-                        <td>R$ ${product.preco}</td>
+                        <td>${product.name}</td>
+                        <td>R$ ${product.price}</td>
                         <td>${product.status}</td>
                         <td class="table-actions">
                             <button onclick="removeProduct('${product.id}')">Remover</button>
@@ -296,13 +187,7 @@ const renderBrandTable = () => {
                 </tr>
             </thead>
             <tbody>
-                ${mockBrands.map(brand => `
-                    <tr>
-                        <td>${brand.name}</td>
-                        <td>${brand.products}</td>
-                        <td>${brand.revenue}</td>
-                    </tr>
-                `).join('')}
+                <!-- Conteúdo mockado removido -->
             </tbody>
         </table>
     `;
@@ -324,17 +209,12 @@ const renderUserTable = () => {
                 </tr>
             </thead>
             <tbody>
-                ${mockUsers.map(user => `
-                    <tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.purchases}</td>
-                    </tr>
-                `).join('')}
+                <!-- Conteúdo mockado removido -->
             </tbody>
         </table>
     `;
 };
+
 
 // ==============================================================================
 // FUNÇÕES DE INTERAÇÃO COM O BACKEND FLASK
@@ -345,7 +225,7 @@ const renderUserTable = () => {
  */
 const fetchAndRenderProducts = async () => {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_PRODUCTS_URL);
         if (!response.ok) throw new Error("Erro ao buscar produtos.");
         products = await response.json();
         renderProductTable();
@@ -365,7 +245,7 @@ const addProduct = async (productData, images) => {
             formData.append("images", image);
         }
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(API_PRODUCTS_URL, {
             method: "POST",
             body: formData,
         });
@@ -388,7 +268,7 @@ const addProduct = async (productData, images) => {
  */
 window.removeProduct = async (productId) => {
     try {
-        const response = await fetch(`${API_URL}/${productId}`, {
+        const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
             method: 'DELETE'
         });
         if (!response.ok) {
@@ -410,11 +290,19 @@ const loadDashboard = async (timeRange) => {
     document.getElementById('kpi-cards').innerHTML = '<div class="card kpi-card skeleton"></div><div class="card kpi-card skeleton"></div><div class="card kpi-card skeleton"></div><div class="card kpi-card skeleton"></div>';
     document.getElementById('analytics-chart').innerHTML = '<div class="card analytics-chart-card skeleton"></div>';
     document.getElementById('recent-sales').innerHTML = '<div class="card recent-sales-card skeleton"></div>';
-    const allData = await getDashboardData();
-    const data = allData[timeRange];
-    renderKpiCards(data);
-    renderAnalyticsChart(data.analytics);
-    renderRecentSales(data.recentSales);
+    
+    try {
+        const response = await fetch(`${API_DASHBOARD_URL}?timeRange=${timeRange}`);
+        if (!response.ok) throw new Error("Erro ao buscar dados do dashboard.");
+        const data = await response.json();
+        
+        renderKpiCards(data);
+        renderAnalyticsChart(data.analytics);
+        renderRecentSales(data.recentSales);
+
+    } catch (error) {
+        console.error("Erro ao carregar o dashboard:", error);
+    }
 };
 
 /**
@@ -439,10 +327,10 @@ const setupEventListeners = () => {
         const images = Array.from(imagesInput.files);
         
         const newProduct = {
-            id: String(Date.now()),
-            nome: document.getElementById('product-name').value,
-            marca: document.getElementById('product-brand').value,
-            preco: parseFloat(document.getElementById('product-price').value),
+            name: document.getElementById('product-name').value,
+            brand: document.getElementById('product-brand').value,
+            price: parseFloat(document.getElementById('product-price').value),
+            description: document.getElementById('product-description').value,
             status: document.getElementById('product-status').value,
         };
 

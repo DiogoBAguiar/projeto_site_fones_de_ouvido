@@ -1,79 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Page</title>
-    <link rel="stylesheet" href="../../static/css/login/register.css">
+    <title>Cadastro Decibell</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login/register.css') }}">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 </head>
-    <body>
-        <main>
-            <div id="modal-login" class="modal">
-                <div class="conteudo-modal-login">
-                    <div class="header-modal">
-                        <a class="return-to-index" href="./index.html"><h2>Cadastre-se na Decibell</h2></a>
+<body>
+    <main>
+        <div id="modal-login" class="modal">
+            <div class="conteudo-modal-login">
+                <div class="header-modal">
+                    <a class="return-to-index" href="{{ url_for('public.home') }}"><h2>Cadastre-se na Decibell</h2></a>
+                </div>
+                <!-- Mensagens de erro/sucesso do Flask -->
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class="flashes">
+                    {% for message in messages %}
+                        <li class="flash-message">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+                {% endwith %}
+                <form id="form-login" class="form-login" action="{{ url_for('public.register') }}" method="post">
+                    <!-- Nome Completo -->
+                    <div class="input-grupo">
+                        <label for="nome">Nome Completo</label>
+                        <input placeholder="Nome" type="text" id="nome" name="nome" required>
+                        <i class='bx bx-user'></i>
                     </div>
-                    <form id="form-login" class="form-login">
-                        <!-- Nome Completo -->
-                        <div class="input-grupo">
-                            <label for="nome">Nome Completo</label>
-                            <input placeholder="Nome" type="text" id="nome" name="nome" required>
-                            <i class='bx bx-user'></i>
-                        </div>
 
-                        <!-- Email -->
-                        <div class="input-grupo">
-                            <label for="email">Email</label>
-                            <input placeholder="exemplo@gmail.com" type="email" id="email" name="email" required>
-                            <i class='bx bx-envelope'></i>
-                        </div>
+                    <!-- Email -->
+                    <div class="input-grupo">
+                        <label for="email">Email</label>
+                        <input placeholder="exemplo@gmail.com" type="email" id="email" name="email" required>
+                        <i class='bx bx-envelope'></i>
+                    </div>
 
-                        <!-- Senha -->
-                        <div class="input-grupo">
-                            <label for="senha">Senha</label>
-                            <input placeholder="senha" type="password" id="senha" name="senha" required>
-                            <i class='bx bx-lock-alt'></i>
-                        </div>
+                    <!-- Senha -->
+                    <div class="input-grupo">
+                        <label for="senha">Senha</label>
+                        <input placeholder="senha" type="password" id="senha" name="senha" required>
+                        <i class='bx bx-lock-alt'></i>
+                    </div>
 
-                        <!-- Confirmar Senha -->
-                        <div class="input-grupo">
-                            <label for="confirmar-senha">Confirmar Senha</label>
-                            <input placeholder="confirmar-senha" type="password" id="confirmar-senha" name="confirmar-senha" required>
-                            <i class='bx bx-lock-alt'></i>
-                        </div>
+                    <!-- Confirmar Senha -->
+                    <div class="input-grupo">
+                        <label for="confirmar-senha">Confirmar Senha</label>
+                        <input placeholder="confirmar-senha" type="password" id="confirmar-senha" name="confirmar-senha" required>
+                        <i class='bx bx-lock-alt'></i>
+                    </div>
 
-                        <!-- Endereço (CEP) -->
-                        <div class="input-grupo">
-                            <label for="cep">CEP</label>
-                            <input placeholder="00000-000" type="text" id="cep" name="cep" required>
-                            <i class='bx bx-map'></i>
-                        </div>
+                    <!-- Endereço (CEP) -->
+                    <div class="input-grupo">
+                        <label for="cep">CEP</label>
+                        <input placeholder="00000-000" type="text" id="cep" name="cep" required>
+                        <i class='bx bx-map'></i>
+                    </div>
 
-                        <!-- Número de Telefone -->
-                        <div class="input-grupo">
-                            <label for="telefone">Telefone</label>
-                            <input placeholder="(00) 9 9999-9999" type="tel" id="telefone" name="telefone" required>
-                            <i class='bx bx-phone'></i>
-                        </div>
+                    <!-- Número de Telefone -->
+                    <div class="input-grupo">
+                        <label for="telefone">Telefone</label>
+                        <input placeholder="(00) 9 9999-9999" type="tel" id="telefone" name="telefone" required>
+                        <i class='bx bx-phone'></i>
+                    </div>
 
-                        <!-- Data de Nascimento -->
-                        <div class="input-grupo">
-                            <label for="nascimento">Data de Nascimento</label>
-                            <input type="date" id="nascimento" name="nascimento" required>
-                        </div>
+                    <!-- Data de Nascimento -->
+                    <div class="input-grupo">
+                        <label for="nascimento">Data de Nascimento</label>
+                        <input type="date" id="nascimento" name="nascimento" required>
+                    </div>
 
-                        <!-- Botão de Login -->
-                        <button type="submit" class="btn-login-modal">Cadastre-se</button>
+                    <!-- Botão de Cadastro -->
+                    <button type="submit" class="btn-login-modal">Cadastre-se</button>
 
-                        <!-- Botão Google -->
-                        <button type="button" class="btn-login-google">
-                            <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
-                            Entrar com o Google
-                        </button>
-                    </form>
-               </div>
+                    <!-- Botão Google -->
+                    <button type="button" class="btn-login-google">
+                        <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
+                        Entrar com o Google
+                    </button>
+                </form>
             </div>
-        </main>
-    </body>
+        </div>
+    </main>
+</body>
 </html>

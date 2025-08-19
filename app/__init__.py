@@ -11,7 +11,7 @@ db = SQLAlchemy()
 
 def create_app(config_class=Config):
     """Fábrica de aplicação para criar a instância do Flask."""
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
     
     # Carrega as configurações da classe Config.
     app.config.from_object(config_class)
@@ -20,23 +20,26 @@ def create_app(config_class=Config):
     db.init_app(app)
 
     # Cria a pasta 'instance' para o banco de dados se ela não existir.
-    
     if not os.path.exists('instance'):
         os.makedirs('instance')
     
     # ==============================================================================
-    # REGISTRO DE BLUEPRINTS
+    # REGISTRO DE BLUEPRINTS E IMPORTAÇÃO DE MODELOS
     # ==============================================================================
     
+    # Importa os modelos para garantir que as relações do SQLAlchemy sejam criadas.
+    from app.models import user, product, review
+
     # Importa os Blueprints de cada arquivo de rota.
+    # Corrigido para importar os dois novos Blueprints
     from app.routes.public import public_bp
     from app.routes.user import user_bp
-    from app.routes.admin import admin_bp
+    from app.routes.admin import admin_page_bp, admin_api_bp
     
     # Registra os Blueprints na aplicação.
     app.register_blueprint(public_bp)
     app.register_blueprint(user_bp, url_prefix='/user')
-    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(admin_page_bp)
+    app.register_blueprint(admin_api_bp)
     
     return app
-
