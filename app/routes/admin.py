@@ -1,6 +1,6 @@
 # app/routes/admin.py
 # Este Blueprint lida com as rotas de gerenciamento e o painel de controle.
-# Conectado ao banco de dados e aos arquivos CSV para dados dinâmicos.
+# Corrigido para garantir o funcionamento do CRUD de produtos e filtros.
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from app import db
@@ -122,18 +122,20 @@ def add_product():
         
         image_paths = []
         if images:
-            product_image_folder = os.path.join(UPLOAD_FOLDER, secure_filename(product_data['name']))
+            product_folder_name = secure_filename(product_data['name']).replace(' ', '_')
+            product_image_folder = os.path.join(UPLOAD_FOLDER, product_folder_name)
             os.makedirs(product_image_folder, exist_ok=True)
             for image in images:
                 filename = secure_filename(image.filename)
                 image_path = os.path.join(product_image_folder, filename)
                 image.save(image_path)
-                image_paths.append(f'/static/uploads/{secure_filename(product_data["name"])}/{filename}')
+                image_paths.append(f'/static/uploads/{product_folder_name}/{filename}')
 
         new_product = Product(
             name=product_data['name'],
             brand=product_data['brand'],
             price=product_data['price'],
+            description=product_data['description'],
             status=product_data['status'],
             images=json.dumps(image_paths),
             seller_id=current_user.id
@@ -231,9 +233,8 @@ def get_dashboard_data():
     return jsonify(dashboard_data)
 
 # ==============================================================================
-# API PARA GERENCIAMENTO DE FILTROS (Novo)
+# API PARA GERENCIAMENTO DE FILTROS
 # ==============================================================================
-
 @admin_api_bp.route('/filters', methods=['GET'])
 @login_required
 def get_filters():
@@ -246,7 +247,6 @@ def get_filters():
         return jsonify(filters_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @admin_api_bp.route('/filters', methods=['POST'])
 @login_required
@@ -263,7 +263,6 @@ def add_filter():
         if not name or not type:
             return jsonify({"error": "Dados do filtro ausentes."}), 400
 
-        # Verifica se o filtro já existe
         existing_filter = Filter.query.filter_by(name=name).first()
         if existing_filter:
             return jsonify({"error": "Este filtro já existe."}), 409
