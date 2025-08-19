@@ -1,6 +1,6 @@
 # app/routes/admin.py
 # Este Blueprint lida com as rotas de gerenciamento e o painel de controle.
-# Corrigido para garantir o funcionamento do CRUD de produtos e filtros.
+# Conectado ao banco de dados e aos arquivos CSV para dados dinâmicos.
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from app import db
@@ -11,7 +11,6 @@ from flask_login import login_required, current_user, login_user, logout_user
 import json
 import os
 import pandas as pd
-import io
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -122,6 +121,7 @@ def add_product():
         
         image_paths = []
         if images:
+            # Garante que o nome da pasta do produto seja seguro
             product_folder_name = secure_filename(product_data['name']).replace(' ', '_')
             product_image_folder = os.path.join(UPLOAD_FOLDER, product_folder_name)
             os.makedirs(product_image_folder, exist_ok=True)

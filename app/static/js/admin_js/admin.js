@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BRANDS_URL = window.location.origin + '/api/admin/brands';
     const API_FILTERS_URL = window.location.origin + '/api/admin/filters';
     
+    // Variável global para armazenar os filtros do banco de dados
+    let allFilters = [];
+
     // Seletores de elementos do DOM
     const kpiCardsContainer = document.getElementById('kpi-cards');
     const recentSalesTbody = document.querySelector('#recent-sales tbody');
@@ -201,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Erro ao buscar filtros.');
             }
             const filters = await response.json();
+            allFilters = filters; // Armazena os filtros na variável global
             renderActiveFilters(filters);
         } catch (error) {
             exibirMensagem(`Não foi possível carregar os filtros: ${error.message}`, 'danger');
@@ -233,7 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const result = await response.json();
                     if (response.ok) {
                         exibirMensagem(result.message, 'success');
-                        fetchAndRenderFilters();
+                        fetchAndRenderFilters(); // Recarrega os filtros
+                        fetchProductsAndUsersAndBrands(); // Atualiza tabelas
                     } else {
                         exibirMensagem(result.error, 'danger');
                     }
@@ -272,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 exibirMensagem(result.message, 'success');
                 manageFiltersForm.reset();
-                fetchAndRenderFilters(); // Atualiza a lista de filtros
+                fetchAndRenderFilters(); // Recarrega os filtros
                 fetchProductsAndUsersAndBrands(); // Atualiza a tabela de marcas
             } else {
                 exibirMensagem(result.error, 'danger');
@@ -296,6 +301,14 @@ document.addEventListener('DOMContentLoaded', () => {
             brand: document.getElementById('product-brand').value
         };
 
+        // Validação: a marca do produto deve ser um filtro existente
+        const brandExistsAsFilter = allFilters.some(f => f.name === productData.brand && f.type === 'brand');
+
+        if (!brandExistsAsFilter) {
+             exibirMensagem('A marca inserida não existe como filtro. Por favor, adicione-a no painel de filtros antes de adicionar o produto.', 'danger');
+             return;
+        }
+
         formData.append('product_data', JSON.stringify(productData));
         
         const images = document.getElementById('product-image').files;
@@ -314,7 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 exibirMensagem(result.message, 'success');
                 addProductForm.reset();
-                // Opcional: limpa as miniaturas de imagem
                 if (imagePreviewsContainer) {
                     imagePreviewsContainer.innerHTML = '';
                     imagePreviewsContainer.classList.add('hidden');

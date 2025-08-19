@@ -69,7 +69,9 @@ body {
 .tabs-container {
     margin-bottom: 2rem;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
 .tabs-list {
@@ -97,6 +99,20 @@ body {
     background-color: var(--roxo-principal);
     color: white;
     box-shadow: 0 4px 6px rgba(76, 81, 191, 0.3);
+}
+.btn-logout {
+    background-color: #d32f2f;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+.btn-logout:hover {
+    background-color: #c62828;
 }
 
 .dashboard-content {
@@ -307,6 +323,31 @@ tbody tr:last-child td {
     min-height: 2rem; /* Para evitar o colapso do layout quando vazio */
 }
 
+.modal-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: fadeInOut 3s forwards;
+    display: none; /* Por padrão, está oculto */
+}
+
+.modal-message.success { background-color: var(--verde-sucesso); }
+.modal-message.info { background-color: #2196F3; } /* Azul */
+.modal-message.danger { background-color: var(--vermelho-erro); }
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
 /* Estilos para os botões de ação nas tabelas */
 .table-action-btn {
     background: none;
@@ -339,4 +380,12 @@ tbody tr:last-child td {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+}
+
+/* Estilo para o campo de pré-visualização de imagens */
+.product-image-previews-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
 }
