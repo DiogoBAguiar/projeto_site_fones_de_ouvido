@@ -13,12 +13,34 @@
             height: 100vh;
             text-align: center;
             flex-direction: column;
+            padding: 2rem;
+        }
+        .error-details {
+            margin-top: 1.5rem;
+            max-width: 600px;
+            color: #6c757d;
+        }
+        .error-details p {
+            margin-bottom: 0.5rem;
+        }
+        .error-details .error-code {
+            font-weight: bold;
+            color: #212529;
         }
     </style>
 </head>
 <body>
     <h1>Ops! Algo deu errado.</h1>
     <p>Ocorreu um erro no servidor. Por favor, tente novamente mais tarde.</p>
+    
     <a href="{{ url_for('public.home') }}">Voltar para a página inicial</a>
+
+    <!-- Sugestão de melhoria: Adicionar mais detalhes sobre o erro -->
+    <div class="error-details">
+        <h3>Detalhes do Erro</h3>
+        <p>A equipe técnica já foi notificada sobre este problema. Por favor, tente atualizar a página ou volte mais tarde.</p>
+        <p>Se o problema persistir, por favor, entre em contato com o suporte e informe o seguinte código de referência:</p>
+        <p class="error-code">ID de Referência: {{ error_id if error_id else 'N/A' }}</p>
+    </div>
 </body>
 </html>

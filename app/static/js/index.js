@@ -1,3 +1,7 @@
+// index.js
+// Este script lida com a lógica principal da página inicial.
+// Refatorado para usar APIs e modularizar a lógica.
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Lógica de Alternância de Tema (Claro/Escuro) ---
@@ -24,6 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Carregar o tema assim que a página for carregada
     carregarTema();
+
+    // Event listeners para alternar o tema
+    const alternarTemaDropdown = document.getElementById('alternar-tema-dropdown');
+    const alternarTemaMobile = document.getElementById('botao-alternar-tema-mobile');
+
+    if (alternarTemaDropdown) {
+        alternarTemaDropdown.addEventListener('click', alternarTema);
+    }
+    if (alternarTemaMobile) {
+        alternarTemaMobile.addEventListener('click', alternarTema);
+    }
 
     // --- Lógica do Menu Mobile ---
     const botaoMenuMobile = document.getElementById('botao-menu-mobile');
@@ -56,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fecharCarrinho = document.getElementById('fechar-carrinho');
     const listaCarrinho = document.getElementById('lista-carrinho');
     const carrinhoTotalValor = document.getElementById('carrinho-total-valor');
-    const botoesAddCarrinho = document.querySelectorAll('.botao-add-carrinho');
     const contadorCarrinho = document.getElementById('contador-carrinho');
     
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
@@ -110,12 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
             carrinho.push({ ...produto, quantidade: 1 });
         }
         renderizarCarrinho();
-        // O carrinho não será mais aberto automaticamente
+        // Exibe uma mensagem de feedback
+        exibirMensagem(`"${produto.name}" adicionado ao carrinho!`, 'success');
     }
 
     function removerDoCarrinho(produtoId) {
-        carrinho = carrinho.filter(item => item.id !== produtoId);
+        carrinho = carrinho.filter(item => item.id !== parseInt(produtoId));
         renderizarCarrinho();
+        exibirMensagem('Item removido do carrinho.', 'info');
     }
 
     function abrirCarrinho() {
@@ -139,9 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Esta lógica de evento para os botões do carrinho agora é dinâmica
-    // e será adicionada após a renderização dos produtos em destaque.
-    
     // --- Lógica do Menu de Busca ---
     const btnLupa = document.querySelector('.btn-lupa');
     const barraBuscaInput = document.querySelector('.barra-busca-input');
@@ -153,90 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Lógica do Dropdown de Perfil (Login/Sair/Tema) e Modal de Login ---
-    const btnPerfil = document.getElementById('btn-perfil');
-    const dropdownPerfil = document.getElementById('dropdown-perfil');
-    const modalLogin = document.getElementById('modal-login');
-    const fecharModalLogin = document.querySelector('.fechar-modal-login');
-    const formLogin = document.getElementById('form-login');
-
-    // Lógica para lidar com os botões de tema
-    function configurarBotoesTema() {
-        const alternarTemaDropdown = document.getElementById('alternar-tema-dropdown');
-        const alternarTemaMobile = document.getElementById('botao-alternar-tema-mobile');
-
-        if (alternarTemaDropdown) {
-            alternarTemaDropdown.addEventListener('click', (e) => {
-                e.preventDefault();
-                alternarTema();
-            });
-        }
-        if (alternarTemaMobile) {
-            alternarTemaMobile.addEventListener('click', alternarTema);
-        }
-    }
-
-    // Lógica fictícia para status de login (pode ser substituída por uma API real)
-    const usuarioLogado = false; // Mude para true para testar o modo logado
-    if (usuarioLogado) {
-        btnPerfil.innerHTML = '<i class="fas fa-user"></i>';
-        const btnLogout = document.getElementById('btn-logout');
-        if (btnLogout) {
-            btnLogout.style.display = 'block';
-            btnLogout.addEventListener('click', () => {
-                // substitui alert por um modal ou mensagem na interface
-                const modalMessage = document.getElementById('modal-message');
-                modalMessage.textContent = 'Você foi desconectado!';
-                modalMessage.style.display = 'block';
-                setTimeout(() => { modalMessage.style.display = 'none'; }, 3000);
-            });
-        }
-    } else {
-        btnPerfil.textContent = 'Login';
-        const btnLogout = document.getElementById('btn-logout');
-        if (btnLogout) {
-            btnLogout.style.display = 'none';
-        }
-        
-        // Re-atribui o evento de alternar tema para o menu dropdown, pois o HTML é recriado
-        configurarBotoesTema();
-    }
-    
-    // Adiciona evento para abrir o modal de login
-    btnPerfil.addEventListener('click', (e) => {
-        if (!usuarioLogado) {
-            e.preventDefault();
-            modalLogin.style.display = 'block';
-            dropdownPerfil.classList.remove('ativo'); // Garante que o dropdown está fechado
-        } else {
-            dropdownPerfil.classList.toggle('ativo');
-        }
-    });
-
-    // Adiciona evento para fechar o modal de login
-    fecharModalLogin.addEventListener('click', () => {
-        modalLogin.style.display = 'none';
-    });
-
-    // Fecha o modal se o usuário clicar fora
-    window.addEventListener('click', (e) => {
-        if (e.target === modalLogin) {
-            modalLogin.style.display = 'none';
-        }
-    });
-    
-    // Lógica fictícia para o envio do formulário
-    formLogin.addEventListener('submit', (e) => {
-        e.preventDefault();
-        // substitui alert por um modal ou mensagem na interface
-        const modalMessage = document.getElementById('modal-message');
-        modalMessage.textContent = 'Login fictício realizado!';
-        modalMessage.style.display = 'block';
-        setTimeout(() => { modalMessage.style.display = 'none'; }, 3000);
-        modalLogin.style.display = 'none';
-        // Aqui você faria uma chamada a uma API para autenticar o usuário
-    });
-
     // --- Lógica do Modal de Produto ---
     const modalProduto = document.getElementById('modal-produto');
     const fecharModal = document.querySelector('.fechar-modal');
@@ -244,26 +173,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalNome = document.querySelector('.modal-nome-produto');
     const modalDescricao = document.querySelector('.modal-descricao-produto');
     const modalPreco = document.querySelector('.modal-preco-produto');
-    // const botoesProduto = document.querySelectorAll('.cartao-produto'); // Removido para ser dinâmico
     const botaoAddCarrinhoModal = document.querySelector('.botao-add-carrinho-modal');
     
     let produtoSelecionado = null;
-
-    // A lógica de clique no cartão de produto agora é gerenciada pelo event listener
-    // na função renderFeaturedProducts.
 
     fecharModal.addEventListener('click', () => {
         modalProduto.style.display = 'none';
     });
 
     window.addEventListener('click', (e) => {
-        if (e.target == modalProduto) {
+        if (e.target === modalProduto) {
             modalProduto.style.display = 'none';
         }
     });
 
     botaoAddCarrinhoModal.addEventListener('click', () => {
         if (produtoSelecionado) {
+            // A função adicionarAoCarrinho já espera o objeto de produto completo
             adicionarAoCarrinho(produtoSelecionado);
             modalProduto.style.display = 'none';
         }
@@ -375,6 +301,21 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Erro ao carregar produtos em destaque:", error);
             destaqueContainer.innerHTML = '<p class="text-center text-gray-500">Não foi possível carregar os produtos em destaque.</p>';
         }
+    }
+    
+    /**
+     * Exibe uma mensagem de feedback para o usuário.
+     * @param {string} message - A mensagem a ser exibida.
+     * @param {string} type - O tipo da mensagem ('success', 'info', 'danger').
+     */
+    function exibirMensagem(message, type = 'info') {
+        const modalMessage = document.getElementById('modal-message');
+        modalMessage.textContent = message;
+        modalMessage.className = `modal-message ${type}`;
+        modalMessage.style.display = 'block';
+        setTimeout(() => {
+            modalMessage.style.display = 'none';
+        }, 3000);
     }
 
     // Chama a função para buscar os produtos em destaque quando o DOM estiver pronto

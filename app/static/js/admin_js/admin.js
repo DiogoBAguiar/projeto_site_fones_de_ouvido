@@ -1,393 +1,274 @@
-// Este código foi corrigido para se comunicar com a nova API do Flask para o Dashboard e produtos.
+// admin.js
+// Este script lida com a lógica do painel de administração.
+// Foi refatorado para buscar dados de forma dinâmica dos endpoints da API.
 
-// ==============================================================================
-// FUNÇÕES DE MANIPULAÇÃO DE DADOS
-// ==============================================================================
+document.addEventListener('DOMContentLoaded', () => {
 
-/**
- * Simula um atraso de rede. É útil para imitar a latência de uma chamada real para uma API
- * e para testar como a UI se comporta durante o carregamento.
- * @param {number} ms - O tempo em milissegundos para esperar.
- * @returns {Promise<void>} Uma Promise que resolve após o tempo especificado.
- */
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Endpoints da nova API do Dashboard
-const API_DASHBOARD_URL = window.location.origin + "/api/dashboard";
-const API_PRODUCTS_URL = window.location.origin + "/api/produtos";
-
-// Objeto que armazena os ícones em formato SVG puro.
-const icons = {
-    DollarSign: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
-    Users: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
-    CreditCard: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></rect></svg>`,
-    Activity: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`,
-};
-
-// Variável para armazenar os dados de produtos.
-let products = [];
-// Variável para armazenar os filtros ativos
-let activeFilters = [];
-
-// ==============================================================================
-// FUNÇÕES DE RENDERIZAÇÃO
-// ==============================================================================
-
-/**
- * Renderiza os cartões de KPI (Indicadores de Desempenho) com os dados fornecidos.
- * @param {object} data - O objeto com os dados dos KPIs.
- */
-const renderKpiCards = (data) => {
-    const kpiContainer = document.getElementById('kpi-cards');
-    kpiContainer.innerHTML = `
-        <div class="card kpi-card">
-            <div class="header">
-                <h3>Receita Total</h3>
-                <div class="h-4 w-4 text-gray-500">${icons.DollarSign}</div>
-            </div>
-            <div class="value">${data.totalRevenue.value}</div>
-            <p class="${data.totalRevenue.changeType === 'increase' ? 'change-increase' : 'change-decrease'}">
-                ${data.totalRevenue.change} <span class="text-gray-500 ml-1">${data.totalRevenue.description}</span>
-            </p>
-        </div>
-        <div class="card kpi-card">
-            <div class="header">
-                <h3>Inscrições</h3>
-                <div class="h-4 w-4 text-gray-500">${icons.Users}</div>
-            </div>
-            <div class="value">${data.subscriptions.value}</div>
-            <p class="${data.subscriptions.changeType === 'increase' ? 'change-increase' : 'change-decrease'}">
-                ${data.subscriptions.change} <span class="text-gray-500 ml-1">${data.subscriptions.description}</span>
-            </p>
-        </div>
-        <div class="card kpi-card">
-            <div class="header">
-                <h3>Vendas</h3>
-                <div class="h-4 w-4 text-gray-500">${icons.CreditCard}</div>
-            </div>
-            <div class="value">${data.sales.value}</div>
-            <p class="${data.sales.changeType === 'increase' ? 'change-increase' : 'change-decrease'}">
-                ${data.sales.change} <span class="text-gray-500 ml-1">${data.sales.description}</span>
-            </p>
-        </div>
-        <div class="card kpi-card">
-            <div class="header">
-                <h3>Ativos Agora</h3>
-                <div class="h-4 w-4 text-gray-500">${icons.Activity}</div>
-            </div>
-            <div class="value">${data.activeNow.value}</div>
-            <p class="${data.activeNow.changeType === 'increase' ? 'change-increase' : 'change-decrease'}">
-                ${data.activeNow.change} <span class="text-gray-500 ml-1">${data.activeNow.description}</span>
-            </p>
-        </div>
-    `;
-};
-
-/**
- * Renderiza o gráfico de barras de analytics.
- * @param {Array<object>} data - O array de objetos com os dados do gráfico.
- */
-const renderAnalyticsChart = (data) => {
-    const chartContainer = document.getElementById('analytics-chart');
-    if (!data || data.length === 0) {
-        chartContainer.innerHTML = `<h3 class="text-lg font-semibold">Analytics</h3><p class="text-center text-gray-500 mt-4">Nenhum dado de analytics disponível.</p>`;
-        return;
-    }
-    const maxTotal = Math.max(...data.map(item => item.total));
-    chartContainer.innerHTML = `
-        <h3 class="text-lg font-semibold">Analytics</h3>
-        <div class="analytics-chart-wrapper">
-            ${data.map(item => `
-                <div class="analytics-chart-bar" style="height: ${Math.max(1, (item.total / maxTotal) * 100)}%;">
-                    <span class="label">${item.name}</span>
-                </div>
-            `).join('')}
-        </div>
-    `;
-};
-
-/**
- * Renderiza a lista de vendas recentes.
- * @param {Array<object>} sales - O array de objetos com as vendas.
- */
-const renderRecentSales = (sales) => {
-    const salesContainer = document.getElementById('recent-sales');
-    salesContainer.innerHTML = `
-        <h3 class="text-lg font-semibold">Vendas Recentes</h3>
-        <p class="description">
-            Você fez ${sales.length} vendas este mês.
-        </p>
-        <div class="sales-list">
-            ${sales.map(sale => `
-                <div class="sale-item">
-                    <div class="icon">${icons.CreditCard}</div>
-                    <div class="info">
-                        <p>Novo cliente</p>
-                        <p>${sale.email}</p>
-                    </div>
-                    <div class="amount">${sale.amount}</div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-};
-
-/**
- * Renderiza a tabela de produtos.
- */
-const renderProductTable = () => {
-    const tableContainer = document.getElementById('products-table');
-    tableContainer.innerHTML = `
-        <h3>Tabela de Produtos</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Imagens</th>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Marca</th>
-                    <th>Preço</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${products.map(product => `
-                    <tr>
-                        <td>
-                            <div class="product-thumbnail-container">
-                                ${product.images.map(image => `<img src="${image}" alt="${product.name}" class="product-thumbnail">`).join('')}
-                            </div>
-                        </td>
-                        <td>${product.id}</td>
-                        <td>${product.name}</td>
-                        <td>R$ ${product.price}</td>
-                        <td>${product.status}</td>
-                        <td class="table-actions">
-                            <button onclick="removeProduct('${product.id}')">Remover</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-};
-
-/**
- * Renderiza a lista de filtros ativos.
- */
-const renderActiveFilters = () => {
-    const filterList = document.getElementById('active-filters-list');
-    filterList.innerHTML = '';
-    if (activeFilters.length === 0) {
-        filterList.innerHTML = '<p class="text-gray-500">Nenhum filtro ativo.</p>';
-        return;
-    }
-    activeFilters.forEach(filter => {
-        const li = document.createElement('li');
-        li.textContent = `${filter.type}: ${filter.name}`;
-        filterList.appendChild(li);
-    });
-};
-
-
-// ==============================================================================
-// FUNÇÕES DE INTERAÇÃO COM O BACKEND FLASK
-// ==============================================================================
-
-/**
- * Busca a lista de produtos da API e renderiza a tabela.
- */
-const fetchAndRenderProducts = async () => {
-    try {
-        const response = await fetch(API_PRODUCTS_URL);
-        if (!response.ok) throw new Error("Erro ao buscar produtos.");
-        products = await response.json();
-        renderProductTable();
-    } catch (error) {
-        console.error("Erro:", error);
-    }
-};
-
-/**
- * Adiciona um novo produto ao backend.
- */
-const addProduct = async (productData, images) => {
-    try {
-        const formData = new FormData();
-        formData.append("product_data", JSON.stringify(productData));
-        for (const image of images) {
-            formData.append("images", image);
-        }
-
-        const response = await fetch(API_PRODUCTS_URL, {
-            method: "POST",
-            body: formData,
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ao adicionar produto: ${errorText}`);
-        }
-        
-        await fetchAndRenderProducts();
-        console.log("Produto adicionado com sucesso!");
-    } catch (error) {
-        console.error("Erro:", error);
-        console.log("Ocorreu um erro ao adicionar o produto.");
-    }
-};
-
-/**
- * Função global para remover um produto.
- */
-window.removeProduct = async (productId) => {
-    try {
-        const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
-            method: 'DELETE'
-        });
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Erro ao remover produto: ${errorText}`);
-        }
-        await fetchAndRenderProducts();
-        console.log("Produto removido com sucesso!");
-    } catch (error) {
-        console.error("Erro:", error);
-        console.log("Ocorreu um erro ao remover o produto.");
-    }
-};
-
-/**
- * Adiciona um novo filtro ao backend.
- */
-const addFilter = async (filterData) => {
-    try {
-        // Envia o filtro para o backend
-        const response = await fetch(`${API_DASHBOARD_URL}/filters`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(filterData)
-        });
-        if (!response.ok) throw new Error("Erro ao adicionar filtro.");
-        
-        const newFilter = await response.json();
-        // Acessa a propriedade 'filter' do objeto retornado
-        activeFilters.push(newFilter.filter);
-        renderActiveFilters();
-        console.log("Filtro adicionado com sucesso!");
-    } catch (error) {
-        console.error("Erro:", error);
-    }
-};
-
-/**
- * Função principal para carregar os dados do painel de controle.
- */
-const loadDashboard = async (timeRange) => {
-    document.getElementById('kpi-cards').innerHTML = '<div class="card kpi-card skeleton"></div><div class="card kpi-card skeleton"></div><div class="card kpi-card skeleton"></div><div class="card kpi-card skeleton"></div>';
-    document.getElementById('analytics-chart').innerHTML = '<div class="card analytics-chart-card skeleton"></div>';
-    document.getElementById('recent-sales').innerHTML = '<div class="card recent-sales-card skeleton"></div>';
+    // Endpoints da API para o dashboard e produtos
+    const API_DASHBOARD_URL = window.location.origin + '/api/dashboard/';
+    const API_PRODUCTS_URL = window.location.origin + '/api/produtos/';
     
-    try {
-        const response = await fetch(`${API_DASHBOARD_URL}?timeRange=${timeRange}`);
-        if (!response.ok) throw new Error("Erro ao buscar dados do dashboard.");
-        const data = await response.json();
-        
-        renderKpiCards(data);
-        renderAnalyticsChart(data.analytics);
-        renderRecentSales(data.recentSales);
+    // Seletores de elementos do DOM
+    const kpiCardsContainer = document.getElementById('kpi-cards');
+    const recentSalesTbody = document.querySelector('#recent-sales tbody');
+    const tabButtons = document.querySelectorAll('.tab-trigger');
+    const productsTbody = document.getElementById('products-tbody');
+    const brandsTbody = document.getElementById('brands-tbody');
+    const usersTbody = document.getElementById('users-tbody');
+    const addProductForm = document.getElementById('add-product-form');
+    const modalMessage = document.getElementById('modal-message');
 
-    } catch (error) {
-        console.error("Erro ao carregar o dashboard:", error);
-    }
-};
-
-/**
- * Configura todos os "ouvintes de eventos" (event listeners) da página.
- */
-const setupEventListeners = () => {
-    document.querySelectorAll('.tab-trigger').forEach(button => {
-        button.addEventListener('click', () => {
-            const activeTab = document.querySelector('.tab-trigger.active');
-            if (activeTab) {
-                activeTab.classList.remove('active');
-            }
-            button.classList.add('active');
-            const timeRange = button.getAttribute('data-value');
-            loadDashboard(timeRange);
-        });
-    });
-
-    document.getElementById('add-product-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const imagesInput = document.getElementById('product-image');
-        const images = Array.from(imagesInput.files);
-        
-        if (images.length > 15) {
-            alert('Você só pode fazer upload de no máximo 15 imagens.');
-            return;
-        }
-
-        const newProduct = {
-            name: document.getElementById('product-name').value,
-            brand: document.getElementById('product-brand').value,
-            price: parseFloat(document.getElementById('product-price').value),
-            description: document.getElementById('product-description').value,
-            status: document.getElementById('product-status').value,
+    // Funções de renderização
+    /**
+     * Renderiza os cartões de KPI (Key Performance Indicators).
+     * @param {Array<Object>} kpis - Um array de objetos de KPI.
+     */
+    function renderKPIs(kpis) {
+        kpiCardsContainer.innerHTML = '';
+        const iconMap = {
+            'totalRevenue': 'fas fa-money-bill-wave',
+            'subscriptions': 'fas fa-user-plus',
+            'sales': 'fas fa-shopping-cart',
+            'activeNow': 'fas fa-users'
         };
 
-        await addProduct(newProduct, images);
+        kpis.forEach(kpi => {
+            const iconClass = iconMap[kpi.metric] || 'fas fa-chart-bar';
+            const colorClass = kpi.changeType === 'increase' ? 'green' : 'red';
+            
+            kpiCardsContainer.innerHTML += `
+                <div class="kpi-card card ${colorClass}">
+                    <div class="icon"><i class="${iconClass}"></i></div>
+                    <p class="value">${kpi.value}</p>
+                    <p class="label">${kpi.description}</p>
+                </div>
+            `;
+        });
+    }
+
+    /**
+     * Renderiza a tabela de vendas recentes.
+     * @param {Array<Object>} sales - Um array de objetos de vendas.
+     */
+    function renderSalesTable(sales) {
+        recentSalesTbody.innerHTML = '';
+        sales.forEach(sale => {
+            recentSalesTbody.innerHTML += `
+                <tr>
+                    <td>${sale.email}</td>
+                    <td>${sale.amount}</td>
+                </tr>
+            `;
+        });
+    }
+    
+    /**
+     * Renderiza a tabela de produtos.
+     * @param {Array<Object>} products - Um array de objetos de produtos.
+     */
+    function renderProductsTable(products) {
+        productsTbody.innerHTML = '';
+        products.forEach(product => {
+            productsTbody.innerHTML += `
+                <tr>
+                    <td><img src="${product.images[0] || 'https://placehold.co/80x80?text=Sem+Imagem'}" alt="${product.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; border: 2px solid var(--borda-claro);"></td>
+                    <td>${product.name}</td>
+                    <td>R$ ${product.price.toFixed(2).replace('.', ',')}</td>
+                    <td>${product.status}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="table-action-btn edit" data-item-id="${product.id}" data-item-name="${product.name}">Editar</button>
+                            <button class="table-action-btn delete" data-item-id="${product.id}" data-item-name="${product.name}">Excluir</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    /**
+     * Renderiza a tabela de marcas.
+     * @param {Array<Object>} brands - Um array de objetos de marcas.
+     */
+    function renderBrandsTable(brands) {
+        brandsTbody.innerHTML = '';
+        brands.forEach(brand => {
+            brandsTbody.innerHTML += `
+                <tr>
+                    <td>${brand.name}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="table-action-btn edit" data-item-id="${brand.id}" data-item-name="${brand.name}">Editar</button>
+                            <button class="table-action-btn delete" data-item-id="${brand.id}" data-item-name="${brand.name}">Excluir</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    /**
+     * Renderiza a tabela de usuários.
+     * @param {Array<Object>} users - Um array de objetos de usuários.
+     */
+    function renderUsersTable(users) {
+        usersTbody.innerHTML = '';
+        users.forEach(user => {
+            usersTbody.innerHTML += `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.date_joined}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // Lógica para carregar os dados das APIs
+    async function fetchDashboardData(timeRange = '30d') {
+        try {
+            const response = await fetch(`${API_DASHBOARD_URL}?timeRange=${timeRange}`);
+            if (!response.ok) {
+                throw new Error('Erro ao buscar dados do dashboard.');
+            }
+            const data = await response.json();
+            
+            renderKPIs(data.kpis);
+            renderSalesTable(data.recentSales);
+            // TODO: Adicionar lógica para renderizar o gráfico com os dados de `data.analytics`
+        } catch (error) {
+            exibirMensagem(`Não foi possível carregar os dados do dashboard: ${error.message}`, 'danger');
+            console.error(error);
+        }
+    }
+
+    async function fetchProductsAndUsers() {
+        try {
+            const productsResponse = await fetch(API_PRODUCTS_URL);
+            const productsData = await productsResponse.json();
+            if (productsResponse.ok) {
+                renderProductsTable(productsData);
+            }
+
+            // Mock de dados de usuários e marcas para a demonstração
+            // Em uma aplicação real, estes dados viriam de uma API
+            const mockUsers = [
+                { username: 'Diogo Aguiar', email: 'diogo@example.com', date_joined: '15/06/2025' },
+                { username: 'Maria Santos', email: 'maria@example.com', date_joined: '10/06/2025' }
+            ];
+            const mockBrands = [
+                { id: 1, name: 'Decibell' },
+                { id: 2, name: 'Sony' },
+                { id: 3, name: 'JBL' }
+            ];
+
+            renderUsersTable(mockUsers);
+            renderBrandsTable(mockBrands);
+        } catch (error) {
+            exibirMensagem(`Não foi possível carregar as tabelas: ${error.message}`, 'danger');
+            console.error(error);
+        }
+    }
+
+    // Lida com a submissão do formulário de adicionar produto
+    addProductForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        e.target.reset();
-        document.getElementById('product-image-previews-container').innerHTML = '';
-        document.getElementById('product-image-previews-container').classList.add('hidden');
+        const formData = new FormData();
+        const productData = {
+            name: document.getElementById('product-name').value,
+            price: parseFloat(document.getElementById('product-price').value),
+            description: document.getElementById('product-description').value,
+            status: document.getElementById('product-status').value
+        };
+        formData.append('product_data', JSON.stringify(productData));
+        
+        // Adiciona as imagens ao FormData
+        const images = document.getElementById('product-image').files;
+        for (let i = 0; i < images.length; i++) {
+            formData.append('images', images[i]);
+        }
+        
+        try {
+            const response = await fetch(API_PRODUCTS_URL, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                exibirMensagem(result.message, 'success');
+                addProductForm.reset();
+                fetchProductsAndUsers();
+            } else {
+                exibirMensagem(result.error, 'danger');
+            }
+        } catch (error) {
+            exibirMensagem('Erro de conexão ao tentar adicionar o produto.', 'danger');
+            console.error(error);
+        }
+    });
+
+    // Lida com a exclusão de produtos
+    productsTbody.addEventListener('click', async (e) => {
+        const targetBtn = e.target;
+        if (targetBtn.classList.contains('delete')) {
+            const productId = targetBtn.dataset.itemId;
+            const productName = targetBtn.dataset.itemName;
+            if (confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
+                try {
+                    const response = await fetch(`${API_PRODUCTS_URL}${productId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        exibirMensagem(result.message, 'success');
+                        fetchProductsAndUsers();
+                    } else {
+                        exibirMensagem(result.error, 'danger');
+                    }
+                } catch (error) {
+                    exibirMensagem('Erro de conexão ao tentar excluir o produto.', 'danger');
+                    console.error(error);
+                }
+            }
+        }
     });
     
-    document.getElementById('product-image').addEventListener('change', (event) => {
-        const files = event.target.files;
-        const previewsContainer = document.getElementById('product-image-previews-container');
-        previewsContainer.innerHTML = '';
-        previewsContainer.classList.add('hidden');
-        
-        if (files.length > 0) {
-            previewsContainer.classList.remove('hidden');
-            Array.from(files).slice(0, 15).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.alt = "Pré-visualização da imagem";
-                    img.classList.add('product-image-preview');
-                    previewsContainer.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+    // Funções de feedback e utilitárias
+    /**
+     * Exibe uma mensagem de feedback para o usuário.
+     * @param {string} message - A mensagem a ser exibida.
+     * @param {string} type - O tipo da mensagem ('success', 'info', 'danger').
+     */
+    function exibirMensagem(message, type = 'info') {
+        if (!modalMessage) return;
+        modalMessage.textContent = message;
+        modalMessage.className = `modal-message ${type}`;
+        modalMessage.style.display = 'block';
+        setTimeout(() => {
+            modalMessage.style.display = 'none';
+        }, 3000);
+    }
+
+    // Inicialização do Dashboard
+    function initDashboard() {
+        // Carrega os dados iniciais (30 dias)
+        fetchDashboardData();
+        // Carrega as tabelas de produtos, marcas e usuários
+        fetchProductsAndUsers();
+    }
+
+    // Adiciona listeners para os botões de tabs
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            fetchDashboardData(button.dataset.value);
+        });
     });
 
-    document.getElementById('add-filter-btn').addEventListener('click', async (e) => {
-        e.preventDefault();
-        const filterType = document.getElementById('filter-type').value;
-        const filterName = document.getElementById('filter-name').value;
-        if (filterType && filterName) {
-            await addFilter({ type: filterType, name: filterName });
-            document.getElementById('filter-name').value = '';
-        } else {
-            alert('Por favor, preencha o tipo e o nome do filtro.');
-        }
-    });
-};
-
-/**
- * Função de inicialização da aplicação.
- */
-const initialize = async () => {
-    const initialTimeRange = document.querySelector('.tab-trigger.active').getAttribute('data-value');
-    await loadDashboard(initialTimeRange);
-    fetchAndRenderProducts();
-    renderActiveFilters(); // Renderiza os filtros ativos
-    setupEventListeners();
-};
-
-window.onload = initialize;
+    // Inicia o dashboard ao carregar a página
+    initDashboard();
+});

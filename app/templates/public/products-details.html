@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Produto</title>
     <!-- Adicione o link para o CSS global, se necessário -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body>
     <div class="container">
@@ -17,10 +18,10 @@
             <!-- Galeria de Imagens -->
             <div class="product-gallery">
                 <div class="main-image-container">
-                    <img src="{{ product.images[0] if product.images|length > 0 else 'https://placehold.co/600x600?text=Sem+Imagem' }}" alt="Imagem Principal do Produto">
+                    <img src="{{ product.get_images()[0] if product.get_images() else 'https://placehold.co/600x600?text=Sem+Imagem' }}" alt="Imagem Principal do Produto">
                 </div>
                 <div class="gallery-thumbnails">
-                    {% for image in product.images %}
+                    {% for image in product.get_images() %}
                         <img src="{{ image }}" alt="Miniatura do Produto">
                     {% endfor %}
                 </div>

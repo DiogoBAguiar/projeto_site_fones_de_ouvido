@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Decibell - Fones de ouvido premium. Tecnologia de áudio de alta qualidade, conforto e design sofisticado.">
     <meta name="theme-color" content="#1a1a1a">
-    <title>Decibell - Fones de Ouvido</title>
+    <title>Decibell - Produtos</title>
     
     <!-- Fonte Inter do Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Ajustado o caminho para o CSS global -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/products/products.css') }}">
 </head>
@@ -45,12 +46,21 @@
                 <div class="perfil-container">
                     <!-- Botão que muda entre Login e o ícone de perfil -->
                     <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário ou fazer login">
-                        <!-- O conteúdo deste botão será definido via JavaScript -->
+                        {% if current_user.is_authenticated %}
+                            <i class="fas fa-user"></i>
+                        {% else %}
+                            Login
+                        {% endif %}
                     </button>
                     <div id="dropdown-perfil" class="dropdown-perfil">
-                        <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                        <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
-                        <button id="btn-logout">Sair</button>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
+                            <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
+                            <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
+                        {% else %}
+                            <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
+                            <a href="{{ url_for('public.login') }}">Entrar</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -66,13 +76,8 @@
             <button class="fechar-menu-mobile" aria-label="Fechar menu">
                 <i class="fas fa-times"></i>
             </button>
-            <a href="#destaque" class="link-nav-mobile">Início</a>
-            <a href="#tipos-fones" class="link-nav-mobile">Estilos</a>
-            <a href="#produtos-destaque" class="link-nav-mobile">Produtos</a>
-            <a href="#depoimentos" class="link-nav-mobile">Depoimentos</a>
-            <a href="#sobre" class="link-nav-mobile">Sobre</a>
-            <a href="#faq" class="link-nav-mobile">FAQ</a>
-            
+            <a href="{{ url_for('public.home') }}" class="link-nav-mobile">Início</a>
+            <a href="{{ url_for('public.products') }}" class="link-nav-mobile">Produtos</a>
             <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">
                 Alternar Tema
             </button>
@@ -90,7 +95,6 @@
         <h2>Seu Carrinho</h2>
         <ul id="lista-carrinho" class="lista-carrinho">
             <!-- Itens do carrinho serão adicionados aqui via JS -->
-            <!-- <li class="item-carrinho">...</li> -->
         </ul>
         <div class="total-carrinho">
             <span>Total:</span>
@@ -99,40 +103,48 @@
         <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
     </aside>
 
+    <!-- Modal para mensagens de feedback -->
+    <div id="modal-message" class="modal-message"></div>
 
     <!-- Conteúdo Principal -->
     <main class="conteudo-principal">
         <div class="container">
+            <!-- Filtros -->
             <div class="filters">
-                <button class="back-to-index"><a href="{{ url_for('public.home') }}">
-                    <i class="fas fa-credit-card"></i>
-                    Voltar para Página principal</a>
-                </button>
+                <a href="{{ url_for('public.home') }}" class="back-to-index">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
                 <h2>Filtros</h2>
                 <h3>Preço</h3>
-                <input type="range" min="0" max="10000" value="500" id="priceRange">
-                <div class="price-display" id="priceDisplay">R$ 1600</div>
-                <h3>Tipos</h3>
-                {% for p in products %}
-                    <label><input type="checkbox" value="{{ p.type }}"> {{ p.type }}</label><br>
-                {% endfor %}
-                <h3>Marca</h3>
-                {% for p in products %}
-                    <label><input type="checkbox" value="{{ p.brand }}"> {{ p.brand }}</label><br>
-                {% endfor %}
+                <input type="range" min="0" max="10000" value="10000" id="priceRange">
+                <div class="price-display" id="priceDisplay"></div>
+                
+                <!-- Adicionado um container para os filtros para facilitar a renderização dinâmica -->
+                <div id="filters-container">
+                    <h3>Tipos</h3>
+                    <!-- Checkboxes serão gerados por JS -->
+                    <div id="type-filters"></div>
+                    
+                    <h3>Marca</h3>
+                    <!-- Checkboxes serão gerados por JS -->
+                    <div id="brand-filters"></div>
+                </div>
             </div>
 
-            <div class="products" id="productList">
-                <!-- Produtos serão gerados aqui -->
+            <div class="products-list-container">
+                <h1 class="page-title">Todos os Produtos</h1>
+                <div class="products" id="productList">
+                    <!-- Produtos serão gerados aqui via JS -->
+                </div>
             </div>
         </div>
 
         <div class="pagination" id="pagination">
-            <!-- Paginação será gerada aqui -->
+            <!-- Paginação será gerada aqui via JS -->
         </div>
     </main>
 
-    <!-- Novo Rodapé Elaborado -->
+    <!-- Rodapé -->
     <footer class="rodape">
         <div class="conteiner">
             <div class="rodape-conteiner">
@@ -141,8 +153,7 @@
                     <p>A mais alta fidelidade sonora para seus ouvidos.</p>
                     <div class="rodape-redes-sociais">
                         <a href="#" aria-label="Siga-nos no Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria
-                        -label="Siga-nos no Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Siga-nos no Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="#" aria-label="Siga-nos no Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" aria-label="Inscreva-se no Youtube"><i class="fab fa-youtube"></i></a>
                     </div>
@@ -177,11 +188,11 @@
             <p class="rodape-copyright">&copy; 2025 Decibell. Todos os direitos reservados.</p>
         </div>
     </footer>
-
+    
     <!-- Modal de Produto -->
     <div id="modal-produto" class="modal">
         <div class="conteudo-modal">
-            <span class="fechar-modal">&times;</span>
+            <span class="fechar-modal" aria-label="Fechar">&times;</span>
             <img src="" alt="" class="modal-imagem">
             <div class="modal-detalhes">
                 <h3 class="modal-nome-produto"></h3>
@@ -191,35 +202,35 @@
             </div>
         </div>
     </div>    
-<div id="modal-login" class="modal">
-    <div class="conteudo-modal-login">
-        <span class="fechar-modal-login">&times;</span>
-        <div class="header-modal">
-            <h2>Entrar na Decibell</h2>
-        </div>
-        <form id="form-login" class="form-login">
-            <div class="input-grupo">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+    <!-- Modal de Login -->
+    <div id="modal-login" class="modal">
+        <div class="conteudo-modal-login">
+            <span class="fechar-modal-login">&times;</span>
+            <div class="header-modal">
+                <h2>Entrar na Decibell</h2>
             </div>
-            <div class="input-grupo">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" required>
+            <form id="form-login" class="form-login" action="{{ url_for('public.login') }}" method="post">
+                <div class="input-grupo">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="input-grupo">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                <button type="submit" class="btn-login-modal">Entrar</button>
+                <p class="link-recuperar-senha"><a href="#">Esqueceu a senha?</a></p>
+                <hr>
+                <button type="button" class="btn-login-google">
+                    <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
+                    Entrar com o Google
+                </button>
+            </form>
+            <div class="footer-modal">
+                <p>Ainda não tem uma conta? <a href="{{ url_for('public.register') }}">Cadastre-se</a></p>
             </div>
-            <button type="submit" class="btn-login-modal">Entrar</button>
-            <p class="link-recuperar-senha"><a href="#">Esqueceu a senha?</a></p>
-            <hr>
-            <button type="button" class="btn-login-google">
-                <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
-                Entrar com o Google
-            </button>
-        </form>
-        <div class="footer-modal">
-            <p>Ainda não tem uma conta? <a href="{{ url_for('public.register') }}">Cadastre-se</a></p>
         </div>
     </div>
-</div>
-<script src="{{ url_for('static', filename='js/index.js') }}"></script>
-<script src="{{ url_for('static', filename='js/products.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/products.js') }}"></script>
 </body>
 </html>

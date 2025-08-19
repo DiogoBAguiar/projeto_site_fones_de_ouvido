@@ -1,5 +1,6 @@
 # app/models/product.py
 # Este arquivo define o modelo de banco de dados para a tabela de produtos.
+# Adicionadas colunas para descrição e especificações, e métodos utilitários.
 
 from app import db
 import json
@@ -16,6 +17,8 @@ class Product(db.Model):
         status (str): O status do produto (por exemplo, "em estoque").
         images (str): Uma string JSON que armazena os caminhos das imagens do produto.
                       Essa abordagem é usada para guardar uma lista de URLs de forma simples.
+        description (str): A descrição detalhada do produto.
+        specs (str): Especificações técnicas do produto, formatadas como texto ou JSON.
         seller_id (int): A chave estrangeira que conecta este produto ao usuário
                          que o adicionou (o vendedor).
     """
@@ -26,6 +29,8 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(32), nullable=False)
     images = db.Column(db.Text, nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    specs = db.Column(db.Text, nullable=True)
     
     # Chave estrangeira para o usuário que adicionou o produto.
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

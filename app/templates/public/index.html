@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Ajustado o caminho para o CSS global -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body class="tema-claro">
@@ -44,12 +45,21 @@
                 <div class="perfil-container">
                     <!-- Botão que muda entre Login e o ícone de perfil -->
                     <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário ou fazer login">
-                        <!-- O conteúdo deste botão será definido via JavaScript -->
+                        {% if current_user.is_authenticated %}
+                            <i class="fas fa-user"></i>
+                        {% else %}
+                            Login
+                        {% endif %}
                     </button>
                     <div id="dropdown-perfil" class="dropdown-perfil">
-                        <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                        <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
-                        <button id="btn-logout">Sair</button>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
+                            <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
+                            <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
+                        {% else %}
+                            <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
+                            <a href="{{ url_for('public.login') }}">Entrar</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -89,7 +99,6 @@
         <h2>Seu Carrinho</h2>
         <ul id="lista-carrinho" class="lista-carrinho">
             <!-- Itens do carrinho serão adicionados aqui via JS -->
-            <!-- <li class="item-carrinho">...</li> -->
         </ul>
         <div class="total-carrinho">
             <span>Total:</span>
@@ -98,6 +107,8 @@
         <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
     </aside>
 
+    <!-- Modal para mensagens de feedback -->
+    <div id="modal-message" class="modal-message"></div>
 
     <!-- Conteúdo Principal -->
     <main class="conteudo-principal">
@@ -259,10 +270,9 @@
                 </form>
             </div>
         </section>
-
     </main>
 
-    <!-- Novo Rodapé Elaborado -->
+    <!-- Rodapé -->
     <footer class="rodape">
         <div class="conteiner">
             <div class="rodape-conteiner">
@@ -311,7 +321,7 @@
     <!-- Modal de Produto -->
     <div id="modal-produto" class="modal">
         <div class="conteudo-modal">
-            <span class="fechar-modal">&times;</span>
+            <span class="fechar-modal" aria-label="Fechar">&times;</span>
             <img src="" alt="" class="modal-imagem">
             <div class="modal-detalhes">
                 <h3 class="modal-nome-produto"></h3>
@@ -321,35 +331,35 @@
             </div>
         </div>
     </div>    
-<div id="modal-login" class="modal">
-    <div class="conteudo-modal-login">
-        <span class="fechar-modal-login">&times;</span>
-        <div class="header-modal">
-            <h2>Entrar na Decibell</h2>
-        </div>
-        <form id="form-login" class="form-login">
-            <div class="input-grupo">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+    <!-- Modal de Login (em index.html agora) -->
+    <div id="modal-login" class="modal">
+        <div class="conteudo-modal-login">
+            <span class="fechar-modal-login">&times;</span>
+            <div class="header-modal">
+                <h2>Entrar na Decibell</h2>
             </div>
-            <div class="input-grupo">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" required>
+            <form id="form-login" class="form-login" action="{{ url_for('public.login') }}" method="post">
+                <div class="input-grupo">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="input-grupo">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                <button type="submit" class="btn-login-modal">Entrar</button>
+                <p class="link-recuperar-senha"><a href="#">Esqueceu a senha?</a></p>
+                <hr>
+                <button type="button" class="btn-login-google">
+                    <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
+                    Entrar com o Google
+                </button>
+            </form>
+            <div class="footer-modal">
+                <p>Ainda não tem uma conta? <a href="{{ url_for('public.register') }}">Cadastre-se</a></p>
             </div>
-            <button type="submit" class="btn-login-modal">Entrar</button>
-            <p class="link-recuperar-senha"><a href="#">Esqueceu a senha?</a></p>
-            <hr>
-            <button type="button" class="btn-login-google">
-                <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
-                Entrar com o Google
-            </button>
-        </form>
-        <div class="footer-modal">
-            <p>Ainda não tem uma conta? <a href="{{ url_for('public.register') }}">Cadastre-se</a></p>
         </div>
     </div>
-</div>
-<script src="{{ url_for('static', filename='js/index.js') }}"></script>
-<script src="{{ url_for('static', filename='js/products.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>

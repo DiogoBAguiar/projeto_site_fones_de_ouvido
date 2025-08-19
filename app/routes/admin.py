@@ -1,26 +1,113 @@
 # app/routes/admin.py
 # Este arquivo é um Blueprint que agrupa todas as rotas
 # de gerenciamento de produtos e do painel de controle da sua aplicação.
+# O código foi refatorado para usar dados reais dos arquivos CSV.
 
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from app import db
 from app.models.product import Product
+from app.models.user import User
+from flask_login import login_required, current_user, login_user, logout_user
 import json
 import os
+import pandas as pd
+import io
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # Define o caminho para a pasta de uploads
 UPLOAD_FOLDER = 'app/static/uploads'
 
 # ==============================================================================
-# BLUEPRINT DA PÁGINA DE ADMINISTRAÇÃO
+# BLUEPRINT DA PÁGINA DE ADMINISTRAÇÃO E LOGIN
 # ==============================================================================
-# Este Blueprint lida apenas com a rota que serve a página HTML.
+# Este Blueprint lida com as rotas que servem as páginas HTML.
 admin_page_bp = Blueprint('admin_page', __name__, url_prefix='/admin')
 
+@admin_page_bp.route('/login', methods=['GET', 'POST'])
+def admin_login():
+    """Rota para a página de login de administrador."""
+    # Se o usuário já estiver autenticado e for admin, redireciona para o dashboard
+    if current_user.is_authenticated and current_user.role == 'admin':
+        return redirect(url_for('admin_page.admin'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('senha')
+        user = User.query.filter_by(email=email).first()
+        
+        # Verifica se o usuário existe, se é um admin e se a senha está correta
+        if user and user.role == 'admin' and check_password_hash(user.password_hash, password):
+            login_user(user, remember=True)
+            return redirect(url_for('admin_page.admin'))
+        else:
+            flash('Login de administrador inválido.', 'danger')
+            
+    return render_template('admin/login_admin.html')
+
 @admin_page_bp.route('/')
+@login_required
 def admin():
-    """Rota para a página de administrador."""
+    """Rota para a página de administrador, protegida por login."""
+    # Garante que apenas usuários com o papel 'admin' possam acessar a página
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Você não tem permissão para acessar esta página.', 'danger')
+        return redirect(url_for('public.home'))
     return render_template('admin/admin.html')
+
+@admin_page_bp.route('/logout')
+@login_required
+def admin_logout():
+    """Rota para fazer logout do administrador."""
+    logout_user()
+    return redirect(url_for('admin_page.admin_login'))
+
+# ==============================================================================
+# FUNÇÕES DE LEITURA DE CSV
+# ==============================================================================
+
+def read_csv_data(filepath, time_range):
+    """Lê um arquivo CSV e filtra por timeRange."""
+    try:
+        # Lê o arquivo CSV com pandas
+        df = pd.read_csv(filepath)
+        # Filtra os dados com base no 'timeRange' fornecido
+        filtered_df = df[df['timeRange'] == time_range]
+        # Converte o DataFrame filtrado para um dicionário de registros
+        return filtered_df.to_dict('records')
+    except Exception as e:
+        print(f"Erro ao ler o arquivo CSV {filepath}: {e}")
+        return []
+
+# ==============================================================================
+# BLUEPRINT DA API DO DASHBOARD
+# ==============================================================================
+# Este Blueprint lida com os endpoints da API para os dados do dashboard.
+dashboard_api_bp = Blueprint('dashboard_api', __name__, url_prefix='/api/dashboard')
+
+@dashboard_api_bp.route('/', methods=['GET'])
+@login_required
+def get_dashboard_data():
+    """
+    Rota de API para obter os dados do dashboard com base no timeRange.
+    Os dados são lidos dos arquivos CSV.
+    """
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+    
+    time_range = request.args.get('timeRange', '30d') # Valor padrão de 30 dias
+
+    kpis_data = read_csv_data('kpis.csv', time_range)
+    analytics_data = read_csv_data('analytics.csv', time_range)
+    recent_sales_data = read_csv_data('recent_sales.csv', time_range)
+
+    # Converte os dados para o formato esperado pelo front-end
+    dashboard_data = {
+        "kpis": kpis_data,
+        "analytics": analytics_data,
+        "recentSales": recent_sales_data
+    }
+    
+    return jsonify(dashboard_data)
 
 # ==============================================================================
 # BLUEPRINT DA API DE PRODUTOS
@@ -29,8 +116,12 @@ def admin():
 admin_api_bp = Blueprint('admin_api', __name__, url_prefix='/api/produtos')
 
 @admin_api_bp.route('/', methods=['GET'])
+@login_required
 def get_products():
     """Rota de API para obter todos os produtos do banco de dados."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+        
     try:
         products = Product.query.all()
         products_list = []
@@ -48,10 +139,13 @@ def get_products():
         return jsonify({"error": str(e)}), 500
 
 @admin_api_bp.route('/', methods=['POST'])
+@login_required
 def add_product():
     """Rota de API para adicionar um novo produto."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+        
     try:
-        # Acessa os dados do formulário com get para evitar KeyError
         product_data_json = request.form.get('product_data')
         images = request.files.getlist('images')
 
@@ -62,27 +156,22 @@ def add_product():
         
         # Lógica para salvar as imagens
         image_paths = []
+        # TODO: Adicionar lógica para salvar imagens
+        # A lógica abaixo é um placeholder, a implementação real dependerá da sua arquitetura
         if images:
-            # Pega o último ID para o diretório
-            last_product = Product.query.order_by(Product.id.desc()).first()
-            new_id = (last_product.id + 1) if last_product else 1
-            
-            product_image_folder = os.path.join(UPLOAD_FOLDER, str(new_id))
-            os.makedirs(product_image_folder, exist_ok=True)
             for image in images:
-                image_path = os.path.join(product_image_folder, image.filename)
+                # Exemplo simples, precisa de uma lógica mais robusta para nomes de arquivos
+                image_path = os.path.join(UPLOAD_FOLDER, image.filename)
                 image.save(image_path)
-                # Garante que o caminho seja relativo à pasta 'static'
-                image_paths.append(f'/static/uploads/{new_id}/{image.filename}')
+                image_paths.append(f'/static/uploads/{image.filename}')
 
-        # Cria a nova instância do produto
         new_product = Product(
             name=product_data['name'],
             brand=product_data['brand'],
             price=product_data['price'],
             status=product_data['status'],
             images=json.dumps(image_paths),
-            seller_id=1 # TODO: Lógica para pegar o ID do usuário logado
+            seller_id=current_user.id # Agora usa o ID do usuário logado
         )
 
         db.session.add(new_product)
@@ -97,8 +186,12 @@ def add_product():
         return jsonify({"error": str(e)}), 500
 
 @admin_api_bp.route('/<int:product_id>', methods=['DELETE'])
+@login_required
 def remove_product(product_id):
     """Rota de API para remover um produto pelo ID."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+
     try:
         product_to_remove = Product.query.get_or_404(product_id)
         
@@ -110,64 +203,20 @@ def remove_product(product_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 400
 
-# ==============================================================================
-# BLUEPRINT DA API DO DASHBOARD
-# ==============================================================================
-# Este Blueprint lida com os endpoints da API para os dados do dashboard.
-dashboard_api_bp = Blueprint('dashboard_api', __name__, url_prefix='/api/dashboard')
-
-@dashboard_api_bp.route('/', methods=['GET'])
-def get_dashboard_data():
-    """Rota de API para obter os dados do dashboard com base no timeRange."""
-    time_range = request.args.get('timeRange', '30d') # Valor padrão de 30 dias
-    
-    # Simula dados do painel. Em uma aplicação real, estes dados viriam do banco de dados.
-    mock_data = {
-        "24h": {
-            "totalRevenue": { "value": "R$ 1.250,00", "change": "+15%", "changeType": "increase", "description": "do que nas últimas 24h" },
-            "subscriptions": { "value": "+10", "change": "+25%", "changeType": "increase", "description": "do que nas últimas 24h" },
-            "sales": { "value": "+5", "change": "-5%", "changeType": "decrease", "description": "do que nas últimas 24h" },
-            "activeNow": { "value": "12", "change": "+3", "changeType": "increase", "description": "visitantes ativos agora" },
-            "analytics": [ { "name": "1h", "total": 300 }, { "name": "2h", "total": 280 } ],
-            "recentSales": [ { "email": "olivia.martin@email.com", "amount": "R$ 150,00" } ]
-        },
-        "7d": {
-            "totalRevenue": { "value": "R$ 8.500,00", "change": "+5.1%", "changeType": "increase", "description": "do que nos últimos 7 dias" },
-            "subscriptions": { "value": "+45", "change": "+10%", "changeType": "increase", "description": "do que nos últimos 7 dias" },
-            "sales": { "value": "+30", "change": "+2%", "changeType": "increase", "description": "do que nos últimos 7 dias" },
-            "activeNow": { "value": "48", "change": "+15", "changeType": "increase", "description": "visitantes ativos agora" },
-            "analytics": [ { "name": "Dia 1", "total": 500 }, { "name": "Dia 2", "total": 600 } ],
-            "recentSales": [ { "email": "john.doe@email.com", "amount": "R$ 450,00" } ]
-        },
-        "30d": {
-            "totalRevenue": { "value": "R$ 35.000,00", "change": "+12.1%", "changeType": "increase", "description": "do que nos últimos 30 dias" },
-            "subscriptions": { "value": "+120", "change": "+8%", "changeType": "increase", "description": "do que nos últimos 30 dias" },
-            "sales": { "value": "+100", "change": "+15%", "changeType": "increase", "description": "do que nos últimos 30 dias" },
-            "activeNow": { "value": "105", "change": "+40", "changeType": "increase", "description": "visitantes ativos agora" },
-            "analytics": [ { "name": "Sem 1", "total": 5000 }, { "name": "Sem 2", "total": 7500 } ],
-            "recentSales": [ { "email": "jane.smith@email.com", "amount": "R$ 300,00" } ]
-        },
-        "12m": {
-            "totalRevenue": { "value": "R$ 450.000,00", "change": "+20%", "changeType": "increase", "description": "do que nos últimos 12 meses" },
-            "subscriptions": { "value": "+450", "change": "+18%", "changeType": "increase", "description": "do que nos últimos 12 meses" },
-            "sales": { "value": "+1500", "change": "+22%", "changeType": "increase", "description": "do que nos últimos 12 meses" },
-            "activeNow": { "value": "200", "change": "+50", "changeType": "increase", "description": "visitantes ativos agora" },
-            "analytics": [ { "name": "Jan", "total": 20000 }, { "name": "Fev", "total": 25000 } ],
-            "recentSales": [ { "email": "diogo.baguiar@email.com", "amount": "R$ 500,00" } ]
-        }
-    }
-    
-    return jsonify(mock_data.get(time_range, {}))
-
-@dashboard_api_bp.route('/filters', methods=['POST'])
+@admin_api_bp.route('/filters', methods=['POST'])
+@login_required
 def add_filter():
     """Rota de API para adicionar um novo filtro."""
+    if current_user.role != 'admin':
+        return jsonify({"error": "Acesso não autorizado."}), 403
+        
     try:
         filter_data = request.get_json()
         if not filter_data or 'type' not in filter_data or 'name' not in filter_data:
             return jsonify({"error": "Dados do filtro ausentes."}), 400
 
-        # Retorna o filtro recebido na resposta para o frontend
+        # TODO: Lógica para salvar o filtro no banco de dados.
+
         return jsonify({"message": "Filtro adicionado com sucesso!", "filter": filter_data}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
