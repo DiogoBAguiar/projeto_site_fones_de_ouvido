@@ -99,7 +99,7 @@ a:hover {
 
 /* Conteúdo Principal */
 .conteudo-principal {
-    padding-top: 80px; /* Para não sobrepor o header fixo */
+    padding-top: 65px; /* Para não sobrepor o header fixo */
 }
 
 .secao {
