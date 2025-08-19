@@ -1,6 +1,7 @@
 // index.js
 // Este script lida com a lógica principal da página inicial.
-// Refatorado para usar APIs e modularizar a lógica.
+// Ajustado para permitir que o formulário de login seja enviado ao back-end
+// e para gerenciar o dropdown de perfil.
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -26,10 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Carregar o tema assim que a página for carregada
     carregarTema();
 
-    // Event listeners para alternar o tema
     const alternarTemaDropdown = document.getElementById('alternar-tema-dropdown');
     const alternarTemaMobile = document.getElementById('botao-alternar-tema-mobile');
 
@@ -60,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fecharMenuMobile.addEventListener('click', fecharMenuMobileHandler);
     overlay.addEventListener('click', fecharMenuMobileHandler);
 
-    // Fechar o menu mobile ao clicar em um link
     document.querySelectorAll('.link-nav-mobile').forEach(link => {
         link.addEventListener('click', fecharMenuMobileHandler);
     });
@@ -124,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
             carrinho.push({ ...produto, quantidade: 1 });
         }
         renderizarCarrinho();
-        // Exibe uma mensagem de feedback
         exibirMensagem(`"${produto.name}" adicionado ao carrinho!`, 'success');
     }
 
@@ -165,33 +162,47 @@ document.addEventListener('DOMContentLoaded', () => {
             barraBuscaInput.focus();
         }
     });
-
-    // --- Lógica do Modal de Produto ---
-    const modalProduto = document.getElementById('modal-produto');
-    const fecharModal = document.querySelector('.fechar-modal');
-    const modalImagem = document.querySelector('.modal-imagem');
-    const modalNome = document.querySelector('.modal-nome-produto');
-    const modalDescricao = document.querySelector('.modal-descricao-produto');
-    const modalPreco = document.querySelector('.modal-preco-produto');
-    const botaoAddCarrinhoModal = document.querySelector('.botao-add-carrinho-modal');
     
-    let produtoSelecionado = null;
+    // --- Lógica do Dropdown de Perfil ---
+    const btnPerfil = document.getElementById('btn-perfil');
+    const dropdownPerfil = document.getElementById('dropdown-perfil');
+    const modalLogin = document.getElementById('modal-login');
+    const fecharModalLogin = document.querySelector('.fechar-modal-login');
 
-    fecharModal.addEventListener('click', () => {
-        modalProduto.style.display = 'none';
-    });
+    if (btnPerfil) {
+        btnPerfil.addEventListener('click', (e) => {
+            // A lógica de autenticação é controlada pelo Jinja no HTML.
+            // O JavaScript apenas lida com o comportamento do dropdown.
+            e.preventDefault();
+            const isLoggedIn = btnPerfil.tagName === 'BUTTON';
+            
+            if (isLoggedIn) {
+                dropdownPerfil.classList.toggle('ativo');
+            } else {
+                // Se não estiver logado, redireciona para a página de login
+                window.location.href = btnPerfil.href;
+            }
+        });
+    }
 
-    window.addEventListener('click', (e) => {
-        if (e.target === modalProduto) {
-            modalProduto.style.display = 'none';
+    // Fecha o dropdown se o usuário clicar fora
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.perfil-container') && dropdownPerfil.classList.contains('ativo')) {
+            dropdownPerfil.classList.remove('ativo');
         }
     });
 
-    botaoAddCarrinhoModal.addEventListener('click', () => {
-        if (produtoSelecionado) {
-            // A função adicionarAoCarrinho já espera o objeto de produto completo
-            adicionarAoCarrinho(produtoSelecionado);
-            modalProduto.style.display = 'none';
+    // Adiciona evento para fechar o modal de login
+    if (fecharModalLogin) {
+        fecharModalLogin.addEventListener('click', () => {
+            modalLogin.style.display = 'none';
+        });
+    }
+
+    // Fecha o modal se o usuário clicar fora
+    window.addEventListener('click', (e) => {
+        if (e.target === modalLogin) {
+            modalLogin.style.display = 'none';
         }
     });
 
@@ -212,20 +223,15 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(secao);
     });
     
-    // Renderizar o carrinho inicial e atualizar o contador na carga da página
     renderizarCarrinho();
     
     // ==============================================================================
-    // FUNÇÕES PARA PRODUTOS EM DESTAQUE (NOVAS)
+    // FUNÇÕES PARA PRODUTOS EM DESTAQUE
     // ==============================================================================
     
     const destaqueContainer = document.querySelector('#produtos-destaque .grade-produtos');
     const API_FEATURED_URL = window.location.origin + "/api/produtos/destaques";
 
-    /**
-     * Renderiza os produtos em destaque na página inicial.
-     * @param {Array} produtos - O array de produtos a serem renderizados.
-     */
     function renderFeaturedProducts(produtos) {
         destaqueContainer.innerHTML = '';
         if (produtos.length === 0) {
@@ -250,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             destaqueContainer.appendChild(card);
             
-            // Adiciona o event listener para o botão "Adicionar ao Carrinho"
             card.querySelector('.botao-add-carrinho').addEventListener('click', (e) => {
                 const produtoParaCarrinho = {
                     id: produto.id,
@@ -261,9 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 adicionarAoCarrinho(produtoParaCarrinho);
             });
             
-            // Adiciona o event listener para o card do produto (para abrir o modal)
             card.addEventListener('click', (e) => {
-                // Evita que o modal abra se o botão "Adicionar ao Carrinho" for clicado
                 if (e.target.classList.contains('botao-add-carrinho')) {
                     return;
                 }
@@ -286,9 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /**
-     * Busca os produtos em destaque do backend (API).
-     */
     async function fetchFeaturedProducts() {
         try {
             const response = await fetch(API_FEATURED_URL);
@@ -303,11 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    /**
-     * Exibe uma mensagem de feedback para o usuário.
-     * @param {string} message - A mensagem a ser exibida.
-     * @param {string} type - O tipo da mensagem ('success', 'info', 'danger').
-     */
     function exibirMensagem(message, type = 'info') {
         const modalMessage = document.getElementById('modal-message');
         modalMessage.textContent = message;
@@ -318,6 +313,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Chama a função para buscar os produtos em destaque quando o DOM estiver pronto
     fetchFeaturedProducts();
 });

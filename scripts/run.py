@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
 import csv
-import os
+import hashlib, os
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Inicializa a aplicação Flask
@@ -36,8 +36,8 @@ def teste_especial(senha: str) -> bool:
 # e foi removida para simplificar. A documentação sugere SQLAlchemy,
 # que é a abordagem mais adequada para um projeto como este.
 
-# --- Rota de login ---
-@app.route("/login", methods=["GET", "POST"])
+# --- Rota de register ---
+@app.route("/register", methods=["GET", "POST"])
 def login():
     """Rota para a página de login."""
     if request.method == "POST":
@@ -112,6 +112,26 @@ def index():
     """Rota de exemplo para a página inicial do site."""
     return render_template("public/index.html")
 
+# --- Rota de login  ---
+@app.route("/login", methods = ["GET","POST"])
+def login():
+    if request.method == "POST":
+       email = request.form["email"]
+       senha = request.form["senha"]
+       with open("usuarios.csv", mode="r", newline="", encoding="utf-8") as arquivo:
+        reader = csv.DictReader(arquivo)
+        usuarios = {}
+        for linha in reader:
+            usuarios[linha["email"]] = linha["senha"]
+
+        if usuarios.get(email) == hash_md5(senha):
+            flash("Login realizado com sucesso!")
+            return redirect(url_for("welcome", email=email))
+        
+        flash("Login inválido!")
+        return render_template("login.html", email=email)
+
 # Se rodar diretamente este arquivo, inicia o servidor.
 if __name__ == "__main__":
+
     app.run(debug=True)
