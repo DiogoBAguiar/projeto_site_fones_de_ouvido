@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BRANDS_URL = window.location.origin + '/api/admin/brands';
     const API_FILTERS_URL = window.location.origin + '/api/admin/filters';
     
-    // Variável global para armazenar os filtros do banco de dados
+    // Variável global para armazenar os filtros do back-end
     let allFilters = [];
 
     // Seletores de elementos do DOM
@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalMessage = document.getElementById('modal-message');
     const productImageInput = document.getElementById('product-image');
     const imagePreviewsContainer = document.getElementById('product-image-previews-container');
+    
+    // Novos seletores para o novo layout de filtros
+    const filtersProductContainer = document.getElementById('filters-product-container');
+
 
     // Funções de renderização
     /**
@@ -137,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
-     * Renderiza os filtros ativos.
+     * Renderiza os filtros ativos no painel "Gerenciar Filtros".
      * @param {Array<Object>} filters - Um array de objetos de filtros.
      */
     function renderActiveFilters(filters) {
@@ -152,6 +156,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 </button>
             `;
             activeFiltersList.appendChild(filterTag);
+        });
+    }
+
+    /**
+     * Renderiza a lista de filtros no novo layout de filtros com checkboxes.
+     */
+    function renderProductFiltersCheckboxes() {
+        filtersProductContainer.innerHTML = '';
+        const filtersByType = allFilters.reduce((acc, filter) => {
+            (acc[filter.type] = acc[filter.type] || []).push(filter);
+            return acc;
+        }, {});
+
+        const order = ['brand', 'type', 'color', 'connectivity'];
+        order.forEach(filterType => {
+            if (filtersByType[filterType] && filtersByType[filterType].length > 0) {
+                const filterGroup = document.createElement('div');
+                filterGroup.classList.add('filter-selection-group');
+                const title = document.createElement('label');
+                title.classList.add('filter-selection-group-title');
+                title.textContent = `${filterType.charAt(0).toUpperCase() + filterType.slice(1)}:`;
+                filterGroup.appendChild(title);
+                
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.classList.add('checkbox-container');
+                filtersByType[filterType].forEach(filter => {
+                    const checkboxWrapper = document.createElement('div');
+                    checkboxWrapper.classList.add('checkbox-wrapper');
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `filter-${filter.id}`;
+                    checkbox.name = filterType;
+                    checkbox.value = filter.id;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `filter-${filter.id}`;
+                    label.textContent = filter.name;
+
+                    checkboxWrapper.appendChild(checkbox);
+                    checkboxWrapper.appendChild(label);
+                    checkboxContainer.appendChild(checkboxWrapper);
+                });
+                filterGroup.appendChild(checkboxContainer);
+                filtersProductContainer.appendChild(filterGroup);
+            }
+        });
+        
+        // Adiciona os event listeners aos checkboxes
+        document.querySelectorAll('#product-filters-container input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const filterId = parseInt(e.target.value);
+                const filter = allFilters.find(f => f.id === filterId);
+
+                if (filter) {
+                    if (e.target.checked) {
+                        // Lógica para garantir seleção única de 'brand'
+                        if (filter.type === 'brand') {
+                            // Desmarca outros checkboxes de 'brand'
+                            document.querySelectorAll(`#product-filters-container input[name="brand"]:checked`).forEach(otherCheckbox => {
+                                if (otherCheckbox.value !== e.target.value) {
+                                    otherCheckbox.checked = false;
+                                }
+                            });
+                            // Remove outras marcas da lista de selecionados
+                            selectedFiltersForProduct = selectedFiltersForProduct.filter(f => f.type !== 'brand');
+                        }
+                        selectedFiltersForProduct.push(filter);
+                    } else {
+                        // Remove o filtro se for desmarcado
+                        selectedFiltersForProduct = selectedFiltersForProduct.filter(f => f.id !== filter.id);
+                    }
+                }
+            });
         });
     }
 
@@ -206,6 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const filters = await response.json();
             allFilters = filters; // Armazena os filtros na variável global
             renderActiveFilters(filters);
+            renderProductFiltersCheckboxes(); // Renderiza os filtros para o formulário de produto
         } catch (error) {
             exibirMensagem(`Não foi possível carregar os filtros: ${error.message}`, 'danger');
             console.error(error);
@@ -292,21 +371,23 @@ document.addEventListener('DOMContentLoaded', () => {
     addProductForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        // Extrai os filtros selecionados
+        const selectedFilterIds = Array.from(document.querySelectorAll('#product-filters-container input[name="filters"]:checked')).map(checkbox => parseInt(checkbox.value));
+        const selectedBrand = allFilters.find(f => selectedFilterIds.includes(f.id) && f.type === 'brand');
+
         const formData = new FormData();
         const productData = {
             name: document.getElementById('product-name').value,
             price: parseFloat(document.getElementById('product-price').value),
             description: document.getElementById('product-description').value,
             status: document.getElementById('product-status').value,
-            brand: document.getElementById('product-brand').value
+            brand: selectedBrand ? selectedBrand.name : null,
+            filters: selectedFilterIds
         };
-
-        // Validação: a marca do produto deve ser um filtro existente
-        const brandExistsAsFilter = allFilters.some(f => f.name === productData.brand && f.type === 'brand');
-
-        if (!brandExistsAsFilter) {
-             exibirMensagem('A marca inserida não existe como filtro. Por favor, adicione-a no painel de filtros antes de adicionar o produto.', 'danger');
-             return;
+        
+        if (!productData.brand) {
+            exibirMensagem('Por favor, selecione uma marca para o produto.', 'danger');
+            return;
         }
 
         formData.append('product_data', JSON.stringify(productData));
@@ -331,6 +412,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     imagePreviewsContainer.innerHTML = '';
                     imagePreviewsContainer.classList.add('hidden');
                 }
+                // Desmarca todos os checkboxes após o envio
+                document.querySelectorAll('#product-filters-container input[name="filters"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
                 fetchProductsAndUsersAndBrands(); // Atualiza todas as tabelas
             } else {
                 exibirMensagem(result.error, 'danger');

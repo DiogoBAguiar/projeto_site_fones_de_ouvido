@@ -1,263 +1,380 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seções Combinadas: Formulário e Rodapé</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Filtros de Produto Compactos</title>
     <style>
-        /* Estilos globais para o corpo */
+        /* Estilos gerais do corpo e layout principal */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Fundo do corpo branco/cinza claro */
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            background-color: #e5e7eb;
+            color: #333;
+            padding: 1rem; /* p-4 */
             display: flex;
-            flex-direction: column; /* Para que o rodapé fique no final */
-            min-height: 100vh; /* Garante que o corpo ocupe a altura total da viewport */
-            overflow-x: hidden; /* Evita rolagem horizontal indesejada */
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
 
-        /* Conteúdo principal para empurrar o rodapé para baixo */
-        main {
-            flex-grow: 1; /* Faz o conteúdo principal ocupar o espaço restante */
+        .container {
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centraliza verticalmente o formulário */
-            align-items: center;
-            padding: 20px 0 0 0; /* Remove padding horizontal para que a seção laranja possa ser full-width */
-        }
-
-        /* --- Seção Subscribe --- */
-        .subscribe-section {
-            background-color: #FF5B00; /* A seção volta a ser laranja */
-            text-align: center;
-            padding: 3rem 0; /* Padding vertical, padding horizontal será controlado pelo inner-content */
-            color: white; /* Cor do texto ajustada para contraste no fundo laranja */
-            border-radius: 12px;
-            width: 100%; /* Ocupa 100% da largura do pai (main) */
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            margin-bottom: 0; /* Colado ao próximo elemento */
-        }
-
-        /* Contêiner para o conteúdo interno da seção subscribe */
-        .subscribe-inner-content {
-            max-width: 600px; /* Limita a largura do conteúdo (título, texto, formulário) */
-            margin: 0 auto; /* Centraliza o conteúdo dentro da seção laranja */
-            padding: 0 1rem; /* Adiciona padding interno para evitar que o conteúdo encoste nas bordas */
-        }
-
-        .subscribe-title {
-            font-size: 2.2rem;
-            font-weight: 400;
-            line-height: 1.4;
-            margin-bottom: 0.8rem;
-        }
-
-        .highlight {
-            color: #FFCF23; /* Destaque amarelo para o texto no fundo laranja */
-            font-weight: 700;
-        }
-
-        .highlight-secondary {
-            font-weight: 700;
-        }
-
-        .subscribe-subtitle {
-            font-weight: bold;
-            color: #FFCF23; /* Subtítulo amarelo para o fundo laranja */
-            margin-bottom: 1.5rem;
-            font-size: 1.2rem;
-        }
-
-        /* Formulário */
-        .subscribe-form {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            column-gap: 10px;
-
-            background-color: #fff; /* Fundo do formulário é branco */
-            border-radius: 50px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            
-            margin: 0 auto;
-            max-width: 450px;
-            padding-right: 15px;
-        }
-
-        .subscribe-form input {
-            border: none;
-            background: transparent;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-            outline: none;
+            gap: 0.75rem; /* gap-3 */
+            padding: 0.75rem; /* p-3 */
+            background-color: #ffffff;
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
             width: 100%;
-            color: #333;
+            max-width: 60rem; /* max-w-5xl */
+        }
+        
+        /* Estilos responsivos para telas maiores (a partir de 768px) */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                gap: 1rem; /* md:gap-4 */
+            }
+            body {
+                padding: 2rem; /* md:p-8 */
+            }
+        }
+        
+        /* Estilos para cada coluna de filtro */
+        .filter-column {
+            flex: 1;
+            min-width: 120px;
+            position: relative;
+        }
+        
+        /* Estilos do cabeçalho de cada filtro (título e ícone) */
+        .filter-header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.25rem; /* pb-1 */
+            margin-bottom: 0.25rem; /* mb-1 */
+            border-bottom: 1px solid #3b82f6; /* border-b border-blue-500 */
+        }
+        
+        .filter-header h3 {
+            font-weight: bold;
+            font-size: 0.875rem; /* text-sm */
+            color: #1f2937; /* text-gray-800 */
+        }
+        
+        .chevron {
+            font-size: 1rem; /* text-base */
+            color: #6b7280; /* text-gray-500 */
+            transition: transform 0.2s ease-out;
+        }
+        
+        .chevron.rotate {
+            transform: rotate(180deg);
+        }
+        
+        /* Estilos para o menu flutuante (dropdown) */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
+            background-color: #ffffff;
+            border-radius: 0.375rem; /* rounded-md */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            padding: 0.5rem; /* p-2 */
+            margin-top: 0.25rem; /* mt-1 */
+        }
+        
+        .dropdown-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        /* Estilos para as opções de checkbox dentro do menu */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* space-y-2 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .option-item label {
+            margin-left: 0.375rem; /* ml-1.5 */
+            color: #4b5563; /* text-gray-700 */
+            transition: color 0.2s duration-200;
         }
 
-        .subscribe-form button {
-            background-color: #FF5B00;
-            color: #fff;
-            font-weight: bold;
-            padding: 0.8rem 1.2rem;
+        .option-item:hover label {
+            color: #3b82f6; /* group-hover:text-blue-600 */
+        }
+
+        /* Estilos para o checkbox real (oculto) e a sua estilização */
+        .option-item input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 0.75rem; /* w-3 */
+            height: 0.75rem; /* h-3 */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            background-color: #f3f4f6; /* bg-gray-100 */
+            border-radius: 0.125rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .option-item input[type="checkbox"]:checked {
+            background-color: #3b82f6; /* text-blue-600 */
+            border-color: #3b82f6;
+        }
+        
+        .option-item input[type="checkbox"]:checked::after {
+            content: '';
+            display: block;
+            width: 0.3rem;
+            height: 0.6rem;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-left: 1px;
+            margin-top: -3px;
+        }
+
+        /* Estilos para as caixas de cores */
+        .color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        /* Estilos para a animação das caixas de cores ao serem clicadas */
+        .option-item input[type="checkbox"]:checked + label .color-box {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Estilos para o botão Limpar Filtros */
+        .clear-button-container {
+            margin-top: 1rem; /* mt-4 */
+            display: flex;
+            justify-content: center;
+        }
+
+        #clear-filters {
+            padding: 0.25rem 0.75rem; /* px-3 py-1 */
+            background-color: #3b82f6; /* bg-blue-600 */
+            color: white;
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.875rem; /* text-sm */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            transition: all 0.3s ease-in-out;
             border: none;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            
-            border-radius: 50px; 
-            border-left: 1px solid #ccc; 
         }
 
-        .subscribe-form button:hover {
-            background-color: #e24f00;
-        }
-
-        /* --- Rodapé --- */
-        .site-footer {
-            background-color: #FF5B00; /* Fundo do rodapé agora é laranja */
-            
-            
-            
-            /* Removido border-top-left-radius e border-top-right-radius para não ter arredondamento */
-            
-            width: 100%;
-        }
-
-        .footer-content {
-            width: 100%;          
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            background-color: #000; /* Conteúdo do rodapé agora é preto */
-            border-radius: 20px 20px none none; /* Removido border-radius para não ter arredondamento */
-            padding: 1.5rem 2rem; /* Adiciona padding interno para o conteúdo preto */
-            box-sizing: border-box; /* Garante que o padding não aumente a largura total */
-        }
-
-        .footer-store {
-            height: 40px;
-            object-fit: contain;
-        }
-
-        .social-icons {
-            display: block;
-            max-width: 100px;
-            margin: 0 auto 0.5rem;
-        }
-
-        .footer-credit {
-            color: #fff; /* Texto do crédito branco para contrastar com o fundo preto */
-            font-size: 0.85rem;
-            text-align: center;
-        }
-
-        /* --- Media query para Mobile --- */
-        @media (max-width: 768px) {
-            .subscribe-section {
-                padding: 2rem 0; /* Ajusta padding para mobile, horizontal 0 */
-                margin-bottom: 0;
-                border-radius: 0; /* Remove arredondamento em mobile para ocupar toda a largura */
-            }
-            .subscribe-title {
-                font-size: 1.8rem;
-            }
-            .subscribe-subtitle {
-                font-size: 1rem;
-            }
-
-            .subscribe-inner-content {
-                max-width: none;
-                padding: 0 1rem; /* Adiciona padding horizontal para o conteúdo em mobile */
-            }
-
-            .subscribe-form {
-                grid-template-columns: 1fr;
-                border-radius: 10px;
-                max-width: 90%;
-                column-gap: 0;
-                padding-right: 0;
-            }
-
-            .subscribe-form input {
-                text-align: center;
-                padding: 1rem;
-            }
-
-            .subscribe-form button {
-                width: 100%;
-                border-radius: 10px;
-                margin-top: 10px;
-                padding: 1rem;
-                border-left: none;
-            }
-
-            .site-footer {
-                border-radius: 0; /* Garante que não há arredondamento em mobile */
-                padding: 1rem 0; /* Ajusta padding para mobile */
-            }
-
-            .footer-content {
-                border-radius: 0; /* Garante que não há arredondamento em mobile */
-                padding: 1rem; /* Ajusta padding para mobile */
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .footer-left,
-            .footer-center,
-            .footer-right {
-                width: 100%;
-                text-align: center;
-            }
-
-            .social-icons {
-                margin: 0.5rem auto;
-            }
+        #clear-filters:hover {
+            background-color: #2563eb; /* hover:bg-blue-700 */
+            transform: scale(1.05); /* hover:scale-105 */
         }
     </style>
 </head>
-<body>
-    <main>
-        <section class="subscribe-section">
-            <div class="subscribe-inner-content">
-                <div class="subscribe-content">
-                    <h2 class="subscribe-title">
-                        get the <span class="highlight">Best &amp; Tasty</span> Foods <br />
-                        with <span class="highlight-secondary">High Quality</span>
-                    </h2>
-                    <p class="subscribe-subtitle">Subscribe to get offers!</p>
-                    <form class="subscribe-form">
-                        <input type="email" placeholder="Enter your E-mail" required />
-                        <button type="submit">SUBSCRIBE</button>
-                    </form>
+<body class="p-4 flex items-start justify-center">
+
+    <div class="container">
+
+        <!-- Coluna para 'Marca' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="brand-content">
+                <h3>Marca</h3>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div id="brand-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-apple" name="brand" value="Apple">
+                        <label for="brand-apple">Apple</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-sony" name="brand" value="Sony">
+                        <label for="brand-sony">Sony</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-jbl" name="brand" value="JBL">
+                        <label for="brand-jbl">JBL</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-samsung" name="brand" value="Samsung">
+                        <label for="brand-samsung">Samsung</label>
+                    </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
 
-    <footer class="site-footer">
-        <div class="footer-content">
-            <!-- Lado esquerdo -->
-            <div class="footer-left">
-                <img src="https://placehold.co/120x40/000/fff?text=Play+Store" alt="Google Play" class="footer-store">
+        <!-- Coluna para 'Conectividade' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="connectivity-content">
+                <h3>Conectividade</h3>
+                <span class="chevron">&#9660;</span>
             </div>
-
-            <!-- Centro -->
-            <div class="footer-center">
-                <img src="https://placehold.co/100x30/000/fff?text=Social" alt="Social media icons" class="social-icons">
-                <p class="footer-credit">designed by zaynab khosravi</p>
-            </div>
-
-            <!-- Lado direito -->
-            <div class="footer-right">
-                <img src="https://placehold.co/120x40/000/fff?text=App+Store" alt="App Store" class="footer-store">
+            <div id="connectivity-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="conn-bluetooth" name="connectivity" value="Bluetooth">
+                        <label for="conn-bluetooth">Bluetooth</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="conn-cabo" name="connectivity" value="Cabo">
+                        <label for="conn-cabo">Cabo</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="conn-wifi" name="connectivity" value="Wi-Fi">
+                        <label for="conn-wifi">Wi-Fi</label>
+                    </div>
+                </div>
             </div>
         </div>
-    </footer>
+
+        <!-- Coluna para 'Tipo de Fone' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="type-content">
+                <h3>Tipo de Fone</h3>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div id="type-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="type-over-ear" name="type" value="Over-ear">
+                        <label for="type-over-ear">Over-ear</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="type-on-ear" name="type" value="On-ear">
+                        <label for="type-on-ear">On-ear</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="type-in-ear" name="type" value="In-ear">
+                        <label for="type-in-ear">In-ear</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna para 'Cor' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="color-content">
+                <h3>Cor</h3>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div id="color-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="color-preto" name="color" value="Preto" class="hidden">
+                        <label for="color-preto">
+                            <div class="color-box" style="background-color: black;"></div>
+                            <span>Preto</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="color-branco" name="color" value="Branco" class="hidden">
+                        <label for="color-branco">
+                            <div class="color-box" style="background-color: white;"></div>
+                            <span>Branco</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="color-vermelho" name="color" value="Vermelho" class="hidden">
+                        <label for="color-vermelho">
+                            <div class="color-box" style="background-color: #ef4444;"></div>
+                            <span>Vermelho</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="color-azul" name="color" value="Azul" class="hidden">
+                        <label for="color-azul">
+                            <div class="color-box" style="background-color: #3b82f6;"></div>
+                            <span>Azul</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão de Limpar Filtros -->
+    <div class="clear-button-container">
+        <button id="clear-filters">
+            Limpar Filtros
+        </button>
+    </div>
+
+    <script>
+        // Adiciona funcionalidade de expandir/contrair aos cabeçalhos
+        document.querySelectorAll('[data-toggle-id]').forEach(header => {
+            header.addEventListener('click', () => {
+                const contentId = header.getAttribute('data-toggle-id');
+                const content = document.getElementById(contentId);
+                const chevron = header.querySelector('.chevron');
+
+                // Fecha todos os outros menus antes de abrir o atual
+                document.querySelectorAll('.dropdown-menu.open').forEach(menu => {
+                    if (menu.id !== contentId) {
+                        menu.classList.remove('open');
+                        const otherChevron = document.querySelector(`[data-toggle-id="${menu.id}"] .chevron`);
+                        if (otherChevron) otherChevron.classList.remove('rotate');
+                    }
+                });
+
+                // Alterna o estado do menu atual
+                content.classList.toggle('open');
+                chevron.classList.toggle('rotate');
+            });
+        });
+
+        // Função para atualizar os filtros selecionados
+        function updateSelectedFilters() {
+            const selectedFilters = {};
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const groupName = checkbox.name;
+                    const value = checkbox.value;
+                    if (!selectedFilters[groupName]) {
+                        selectedFilters[groupName] = [];
+                    }
+                    selectedFilters[groupName].push(value);
+                }
+            });
+            console.log("Filtros Selecionados:", selectedFilters);
+        }
+
+        // Adiciona um ouvinte de evento para cada checkbox
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedFilters);
+        });
+
+        // Adiciona um ouvinte de evento para o botão de limpar filtros
+        document.getElementById('clear-filters').addEventListener('click', () => {
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectedFilters();
+        });
+
+        // Chama a função de atualização quando a página carrega
+        window.addEventListener('load', updateSelectedFilters);
+    </script>
 </body>
 </html>

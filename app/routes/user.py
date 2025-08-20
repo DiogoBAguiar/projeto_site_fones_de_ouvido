@@ -1,16 +1,18 @@
 # app/routes/user.py
 # Este Blueprint lida com as rotas específicas para usuários autenticados.
+# Refatorado para usar arquivos CSV em vez de um banco de dados,
+# e para incluir a lógica de atualização de perfil.
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
-from app import db # Importa a instância do SQLAlchemy
-from app.models.user import User # Importa o modelo de Usuário
-from werkzeug.security import generate_password_hash, check_password_hash
+from app.models.user import User
+from app.utils import data_manager
+from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 import os
 
 # Cria o Blueprint com o nome 'user' e um prefixo de URL.
-user_bp = Blueprint('user', __name__)
+user_bp = Blueprint('user', __name__, url_prefix='/user')
 
 # Define o caminho para a pasta de uploads
 UPLOAD_FOLDER = 'app/static/uploads/profile_pictures'
@@ -19,54 +21,69 @@ UPLOAD_FOLDER = 'app/static/uploads/profile_pictures'
 @login_required
 def profile():
     """Rota para a página de perfil do usuário."""
+    # A página de perfil será renderizada com base nos dados do usuário logado.
     return render_template('user/profile.html')
 
 @user_bp.route('/profile/update', methods=['POST'])
 @login_required
 def update_profile():
-    """Rota para atualizar as informações do perfil do usuário."""
+    """Rota de API para atualizar as informações do perfil do usuário."""
     try:
-        # Pega os dados do formulário
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-
-        # Atualiza os dados do usuário atual
-        current_user.username = username
-        current_user.email = email
+        
+        # Garante que as informações obrigatórias estão presentes
+        if not username or not email:
+            flash('Nome de usuário e email são obrigatórios.', 'danger')
+            return redirect(url_for('user.profile'))
 
         # Lógica para alterar a senha
         if password:
-            if password == confirm_password:
-                current_user.password_hash = generate_password_hash(password).decode('utf-8')
-            else:
-                flash('As senhas não coincidem.', 'danger')
-                return redirect(url_for('user.profile'))
-
+            hashed_password = generate_password_hash(password)
+            current_user.password_hash = hashed_password
+        
         # Lógica para upload de foto de perfil
         if 'profile_picture' in request.files:
             file = request.files['profile_picture']
             if file.filename != '':
-                # Garante que a pasta de uploads existe
                 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-                # Salva a imagem com um nome seguro
-                filename = secure_filename(file.filename)
+                filename = secure_filename(f'{current_user.id}_{file.filename}')
                 file_path = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(file_path)
-                # Salva o caminho da imagem no banco de dados
                 current_user.profile_picture = url_for('static', filename=f'uploads/profile_pictures/{filename}')
-
-        db.session.commit()
+        
+        # Cria um novo objeto User com as informações atualizadas
+        updated_user = User(
+            id=current_user.id,
+            username=username,
+            email=email,
+            password_hash=current_user.password_hash,
+            role=current_user.role,
+            profile_picture=current_user.profile_picture,
+            date_joined=current_user.date_joined
+        )
+        
+        # Atualiza o arquivo CSV de usuários
+        data_manager.update_user(updated_user)
+        
         flash('Perfil atualizado com sucesso!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Ocorreu um erro ao atualizar o perfil: {str(e)}', 'danger')
+        return redirect(url_for('user.profile'))
     
-    return redirect(url_for('user.profile'))
+    except Exception as e:
+        flash(f'Ocorreu um erro ao atualizar o perfil: {str(e)}', 'danger')
+        return redirect(url_for('user.profile'))
 
 @user_bp.route('/cart')
 @login_required
 def cart():
     """Rota para a página de carrinho do usuário."""
+    # Lógica do carrinho aqui...
     return render_template('user/cart.html')
+
+@user_bp.route('/api/profile', methods=['GET'])
+@login_required
+def get_user_profile():
+    """Rota de API para obter os dados do perfil do usuário logado."""
+    user_data = current_user.to_dict()
+    return jsonify(user_data)

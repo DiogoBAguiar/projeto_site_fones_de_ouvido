@@ -44,22 +44,25 @@
 
                 <!-- Menu de Perfil do Usuário -->
                 <div class="perfil-container">
-                    <!-- Botão que muda entre Login e o ícone de perfil -->
-                    <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário ou fazer login">
-                        {% if current_user.is_authenticated %}
-                            <i class="fas fa-user"></i>
-                        {% else %}
-                            Login
-                        {% endif %}
-                    </button>
+                    <!-- O conteúdo deste botão será definido via Jinja/Flask -->
+                    {% if current_user.is_authenticated %}
+                        <!-- Se o usuário estiver logado, mostra a foto de perfil -->
+                        <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
+                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
+                        </button>
+                    {% else %}
+                        <!-- Se o usuário não estiver logado, mostra o botão de login -->
+                        <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}">Login</a>
+                    {% endif %}
+                    
+                    <!-- Dropdown de Perfil -->
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         {% if current_user.is_authenticated %}
                             <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                            <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
+                            <button id="alternar-tema-dropdown">Configurações do Sistema</button>
                             <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
                         {% else %}
-                            <button id="alternar-tema-dropdown">Modo Claro e Escuro</button>
-                            <a href="{{ url_for('public.login') }}">Entrar</a>
+                            <button id="alternar-tema-dropdown">Configurações do Sistema</button>
                         {% endif %}
                     </div>
                 </div>
@@ -161,7 +164,7 @@
                 <div class="rodape-coluna">
                     <h3>Navegação</h3>
                     <ul>
-                        <li><a href="#produtos-destaque">Produtos</a></li>
+                        <li><a href="{{ url_for('public.products') }}">Produtos</a></li>
                         <li><a href="#tipos-fones">Estilos</a></li>
                         <li><a href="#sobre">Sobre</a></li>
                         <li><a href="#depoimentos">Depoimentos</a></li>

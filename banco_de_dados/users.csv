@@ -1,0 +1,2 @@
+id,username,email,password_hash,role,profile_picture,date_joined
+1,teste,teste@teste.com,scrypt:32768:8:1$lCSJktROgFxCXcph$6ebd777e893de7312a03f8f3a278e9f1486fea0be86f14f4b737270b3de2f665e03c4036048ca31079227ebf9aeee6df605332ac78be7e5730222a86b2bd7380,admin,,2025-08-20T00:51:50.648024

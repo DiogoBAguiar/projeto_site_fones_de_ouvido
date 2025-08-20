@@ -1,48 +1,71 @@
 # app/models/product.py
-# Este arquivo define o modelo de banco de dados para a tabela de produtos.
-# Adicionadas colunas para descrição e especificações, e métodos utilitários.
+# Este arquivo define o modelo de dados para os produtos.
+# Refatorado para ser um modelo de dados simples, compatível com arquivos CSV.
 
-from app import db
 import json
+from datetime import datetime
 
-class Product(db.Model):
+class Product:
     """
-    Modelo para a tabela 'products'.
+    Modelo de dados para os produtos.
 
     Atributos:
-        id (int): A chave primária da tabela.
+        id (int): A chave primária (ID do produto).
         name (str): O nome do produto.
         brand (str): A marca do produto.
         price (float): O preço do produto.
         status (str): O status do produto (por exemplo, "em estoque").
-        images (str): Uma string JSON que armazena os caminhos das imagens do produto.
-                      Essa abordagem é usada para guardar uma lista de URLs de forma simples.
+        images (list): Uma lista de strings com os caminhos das imagens.
         description (str): A descrição detalhada do produto.
         specs (str): Especificações técnicas do produto, formatadas como texto ou JSON.
-        seller_id (int): A chave estrangeira que conecta este produto ao usuário
-                         que o adicionou (o vendedor).
+        seller_id (int): O ID do usuário que adicionou o produto.
     """
-    __tablename__ = 'products' # Define o nome da tabela
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), nullable=False)
-    brand = db.Column(db.String(64), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(32), nullable=False)
-    images = db.Column(db.Text, nullable=True)
-    description = db.Column(db.Text, nullable=True)
-    specs = db.Column(db.Text, nullable=True)
+    def __init__(self, id, name, brand, price, status, images, description, specs, seller_id):
+        self.id = id
+        self.name = name
+        self.brand = brand
+        self.price = price
+        self.status = status
+        self.images = images
+        self.description = description
+        self.specs = specs
+        self.seller_id = seller_id
     
-    # Chave estrangeira para o usuário que adicionou o produto.
-    seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
-    # Relacionamento com avaliações.
-    # O `backref='product'` cria uma referência de volta no modelo Review.
-    reviews = db.relationship('Review', backref='product', lazy=True)
-    
-    def __repr__(self):
-        """Retorna uma representação legível do objeto para fins de depuração."""
-        return f'<Product {self.name}>'
-    
-    def get_images(self):
-        """Retorna a lista de caminhos de imagens, convertendo de JSON."""
-        return json.loads(self.images) if self.images else []
+    def to_dict(self):
+        """
+        Serializa o objeto Product para um dicionário, útil para salvar no CSV.
+        O campo 'images' é convertido para uma string JSON.
+        """
+        return {
+            'id': self.id,
+            'name': self.name,
+            'brand': self.brand,
+            'price': self.price,
+            'status': self.status,
+            'images': json.dumps(self.images),
+            'description': self.description,
+            'specs': self.specs,
+            'seller_id': self.seller_id
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        """
+        Cria um objeto Product a partir de um dicionário, lido do CSV.
+        O campo 'images' é convertido de uma string JSON para uma lista.
+        """
+        try:
+            images = json.loads(data['images']) if data['images'] else []
+        except (json.JSONDecodeError, TypeError):
+            images = []
+        return cls(
+            id=int(data['id']),
+            name=data['name'],
+            brand=data['brand'],
+            price=float(data['price']),
+            status=data['status'],
+            images=images,
+            description=data.get('description'),
+            specs=data.get('specs'),
+            seller_id=int(data['seller_id'])
+        )

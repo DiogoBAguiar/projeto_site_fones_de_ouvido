@@ -1,12 +1,12 @@
 # app/routes/admin.py
 # Este Blueprint lida com as rotas de gerenciamento e o painel de controle.
-# Conectado ao banco de dados e aos arquivos CSV para dados dinâmicos.
+# Corrigido para garantir o funcionamento do CRUD de produtos e filtros.
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
-from app import db
 from app.models.product import Product
 from app.models.user import User
 from app.models.filter import Filter
+from app.utils import data_manager
 from flask_login import login_required, current_user, login_user, logout_user
 import json
 import os
@@ -31,7 +31,7 @@ def admin_login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('senha')
-        user = User.query.filter_by(email=email).first()
+        user = data_manager.get_user_by_email(email)
         
         if user and user.role == 'admin' and check_password_hash(user.password_hash, password):
             login_user(user, remember=True)
@@ -62,7 +62,7 @@ def admin_logout():
 # ==============================================================================
 
 def read_csv_data(filepath, time_range):
-    """Lê um arquivo CSV e filtra por timeRange."""
+    """Lê um arquivo CSV e filtra por timeRange usando pandas."""
     try:
         df = pd.read_csv(filepath)
         filtered_df = df[df['timeRange'] == time_range]
@@ -79,26 +79,13 @@ admin_api_bp = Blueprint('admin_api', __name__, url_prefix='/api/admin')
 @admin_api_bp.route('/products', methods=['GET'])
 @login_required
 def get_products():
-    """Rota de API para obter todos os produtos do banco de dados."""
+    """Rota de API para obter todos os produtos do CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
         
     try:
-        products = Product.query.all()
-        products_list = []
-        for product in products:
-            try:
-                images = json.loads(product.images) if product.images else []
-            except json.JSONDecodeError:
-                images = []
-            products_list.append({
-                'id': product.id,
-                'name': product.name,
-                'brand': product.brand,
-                'price': product.price,
-                'status': product.status,
-                'images': images
-            })
+        products = data_manager.get_products()
+        products_list = [p.to_dict() for p in products]
         return jsonify(products_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -106,7 +93,7 @@ def get_products():
 @admin_api_bp.route('/products', methods=['POST'])
 @login_required
 def add_product():
-    """Rota de API para adicionar um novo produto."""
+    """Rota de API para adicionar um novo produto ao CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
         
@@ -121,7 +108,6 @@ def add_product():
         
         image_paths = []
         if images:
-            # Garante que o nome da pasta do produto seja seguro
             product_folder_name = secure_filename(product_data['name']).replace(' ', '_')
             product_image_folder = os.path.join(UPLOAD_FOLDER, product_folder_name)
             os.makedirs(product_image_folder, exist_ok=True)
@@ -132,60 +118,46 @@ def add_product():
                 image_paths.append(f'/static/uploads/{product_folder_name}/{filename}')
 
         new_product = Product(
+            id=data_manager.get_next_id(data_manager.PRODUCTS_CSV),
             name=product_data['name'],
             brand=product_data['brand'],
             price=product_data['price'],
             description=product_data['description'],
             status=product_data['status'],
-            images=json.dumps(image_paths),
+            images=image_paths,
             seller_id=current_user.id
         )
 
-        db.session.add(new_product)
-        db.session.commit()
+        data_manager.save_product(new_product)
 
-        return jsonify({"message": "Produto adicionado com sucesso!", "product": product_data}), 201
+        return jsonify({"message": "Produto adicionado com sucesso!", "product": new_product.to_dict()}), 201
     except json.JSONDecodeError:
-        db.session.rollback()
         return jsonify({"error": "Dados JSON do produto mal formatados."}), 400
     except Exception as e:
-        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 @admin_api_bp.route('/products/<int:product_id>', methods=['DELETE'])
 @login_required
 def remove_product(product_id):
-    """Rota de API para remover um produto pelo ID."""
+    """Rota de API para remover um produto do CSV pelo ID."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
 
     try:
-        product_to_remove = Product.query.get_or_404(product_id)
-        
-        db.session.delete(product_to_remove)
-        db.session.commit()
-
+        data_manager.delete_product(product_id)
         return jsonify({"message": "Produto removido com sucesso!"}), 200
     except Exception as e:
-        db.session.rollback()
         return jsonify({"error": str(e)}), 400
 
 @admin_api_bp.route('/users', methods=['GET'])
 @login_required
 def get_users():
-    """Rota de API para obter todos os usuários."""
+    """Rota de API para obter todos os usuários do CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
     try:
-        users = User.query.all()
-        users_list = []
-        for user in users:
-            users_list.append({
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'date_joined': user.date_joined.strftime('%d/%m/%Y %H:%M:%S')
-            })
+        users = data_manager.get_users()
+        users_list = [user.to_dict() for user in users]
         return jsonify(users_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -193,18 +165,21 @@ def get_users():
 @admin_api_bp.route('/brands', methods=['GET'])
 @login_required
 def get_brands():
-    """Rota de API para obter todas as marcas únicas de produtos."""
+    """
+    Rota de API para obter todas as marcas únicas do CSV.
+    Ajustado para ler do arquivo de filtros.
+    """
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
     try:
-        brands = db.session.query(Product.brand).distinct().all()
-        brands_list = [brand[0] for brand in brands]
-        return jsonify([{'name': brand} for brand in brands_list])
+        filters = data_manager.get_filters()
+        brands = [f for f in filters if f['type'] == 'brand']
+        return jsonify(brands)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 # ==============================================================================
-# BLUEPRINT DA API DO DASHBOARD
+# BLUEPRINT DA API DO DASHBOARD (Ainda usa CSVs estáticos com Pandas)
 # ==============================================================================
 dashboard_api_bp = Blueprint('dashboard_api', __name__, url_prefix='/api/dashboard')
 
@@ -238,20 +213,19 @@ def get_dashboard_data():
 @admin_api_bp.route('/filters', methods=['GET'])
 @login_required
 def get_filters():
-    """Rota de API para obter todos os filtros ativos."""
+    """Rota de API para obter todos os filtros ativos do CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
     try:
-        filters = Filter.query.all()
-        filters_list = [{'id': f.id, 'name': f.name, 'type': f.type} for f in filters]
-        return jsonify(filters_list)
+        filters = data_manager.get_filters()
+        return jsonify(filters)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @admin_api_bp.route('/filters', methods=['POST'])
 @login_required
 def add_filter():
-    """Rota de API para adicionar um novo filtro."""
+    """Rota de API para adicionar um novo filtro ao CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
         
@@ -263,31 +237,31 @@ def add_filter():
         if not name or not type:
             return jsonify({"error": "Dados do filtro ausentes."}), 400
 
-        existing_filter = Filter.query.filter_by(name=name).first()
-        if existing_filter:
+        # Verifica se o filtro já existe
+        existing_filters = data_manager.get_filters()
+        if any(f['name'] == name for f in existing_filters):
             return jsonify({"error": "Este filtro já existe."}), 409
             
-        new_filter = Filter(name=name, type=type)
-        db.session.add(new_filter)
-        db.session.commit()
+        new_filter_data = {
+            'id': data_manager.get_next_id(data_manager.FILTERS_CSV),
+            'name': name,
+            'type': type
+        }
+        data_manager.save_filter(new_filter_data)
 
-        return jsonify({"message": "Filtro adicionado com sucesso!", "filter": {'id': new_filter.id, 'name': new_filter.name, 'type': new_filter.type}}), 201
+        return jsonify({"message": "Filtro adicionado com sucesso!", "filter": new_filter_data}), 201
     except Exception as e:
-        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 @admin_api_bp.route('/filters/<int:filter_id>', methods=['DELETE'])
 @login_required
 def remove_filter(filter_id):
-    """Rota de API para remover um filtro pelo ID."""
+    """Rota de API para remover um filtro do CSV pelo ID."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
         
     try:
-        filter_to_remove = Filter.query.get_or_404(filter_id)
-        db.session.delete(filter_to_remove)
-        db.session.commit()
+        data_manager.delete_filter(filter_id)
         return jsonify({"message": "Filtro removido com sucesso!"}), 200
     except Exception as e:
-        db.session.rollback()
         return jsonify({"error": str(e)}), 500

@@ -7,14 +7,15 @@ const productsPerPage = 12;
 let selectedPrice = 10000; // Preço máximo padrão
 let selectedTypes = [];
 let selectedBrands = [];
-let allAvailableBrands = [];
-let allAvailableTypes = [];
 
-
-
-// Variável global para armazenar os produtos do backend
+// Variável global para armazenar os produtos do back-end
 let products = [];
+// Variável global para armazenar os filtros do back-end
+let filters = [];
+
 const API_PRODUCTS_URL = window.location.origin + "/api/products";
+const API_FILTERS_URL = window.location.origin + "/api/admin/filters"; // Usamos a API de admin para buscar todos os filtros
+
 const priceRange = document.getElementById('priceRange');
 const priceDisplay = document.getElementById('priceDisplay');
 const productList = document.getElementById('productList');
@@ -23,27 +24,30 @@ const typeFiltersContainer = document.getElementById('type-filters');
 const brandFiltersContainer = document.getElementById('brand-filters');
 
 /**
- * Busca os produtos da API e renderiza a lista.
+ * Busca os produtos e filtros da API e renderiza a lista.
  */
-async function fetchProducts() {
+async function fetchData() {
     try {
-        const response = await fetch(API_PRODUCTS_URL);
-        if (!response.ok) {
+        const productsResponse = await fetch(API_PRODUCTS_URL);
+        if (!productsResponse.ok) {
             throw new Error('Erro ao buscar produtos da API.');
         }
-        products = await response.json();
-        
-        // Extrai filtros únicos
-        const brands = new Set(products.map(p => p.brand));
-        const types = new Set(products.map(p => p.type));
-        allAvailableBrands = Array.from(brands);
-        allAvailableTypes = Array.from(types);
+        products = await productsResponse.json();
 
+        const filtersResponse = await fetch(API_FILTERS_URL);
+        if (!filtersResponse.ok) {
+            throw new Error('Erro ao buscar filtros da API.');
+        }
+        filters = await filtersResponse.json();
+        
+        // Renderiza os filtros de marca e tipo com base nos dados do CSV
         renderFilters();
         updateProductList();
     } catch (error) {
-        console.error("Erro ao carregar produtos:", error);
-        productList.innerHTML = `<p class="text-center text-gray-500">Não foi possível carregar os produtos. Tente novamente mais tarde.</p>`;
+        console.error("Erro ao carregar dados:", error);
+        if (productList) {
+            productList.innerHTML = `<p class="text-center text-gray-500">Não foi possível carregar os produtos. Tente novamente mais tarde.</p>`;
+        }
     }
 }
 
@@ -53,16 +57,20 @@ async function fetchProducts() {
 function renderFilters() {
     typeFiltersContainer.innerHTML = '';
     brandFiltersContainer.innerHTML = '';
+    
+    // Obtém os filtros de tipo e marca
+    const typeFilters = filters.filter(f => f.type === 'type');
+    const brandFilters = filters.filter(f => f.type === 'brand');
 
-    allAvailableTypes.forEach(type => {
+    typeFilters.forEach(filter => {
         const label = document.createElement('label');
-        label.innerHTML = `<input type="checkbox" value="${type}"> ${type}`;
+        label.innerHTML = `<input type="checkbox" value="${filter.name}"> ${filter.name}`;
         typeFiltersContainer.appendChild(label);
     });
 
-    allAvailableBrands.forEach(brand => {
+    brandFilters.forEach(filter => {
         const label = document.createElement('label');
-        label.innerHTML = `<input type="checkbox" value="${brand}"> ${brand}`;
+        label.innerHTML = `<input type="checkbox" value="${filter.name}"> ${filter.name}`;
         brandFiltersContainer.appendChild(label);
     });
     
@@ -94,7 +102,7 @@ function displayProducts(page, filteredProducts) {
         const link = document.createElement('a');
         link.href = `/products-details/${product.id}`;
         link.innerHTML = `
-            <img src="${product.images[0] || 'https://via.placeholder.com/100'}" alt="${product.name}">
+            <img src="${product.images[0] || 'https://placehold.co/100'}" alt="${product.name}">
             <div class="product-info">
                 <div class="product-name">${product.name}</div>
                 <div class="product-price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
@@ -102,7 +110,6 @@ function displayProducts(page, filteredProducts) {
         `;
         
         productDiv.appendChild(link);
-        
         productList.appendChild(productDiv);
     });
 }
@@ -112,6 +119,7 @@ function displayProducts(page, filteredProducts) {
  * @param {Array<Object>} filteredProducts - A lista de produtos filtrados.
  */
 function displayPagination(filteredProducts) {
+    if (!pagination) return;
     pagination.innerHTML = '';
     const pageCount = Math.ceil(filteredProducts.length / productsPerPage);
 
@@ -127,6 +135,7 @@ function displayPagination(filteredProducts) {
             // Atualiza a classe 'active'
             document.querySelectorAll('.pagination button').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         pagination.appendChild(button);
     }
@@ -136,6 +145,7 @@ function displayPagination(filteredProducts) {
  * Atualiza a exibição do preço e o valor do filtro.
  */
 function updatePriceDisplay() {
+    if (!priceRange || !priceDisplay) return;
     const value = priceRange.value;
     priceDisplay.textContent = `R$ ${parseFloat(value).toFixed(2).replace('.', ',')}`;
     selectedPrice = parseFloat(value);
@@ -146,11 +156,9 @@ function updatePriceDisplay() {
  * Filtra a lista de produtos e atualiza a exibição.
  */
 function updateProductList() {
-    // Coleta os valores dos filtros selecionados
     selectedTypes = Array.from(document.querySelectorAll('#type-filters input[type="checkbox"]:checked')).map(cb => cb.value);
     selectedBrands = Array.from(document.querySelectorAll('#brand-filters input[type="checkbox"]:checked')).map(cb => cb.value);
     
-    // Filtra os produtos com base nos critérios selecionados
     const filteredProducts = products.filter(product => {
         const matchesPrice = product.price <= selectedPrice;
         const matchesType = selectedTypes.length === 0 || selectedTypes.includes(product.type);
@@ -164,10 +172,11 @@ function updateProductList() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    fetchProducts();
-    priceRange.addEventListener('input', updatePriceDisplay);
-    priceRange.addEventListener('change', updateProductList); // Atualiza na soltura do slider
-
+    fetchData();
+    if (priceRange) {
+        priceRange.addEventListener('input', updatePriceDisplay);
+        priceRange.addEventListener('change', updateProductList); // Atualiza na soltura do slider
+    }
     // Inicializa o valor exibido do slider
     updatePriceDisplay();
 });

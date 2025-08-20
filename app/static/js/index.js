@@ -1,7 +1,6 @@
 // index.js
 // Este script lida com a lógica principal da página inicial.
-// Ajustado para permitir que o formulário de login seja enviado ao back-end
-// e para gerenciar o dropdown de perfil.
+// Refatorado para usar APIs e modularizar a lógica.
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -27,8 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // Carregar o tema assim que a página for carregada
     carregarTema();
 
+    // Event listeners para alternar o tema
     const alternarTemaDropdown = document.getElementById('alternar-tema-dropdown');
     const alternarTemaMobile = document.getElementById('botao-alternar-tema-mobile');
 
@@ -59,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fecharMenuMobile.addEventListener('click', fecharMenuMobileHandler);
     overlay.addEventListener('click', fecharMenuMobileHandler);
 
+    // Fechar o menu mobile ao clicar em um link
     document.querySelectorAll('.link-nav-mobile').forEach(link => {
         link.addEventListener('click', fecharMenuMobileHandler);
     });
@@ -122,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             carrinho.push({ ...produto, quantidade: 1 });
         }
         renderizarCarrinho();
+        // Exibe uma mensagem de feedback
         exibirMensagem(`"${produto.name}" adicionado ao carrinho!`, 'success');
     }
 
@@ -203,6 +206,34 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (e) => {
         if (e.target === modalLogin) {
             modalLogin.style.display = 'none';
+        }
+    });
+
+    // --- Lógica do Modal de Produto ---
+    const modalProduto = document.getElementById('modal-produto');
+    const fecharModal = document.querySelector('.fechar-modal');
+    const modalImagem = document.querySelector('.modal-imagem');
+    const modalNome = document.querySelector('.modal-nome-produto');
+    const modalDescricao = document.querySelector('.modal-descricao-produto');
+    const modalPreco = document.querySelector('.modal-preco-produto');
+    const botaoAddCarrinhoModal = document.querySelector('.botao-add-carrinho-modal');
+    
+    let produtoSelecionado = null;
+
+    fecharModal.addEventListener('click', () => {
+        modalProduto.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modalProduto) {
+            modalProduto.style.display = 'none';
+        }
+    });
+
+    botaoAddCarrinhoModal.addEventListener('click', () => {
+        if (produtoSelecionado) {
+            adicionarAoCarrinho(produtoSelecionado);
+            modalProduto.style.display = 'none';
         }
     });
 
@@ -305,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function exibirMensagem(message, type = 'info') {
         const modalMessage = document.getElementById('modal-message');
+        if (!modalMessage) return;
         modalMessage.textContent = message;
         modalMessage.className = `modal-message ${type}`;
         modalMessage.style.display = 'block';

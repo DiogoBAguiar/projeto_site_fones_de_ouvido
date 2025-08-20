@@ -1,10 +1,11 @@
 // products-details.js
 // Este script lida com a lógica da página de detalhes do produto.
+// Refatorado para usar a nova arquitetura baseada em CSV.
 
 document.addEventListener('DOMContentLoaded', () => {
     
     // URL base para a API de produtos
-    const API_PRODUCT_DETAILS_URL = window.location.origin + "/api/produtos/";
+    const API_PRODUCT_DETAILS_URL = window.location.origin + "/api/products/";
 
     // Seletores de elementos da página
     const mainImage = document.querySelector('.main-image-container img');

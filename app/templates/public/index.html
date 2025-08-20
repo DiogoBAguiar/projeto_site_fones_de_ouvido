@@ -13,7 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Ajustado o caminho para o CSS global -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body class="tema-claro">
@@ -45,9 +44,10 @@
                 <div class="perfil-container">
                     <!-- O conteúdo deste botão será definido via Jinja/Flask -->
                     {% if current_user.is_authenticated %}
-                        <!-- Se o usuário estiver logado, mostra a foto de perfil e o nome -->
+                        <!-- Se o usuário estiver logado, mostra a foto de perfil -->
                         <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
-                            <img src="{{ url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
+                            <!-- A foto de perfil agora vem do modelo de usuário, que será atualizado para CSV -->
+                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
                         </button>
                     {% else %}
                         <!-- Se o usuário não estiver logado, mostra o botão de login -->
@@ -182,7 +182,7 @@
         <section id="produtos-destaque" class="secao secao-produtos-destaque oculta">
             <h2 class="titulo-secao">Produtos em Destaque</h2>
             <div class="grade-produtos">
-                <!-- Agora, os produtos serão injetados aqui via JavaScript. -->
+                <!-- Os produtos serão injetados aqui via JavaScript. -->
             </div>
         </section>
 
@@ -333,7 +333,7 @@
             </div>
         </div>
     </div>    
-    <!-- Modal de Login -->
+    <!-- Modal de Login (em index.html agora) -->
     <div id="modal-login" class="modal">
         <div class="conteudo-modal-login">
             <span class="fechar-modal-login">&times;</span>

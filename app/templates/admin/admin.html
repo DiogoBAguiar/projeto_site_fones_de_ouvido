@@ -10,7 +10,324 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/global_admin.css') }}">
+    <style>
+        :root {
+            --fundo-claro: #f0f2f5;
+            --texto-claro: #1a1a1a;
+            --card-claro: #ffffff;
+            --borda-claro: #e0e0e0;
+            --primaria-claro: #2c3e50;
+            --secundaria-claro: #34495e;
+            --sombra-claro: rgba(0, 0, 0, 0.1);
+            --cor-link: #3498db;
+            --cor-link-hover: #2980b9;
+            --cor-sucesso: #22c55e;
+            --cor-erro: #ef4444;
+            --roxo-principal: #4c51bf;
+            --verde-sucesso: #22c55e;
+            --vermelho-erro: #ef4444;
+            --amarelo-alerta: #eab308;
+            --tag-fundo: #e0e7ff;
+            --tag-texto: #4338ca;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--fundo-claro);
+            color: var(--texto-claro);
+            line-height: 1.6;
+        }
+
+        /* Estilo da barra de rolagem */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e5e7eb; }
+        ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .main-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 2rem; text-align: center; color: var(--primaria-claro); }
+        .card { background-color: var(--card-claro); border-radius: 1rem; box-shadow: 0 4px 6px var(--sombra-claro); padding: 1.5rem; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card:hover { box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15); transform: translateY(-2px); }
+
+        .tabs-container { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+        .tabs-list { display: flex; gap: 0.5rem; padding: 0.25rem; background-color: var(--borda-claro); border-radius: 0.5rem; }
+        .tab-trigger { background-color: transparent; color: var(--secundaria-claro); border: none; border-radius: 0.5rem; padding: 0.75rem 1.5rem; font-weight: 500; transition: background-color 0.3s, color 0.3s; cursor: pointer; }
+        .tab-trigger:hover { background-color: var(--borda-claro); }
+        .tab-trigger.active { background-color: var(--roxo-principal); color: white; box-shadow: 0 4px 6px rgba(76, 81, 191, 0.3); }
+        .btn-logout { background-color: #d32f2f; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 500; text-decoration: none; transition: background-color 0.3s ease; border: none; cursor: pointer; }
+        .btn-logout:hover { background-color: #c62828; }
+
+        .dashboard-content { display: flex; flex-direction: column; gap: 2rem; }
+        .kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .kpi-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); }
+        .kpi-card.purple { background-color: var(--roxo-principal); }
+        .kpi-card.green { background-color: var(--verde-sucesso); }
+        .kpi-card.red { background-color: var(--vermelho-erro); }
+        .kpi-card.yellow { background-color: var(--amarelo-alerta); }
+        .kpi-card .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .kpi-card .value { font-size: 1.5rem; font-weight: 700; }
+        .kpi-card .label { font-size: 0.875rem; opacity: 0.9; }
+
+        .main-content, .bottom-sections, .tables-container { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+        @media (min-width: 1024px) {
+            .main-content, .bottom-sections { grid-template-columns: 1fr 1fr; }
+        }
+
+        .analytics-chart-card { min-height: 300px; display: flex; align-items: center; justify-content: center; }
+        .recent-sales-card h3, .card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background-color: #f9fafb; }
+        th, td { padding: 0.75rem 1.5rem; text-align: left; border-bottom: 1px solid var(--borda-claro); }
+        th { font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .file-upload-label { display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 1rem; border: 2px dashed var(--borda-claro); border-radius: 0.75rem; color: var(--primaria-claro); transition: border-color 0.3s, color 0.3s; }
+        .file-upload-label:hover { border-color: #9ca3af; color: var(--secundaria-claro); }
+
+        .form-input, .form-textarea, .form-select { width: 100%; padding: 0.75rem; border: 1px solid var(--borda-claro); border-radius: 0.5rem; transition: border-color 0.3s, box-shadow 0.3s; }
+        .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--roxo-principal); outline: none; box-shadow: 0 0 0 2px rgba(76, 81, 191, 0.2); }
+
+        .form-button { width: 100%; padding: 0.75rem; margin-top: 1rem; background-color: var(--roxo-principal); color: white; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s; }
+        .form-button:hover { background-color: var(--secundaria-claro); }
+
+        .product-image-previews-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .product-image-previews-container img { width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; border: 2px solid var(--borda-claro); }
+
+        .hidden { display: none; }
+        
+        /* NOVO: Estilos para o seletor de filtros com checkboxes */
+        .filter-selection-group {
+            margin-top: 1rem;
+        }
+        .filter-selection-group-title {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--borda-claro);
+            border-radius: 0.5rem;
+        }
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .checkbox-wrapper label {
+            margin: 0;
+            font-weight: 400;
+        }
+
+        #selected-filters-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            min-height: 2rem;
+            border: 1px solid var(--borda-claro);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .selected-filter-tag { background-color: var(--tag-fundo); color: var(--tag-texto); padding: 0.25rem 0.75rem; border-radius: 9999px; display: inline-flex; align-items: center; font-size: 0.875rem; margin-right: 0.5rem; margin-bottom: 0.5rem; }
+        .selected-filter-tag .remove-btn { 
+            background: none; 
+            border: none; 
+            color: inherit; 
+            margin-left: 0.5rem; 
+            cursor: pointer; 
+            font-size: 0.75rem;
+            line-height: 1;
+            padding: 0;
+        }
+        .table-action-btn { background: none; border: none; font-weight: 500; cursor: pointer; transition: color 0.2s ease, background-color 0.2s ease; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
+        .table-action-btn.edit { color: var(--cor-link); }
+        .table-action-btn.edit:hover { background-color: rgba(52, 152, 219, 0.1); }
+        .table-action-btn.delete { color: var(--cor-erro); }
+        .table-action-btn.delete:hover { background-color: rgba(239, 68, 68, 0.1); }
+        .table-actions { display: flex; gap: 0.5rem; align-items: center; }
+        .product-image-previews-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem; /* gap-3 */
+            padding: 0.75rem; /* p-3 */
+            background-color: #ffffff;
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            width: 100%;
+            max-width: 60rem; /* max-w-5xl */
+        }
+        
+        /* Estilos responsivos para telas maiores (a partir de 768px) */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                gap: 1rem; /* md:gap-4 */
+            }
+            body {
+                padding: 2rem; /* md:p-8 */
+            }
+        }
+        
+        /* Estilos para cada coluna de filtro */
+        .filter-column {
+            flex: 1;
+            min-width: 120px;
+            position: relative;
+        }
+        
+        /* Estilos do cabeçalho de cada filtro (título e ícone) */
+        .filter-header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.25rem; /* pb-1 */
+            margin-bottom: 0.25rem; /* mb-1 */
+            border-bottom: 1px solid #3b82f6; /* border-b border-blue-500 */
+        }
+        
+        .filter-header h3 {
+            font-weight: bold;
+            font-size: 0.875rem; /* text-sm */
+            color: #1f2937; /* text-gray-800 */
+        }
+        
+        .chevron {
+            font-size: 1rem; /* text-base */
+            color: #6b7280; /* text-gray-500 */
+            transition: transform 0.2s ease-out;
+        }
+        
+        .chevron.rotate {
+            transform: rotate(180deg);
+        }
+        
+        /* Estilos para o menu flutuante (dropdown) */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
+            background-color: #ffffff;
+            border-radius: 0.375rem; /* rounded-md */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            padding: 0.5rem; /* p-2 */
+            margin-top: 0.25rem; /* mt-1 */
+        }
+        
+        .dropdown-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        /* Estilos para as opções de checkbox dentro do menu */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* space-y-2 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .option-item label {
+            margin-left: 0.375rem; /* ml-1.5 */
+            color: #4b5563; /* text-gray-700 */
+            transition: color 0.2s duration-200;
+        }
+
+        .option-item:hover label {
+            color: #3b82f6; /* group-hover:text-blue-600 */
+        }
+
+        /* Estilos para o checkbox real (oculto) e a sua estilização */
+        .option-item input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 0.75rem; /* w-3 */
+            height: 0.75rem; /* h-3 */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            background-color: #f3f4f6; /* bg-gray-100 */
+            border-radius: 0.125rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .option-item input[type="checkbox"]:checked {
+            background-color: #3b82f6; /* text-blue-600 */
+            border-color: #3b82f6;
+        }
+        
+        .option-item input[type="checkbox"]:checked::after {
+            content: '';
+            display: block;
+            width: 0.3rem;
+            height: 0.6rem;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-left: 1px;
+            margin-top: -3px;
+        }
+
+        /* Estilos para as caixas de cores */
+        .color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        /* Estilos para a animação das caixas de cores ao serem clicadas */
+        .option-item input[type="checkbox"]:checked + label .color-box {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Estilos para o botão Limpar Filtros */
+        .clear-button-container {
+            margin-top: 1rem; /* mt-4 */
+            display: flex;
+            justify-content: center;
+        }
+
+        #clear-filters {
+            padding: 0.25rem 0.75rem; /* px-3 py-1 */
+            background-color: #3b82f6; /* bg-blue-600 */
+            color: white;
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.875rem; /* text-sm */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            transition: all 0.3s ease-in-out;
+            border: none;
+            cursor: pointer;
+        }
+
+        #clear-filters:hover {
+            background-color: #2563eb; /* hover:bg-blue-700 */
+            transform: scale(1.05); /* hover:scale-105 */
+        }
+        
+    </style>
     <!-- Recharts CDN para gráficos -->
     <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
 </head>
@@ -71,25 +388,145 @@
                     <div class="card">
                         <h3>Adicionar Produto</h3>
                         <form id="add-product-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                            <!-- Visualização da imagem selecionada -->
-                            <div id="product-image-previews-container" class="product-image-previews-container hidden"></div>
-                            
                             <input type="text" id="product-name" name="name" placeholder="Nome do Produto" required class="form-input">
                             <input type="number" id="product-price" name="price" placeholder="Preço" step="0.01" required class="form-input">
                             <textarea id="product-description" name="description" placeholder="Descrição do Produto" required class="form-textarea"></textarea>
                             <input type="text" id="product-status" name="status" placeholder="Status (Ex: 'Em estoque')" required class="form-input">
                             
-                            <!-- Campo para marca -->
-                            <div class="filter-selection">
-                                <label for="product-brand" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Marca do Produto:</label>
-                                <input type="text" id="product-brand" name="brand" placeholder="Marca (Ex: 'Decibell')" required class="form-input">
-                            </div>
+                            <!-- Nova seção de filtros para checkboxes -->
+                            <div class="container">
 
+        <!-- Coluna para 'Marca' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="brand-content">
+                <h3>Marca</h3>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div id="brand-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-apple" name="brand" value="Apple">
+                        <label for="brand-apple">Apple</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-sony" name="brand" value="Sony">
+                        <label for="brand-sony">Sony</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-jbl" name="brand" value="JBL">
+                        <label for="brand-jbl">JBL</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="brand-samsung" name="brand" value="Samsung">
+                        <label for="brand-samsung">Samsung</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna para 'Conectividade' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="connectivity-content">
+                <h3>Conectividade</h3>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div id="connectivity-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="conn-bluetooth" name="connectivity" value="Bluetooth">
+                        <label for="conn-bluetooth">Bluetooth</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="conn-cabo" name="connectivity" value="Cabo">
+                        <label for="conn-cabo">Cabo</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="conn-wifi" name="connectivity" value="Wi-Fi">
+                        <label for="conn-wifi">Wi-Fi</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna para 'Tipo de Fone' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="type-content">
+                <h3>Tipo de Fone</h3>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div id="type-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="type-over-ear" name="type" value="Over-ear">
+                        <label for="type-over-ear">Over-ear</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="type-on-ear" name="type" value="On-ear">
+                        <label for="type-on-ear">On-ear</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="type-in-ear" name="type" value="In-ear">
+                        <label for="type-in-ear">In-ear</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna para 'Cor' -->
+        <div class="filter-column">
+            <div class="filter-header" data-toggle-id="color-content">
+                <h3>Cor</h3>
+                <span class="chevron">&#9660;</span>
+            </div>
+            <div id="color-content" class="dropdown-menu">
+                <div class="options-list">
+                    <div class="option-item">
+                        <input type="checkbox" id="color-preto" name="color" value="Preto" class="hidden">
+                        <label for="color-preto">
+                            <div class="color-box" style="background-color: black;"></div>
+                            <span>Preto</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="color-branco" name="color" value="Branco" class="hidden">
+                        <label for="color-branco">
+                            <div class="color-box" style="background-color: white;"></div>
+                            <span>Branco</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="color-vermelho" name="color" value="Vermelho" class="hidden">
+                        <label for="color-vermelho">
+                            <div class="color-box" style="background-color: #ef4444;"></div>
+                            <span>Vermelho</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="color-azul" name="color" value="Azul" class="hidden">
+                        <label for="color-azul">
+                            <div class="color-box" style="background-color: #3b82f6;"></div>
+                            <span>Azul</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão de Limpar Filtros -->
+    <div class="clear-button-container">
+        <button id="clear-filters">
+            Limpar Filtros
+        </button>
+    </div>
+                            </div>
+                            
                             <label for="product-image" class="file-upload-label" style="margin-top: 1rem;">
                                 <i class="fas fa-camera" style="margin-right: 0.5rem;"></i>
                                 <span>Selecionar Imagens (máx. 15)</span>
                             </label>
                             <input type="file" id="product-image" name="images" class="hidden" multiple accept="image/*">
+                            <div id="product-image-previews-container" class="product-image-previews-container hidden"></div>
                             
                             <button type="submit" class="form-button">Adicionar Produto</button>
                         </form>

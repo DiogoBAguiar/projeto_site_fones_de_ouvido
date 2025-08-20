@@ -18,10 +18,10 @@
             <!-- Galeria de Imagens -->
             <div class="product-gallery">
                 <div class="main-image-container">
-                    <img src="{{ product.get_images()[0] if product.get_images() else 'https://placehold.co/600x600?text=Sem+Imagem' }}" alt="Imagem Principal do Produto">
+                    <img src="{{ product.images[0] if product.images|length > 0 else 'https://placehold.co/600x600?text=Sem+Imagem' }}" alt="Imagem Principal do Produto">
                 </div>
                 <div class="gallery-thumbnails">
-                    {% for image in product.get_images() %}
+                    {% for image in product.images %}
                         <img src="{{ image }}" alt="Miniatura do Produto">
                     {% endfor %}
                 </div>
