@@ -55,7 +55,7 @@ def admin():
 def admin_logout():
     """Rota para fazer logout do administrador."""
     logout_user()
-    return redirect(url_for('admin_page.admin_login'))
+    return redirect(url_for('public.home'))
 
 # ==============================================================================
 # FUNÇÕES DE LEITURA DE CSV
