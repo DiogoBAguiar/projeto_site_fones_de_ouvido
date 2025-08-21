@@ -82,77 +82,138 @@
         th { font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
         tbody tr:last-child td { border-bottom: none; }
 
-        .file-upload-label { display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 1rem; border: 2px dashed var(--borda-claro); border-radius: 0.75rem; color: var(--primaria-claro); transition: border-color 0.3s, color 0.3s; }
-        .file-upload-label:hover { border-color: #9ca3af; color: var(--secundaria-claro); }
+        /* Estilos aprimorados para a área de upload de imagens */
+        .file-upload-label { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer; 
+            padding: 2rem;
+            border: 2px dashed var(--borda-claro);
+            border-radius: 0.75rem;
+            color: var(--primaria-claro);
+            transition: border-color 0.3s, background-color 0.3s; 
+            text-align: center;
+        }
+        .file-upload-label:hover, .file-upload-label.drag-over {
+            border-color: var(--roxo-principal);
+            background-color: rgba(76, 81, 191, 0.1);
+        }
+        .file-upload-label .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primaria-claro);
+        }
+        .file-upload-label .upload-text {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .file-upload-label .upload-subtext {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
 
-        .form-input, .form-textarea, .form-select { width: 100%; padding: 0.75rem; border: 1px solid var(--borda-claro); border-radius: 0.5rem; transition: border-color 0.3s, box-shadow 0.3s; }
-        .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--roxo-principal); outline: none; box-shadow: 0 0 0 2px rgba(76, 81, 191, 0.2); }
+        .form-input, .form-textarea, .form-select { 
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--borda-claro);
+            border-radius: 0.5rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #f9fafb;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus { 
+            border-color: var(--roxo-principal);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 81, 191, 0.2); 
+        }
 
-        .form-button { width: 100%; padding: 0.75rem; margin-top: 1rem; background-color: var(--roxo-principal); color: white; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s; }
-        .form-button:hover { background-color: var(--secundaria-claro); }
+        .form-button { 
+            width: 100%; 
+            padding: 0.75rem; 
+            margin-top: 1rem; 
+            background-color: var(--roxo-principal); 
+            color: white; 
+            border: none; 
+            border-radius: 0.5rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: background-color 0.3s; 
+        }
+        .form-button:hover { 
+            background-color: var(--secundaria-claro); 
+        }
 
-        .product-image-previews-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .product-image-previews-container img { width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; border: 2px solid var(--borda-claro); }
+        .product-image-previews-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 1rem; /* Aumentado o espaçamento */
+            margin-top: 1rem;
+        }
+        .preview-item {
+            position: relative;
+            width: 120px; /* Tamanho fixo para as miniaturas */
+            height: 120px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: grab;
+            transition: transform 0.2s ease;
+        }
+        .preview-item:active {
+            cursor: grabbing;
+        }
+        .preview-item.drag-over-item {
+            border: 2px dashed var(--roxo-principal);
+            transform: scale(1.05);
+        }
+        .preview-item img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block;
+        }
+        .preview-item .image-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 9999px;
+        }
+        .remove-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: var(--vermelho-erro);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .remove-image-btn:hover {
+            opacity: 1;
+        }
 
         .hidden { display: none; }
         
-        /* NOVO: Estilos para o seletor de filtros com checkboxes */
-        .filter-selection-group {
+        /* Estilos para a seção de filtros */
+        .filter-section-title {
+            font-weight: 600;
             margin-top: 1rem;
-        }
-        .filter-selection-group-title {
-            font-weight: 500;
             margin-bottom: 0.5rem;
-            display: block;
+            color: var(--primaria-claro);
         }
-        .checkbox-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            padding: 1rem;
-            border: 1px solid var(--borda-claro);
-            border-radius: 0.5rem;
-        }
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .checkbox-wrapper label {
-            margin: 0;
-            font-weight: 400;
-        }
-
-        #selected-filters-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            min-height: 2rem;
-            border: 1px solid var(--borda-claro);
-            border-radius: 0.5rem;
-            padding: 0.5rem;
-        }
-
-        .selected-filter-tag { background-color: var(--tag-fundo); color: var(--tag-texto); padding: 0.25rem 0.75rem; border-radius: 9999px; display: inline-flex; align-items: center; font-size: 0.875rem; margin-right: 0.5rem; margin-bottom: 0.5rem; }
-        .selected-filter-tag .remove-btn { 
-            background: none; 
-            border: none; 
-            color: inherit; 
-            margin-left: 0.5rem; 
-            cursor: pointer; 
-            font-size: 0.75rem;
-            line-height: 1;
-            padding: 0;
-        }
-        .table-action-btn { background: none; border: none; font-weight: 500; cursor: pointer; transition: color 0.2s ease, background-color 0.2s ease; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
-        .table-action-btn.edit { color: var(--cor-link); }
-        .table-action-btn.edit:hover { background-color: rgba(52, 152, 219, 0.1); }
-        .table-action-btn.delete { color: var(--cor-erro); }
-        .table-action-btn.delete:hover { background-color: rgba(239, 68, 68, 0.1); }
-        .table-actions { display: flex; gap: 0.5rem; align-items: center; }
-        .product-image-previews-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
-
+        
         .container {
             display: flex;
             flex-direction: column;
@@ -393,140 +454,32 @@
                             <textarea id="product-description" name="description" placeholder="Descrição do Produto" required class="form-textarea"></textarea>
                             <input type="text" id="product-status" name="status" placeholder="Status (Ex: 'Em estoque')" required class="form-input">
                             
-                            <!-- Nova seção de filtros para checkboxes -->
-                            <div class="container">
+                            <!-- Título para a seção de filtros -->
+                            <h4 class="filter-section-title">Selecione os Filtros</h4>
 
-        <!-- Coluna para 'Marca' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="brand-content">
-                <h3>Marca</h3>
-                <span class="chevron">&#9660;</span>
-            </div>
-            <div id="brand-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-apple" name="brand" value="Apple">
-                        <label for="brand-apple">Apple</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-sony" name="brand" value="Sony">
-                        <label for="brand-sony">Sony</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-jbl" name="brand" value="JBL">
-                        <label for="brand-jbl">JBL</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-samsung" name="brand" value="Samsung">
-                        <label for="brand-samsung">Samsung</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Coluna para 'Conectividade' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="connectivity-content">
-                <h3>Conectividade</h3>
-                <span class="chevron">&#9660;</span>
-            </div>
-            <div id="connectivity-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="conn-bluetooth" name="connectivity" value="Bluetooth">
-                        <label for="conn-bluetooth">Bluetooth</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="conn-cabo" name="connectivity" value="Cabo">
-                        <label for="conn-cabo">Cabo</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="conn-wifi" name="connectivity" value="Wi-Fi">
-                        <label for="conn-wifi">Wi-Fi</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Coluna para 'Tipo de Fone' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="type-content">
-                <h3>Tipo de Fone</h3>
-                <span class="chevron">&#9660;</span>
-            </div>
-            <div id="type-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="type-over-ear" name="type" value="Over-ear">
-                        <label for="type-over-ear">Over-ear</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="type-on-ear" name="type" value="On-ear">
-                        <label for="type-on-ear">On-ear</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="type-in-ear" name="type" value="In-ear">
-                        <label for="type-in-ear">In-ear</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Coluna para 'Cor' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="color-content">
-                <h3>Cor</h3>
-                <span class="chevron">&#9660;</span>
-            </div>
-            <div id="color-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="color-preto" name="color" value="Preto" class="hidden">
-                        <label for="color-preto">
-                            <div class="color-box" style="background-color: black;"></div>
-                            <span>Preto</span>
-                        </label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="color-branco" name="color" value="Branco" class="hidden">
-                        <label for="color-branco">
-                            <div class="color-box" style="background-color: white;"></div>
-                            <span>Branco</span>
-                        </label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="color-vermelho" name="color" value="Vermelho" class="hidden">
-                        <label for="color-vermelho">
-                            <div class="color-box" style="background-color: #ef4444;"></div>
-                            <span>Vermelho</span>
-                        </label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="color-azul" name="color" value="Azul" class="hidden">
-                        <label for="color-azul">
-                            <div class="color-box" style="background-color: #3b82f6;"></div>
-                            <span>Azul</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Botão de Limpar Filtros -->
-    <div class="clear-button-container">
-        <button id="clear-filters">
-            Limpar Filtros
-        </button>
-    </div>
+                            <!-- Seção de filtros com checkboxes. Conteúdo será gerado dinamicamente pelo JS -->
+                            <div class="container" id="filters-product-container">
+                                <!-- Os filtros serão injetados aqui via JS -->
+                            </div>
+                        
+                            <!-- Botão de Limpar Filtros -->
+                            <div class="clear-button-container">
+                                <button type="button" id="clear-filters">
+                                    Limpar Filtros
+                                </button>
                             </div>
                             
-                            <label for="product-image" class="file-upload-label" style="margin-top: 1rem;">
-                                <i class="fas fa-camera" style="margin-right: 0.5rem;"></i>
-                                <span>Selecionar Imagens (máx. 15)</span>
+                            <!-- Área de pré-visualização de imagens -->
+                            <h4 class="filter-section-title" style="margin-top: 1.5rem;">Pré-visualização de Imagens (Reordenáveis)</h4>
+                            <div id="product-image-previews-container" class="product-image-previews-container hidden"></div>
+
+                            <!-- Área de upload de imagens (agora com suporte a arrastar e soltar) -->
+                            <label for="product-image" id="image-upload-label" class="file-upload-label" style="margin-top: 1rem;">
+                                <i class="fas fa-camera upload-icon"></i>
+                                <span class="upload-text">Clique ou arraste e solte imagens aqui</span>
+                                <span class="upload-subtext">(máx. 15 arquivos)</span>
                             </label>
                             <input type="file" id="product-image" name="images" class="hidden" multiple accept="image/*">
-                            <div id="product-image-previews-container" class="product-image-previews-container hidden"></div>
                             
                             <button type="submit" class="form-button">Adicionar Produto</button>
                         </form>

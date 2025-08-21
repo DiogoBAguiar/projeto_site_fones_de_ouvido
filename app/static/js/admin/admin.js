@@ -1,6 +1,7 @@
 // admin.js
 // Este script lida com a lógica do painel de administração.
 // Refatorado para buscar dados de forma dinâmica de todos os endpoints da API.
+// Inclui agora a pré-visualização de imagens com reordenação e exclusão, além de atualizar a tabela de produtos após o envio.
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -10,9 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_USERS_URL = window.location.origin + '/api/admin/users';
     const API_BRANDS_URL = window.location.origin + '/api/admin/brands';
     const API_FILTERS_URL = window.location.origin + '/api/admin/filters';
+    const API_VISITS_URL = window.location.origin + '/api/admin/visits'; // Endpoint de visitas ajustado
     
     // Variável global para armazenar os filtros do back-end
     let allFilters = [];
+    // Novo array global para armazenar os arquivos de imagem para o upload
+    let uploadedFiles = [];
 
     // Seletores de elementos do DOM
     const kpiCardsContainer = document.getElementById('kpi-cards');
@@ -30,23 +34,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const productImageInput = document.getElementById('product-image');
     const imagePreviewsContainer = document.getElementById('product-image-previews-container');
     
-    // Novos seletores para o novo layout de filtros
+    // Novos seletores para o novo layout de filtros e upload
     const filtersProductContainer = document.getElementById('filters-product-container');
-
+    const imageUploadLabel = document.getElementById('image-upload-label');
 
     // Funções de renderização
     /**
      * Renderiza os cartões de KPI (Key Performance Indicators).
      * @param {Array<Object>} kpis - Um array de objetos de KPI.
+     * @param {number} totalVisits - A contagem total de visitantes.
      */
-    function renderKPIs(kpis) {
+    function renderKPIs(kpis, totalVisits) {
         kpiCardsContainer.innerHTML = '';
         const iconMap = {
             'totalRevenue': 'fas fa-money-bill-wave',
             'subscriptions': 'fas fa-user-plus',
             'sales': 'fas fa-shopping-cart',
-            'activeNow': 'fas fa-users'
+            'activeNow': 'fas fa-users',
+            'visitors': 'fas fa-eye'
         };
+
+        // Adiciona o card de visitantes
+        const visitsCard = {
+            metric: 'visitors',
+            value: totalVisits,
+            description: 'Visitantes',
+            changeType: 'increase' // Assumimos que o número de visitantes sempre aumenta
+        };
+        kpis.push(visitsCard);
 
         kpis.forEach(kpi => {
             const iconClass = iconMap[kpi.metric] || 'fas fa-chart-bar';
@@ -161,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Renderiza a lista de filtros no novo layout de filtros com checkboxes.
+     * Os filtros são lidos da variável global `allFilters`.
      */
     function renderProductFiltersCheckboxes() {
         filtersProductContainer.innerHTML = '';
@@ -169,86 +185,324 @@ document.addEventListener('DOMContentLoaded', () => {
             return acc;
         }, {});
 
-        const order = ['brand', 'type', 'color', 'connectivity'];
+        // Ordem desejada dos grupos de filtro
+        const order = ['brand', 'connectivity', 'type', 'color'];
+        
         order.forEach(filterType => {
-            if (filtersByType[filterType] && filtersByType[filterType].length > 0) {
+            const filtersOfType = filtersByType[filterType];
+            if (filtersOfType && filtersOfType.length > 0) {
                 const filterGroup = document.createElement('div');
-                filterGroup.classList.add('filter-selection-group');
-                const title = document.createElement('label');
-                title.classList.add('filter-selection-group-title');
-                title.textContent = `${filterType.charAt(0).toUpperCase() + filterType.slice(1)}:`;
-                filterGroup.appendChild(title);
-                
-                const checkboxContainer = document.createElement('div');
-                checkboxContainer.classList.add('checkbox-container');
-                filtersByType[filterType].forEach(filter => {
-                    const checkboxWrapper = document.createElement('div');
-                    checkboxWrapper.classList.add('checkbox-wrapper');
-                    
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `filter-${filter.id}`;
-                    checkbox.name = filterType;
-                    checkbox.value = filter.id;
-                    
-                    const label = document.createElement('label');
-                    label.htmlFor = `filter-${filter.id}`;
-                    label.textContent = filter.name;
-
-                    checkboxWrapper.appendChild(checkbox);
-                    checkboxWrapper.appendChild(label);
-                    checkboxContainer.appendChild(checkboxWrapper);
-                });
-                filterGroup.appendChild(checkboxContainer);
+                filterGroup.classList.add('filter-column');
+                filterGroup.innerHTML = `
+                    <div class="filter-header" data-toggle-id="${filterType}-content">
+                        <h3>${filterType.charAt(0).toUpperCase() + filterType.slice(1)}</h3>
+                        <span class="chevron">&#9660;</span>
+                    </div>
+                    <div id="${filterType}-content" class="dropdown-menu">
+                        <div class="options-list">
+                            ${filtersOfType.map(filter => `
+                                <div class="option-item">
+                                    <input type="checkbox" id="filter-${filter.id}" name="filters" value="${filter.id}">
+                                    <label for="filter-${filter.id}">
+                                        ${filter.type === 'color' ? `<div class="color-box" style="background-color: ${filter.name.toLowerCase()};"></div>` : ''}
+                                        <span>${filter.name}</span>
+                                    </label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
                 filtersProductContainer.appendChild(filterGroup);
             }
         });
         
-        // Adiciona os event listeners aos checkboxes
-        document.querySelectorAll('#product-filters-container input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const filterId = parseInt(e.target.value);
-                const filter = allFilters.find(f => f.id === filterId);
-
-                if (filter) {
-                    if (e.target.checked) {
-                        // Lógica para garantir seleção única de 'brand'
-                        if (filter.type === 'brand') {
-                            // Desmarca outros checkboxes de 'brand'
-                            document.querySelectorAll(`#product-filters-container input[name="brand"]:checked`).forEach(otherCheckbox => {
-                                if (otherCheckbox.value !== e.target.value) {
-                                    otherCheckbox.checked = false;
-                                }
-                            });
-                            // Remove outras marcas da lista de selecionados
-                            selectedFiltersForProduct = selectedFiltersForProduct.filter(f => f.type !== 'brand');
-                        }
-                        selectedFiltersForProduct.push(filter);
-                    } else {
-                        // Remove o filtro se for desmarcado
-                        selectedFiltersForProduct = selectedFiltersForProduct.filter(f => f.id !== filter.id);
-                    }
-                }
-            });
+        // Adiciona listeners para os dropdowns
+        document.querySelectorAll('.filter-header').forEach(header => {
+            header.addEventListener('click', toggleDropdown);
         });
     }
+
+    /**
+     * Lida com a funcionalidade de dropdown dos filtros.
+     * @param {Event} e - O evento de clique.
+     */
+    function toggleDropdown(e) {
+        const header = e.currentTarget;
+        const dropdown = document.getElementById(header.dataset.toggleId);
+        const chevron = header.querySelector('.chevron');
+        
+        const isCurrentlyOpen = dropdown.classList.contains('open');
+
+        // Fecha todos os outros dropdowns
+        document.querySelectorAll('.dropdown-menu.open').forEach(menu => {
+            menu.classList.remove('open');
+            menu.previousElementSibling.querySelector('.chevron').classList.remove('rotate');
+        });
+
+        // Abre ou fecha o dropdown clicado
+        if (!isCurrentlyOpen) {
+            dropdown.classList.add('open');
+            chevron.classList.add('rotate');
+        }
+    }
+    
+    // ==============================================================================
+    // LÓGICA DE UPLOAD E PRÉ-VISUALIZAÇÃO DE IMAGENS
+    // ==============================================================================
+
+    /**
+     * Lida com os arquivos arrastados ou selecionados pelo input.
+     * Adiciona-os à lista de arquivos a serem enviados, respeitando o limite de 15.
+     * @param {FileList} files - A lista de arquivos do evento.
+     */
+    function handleFiles(files) {
+        // Concatena a nova lista de arquivos com a lista existente
+        for (const file of files) {
+            if (uploadedFiles.length < 15) {
+                uploadedFiles.push(file);
+            } else {
+                exibirMensagem('Limite de 15 imagens atingido. As imagens restantes não serão adicionadas.', 'danger');
+                break;
+            }
+        }
+        // Atualiza a pré-visualização das imagens
+        renderImagePreviews();
+    }
+
+    /**
+     * Renderiza as pré-visualizações de imagens a partir da lista 'uploadedFiles'.
+     */
+    function renderImagePreviews() {
+        imagePreviewsContainer.innerHTML = '';
+        if (uploadedFiles.length > 0) {
+            imagePreviewsContainer.classList.remove('hidden');
+            uploadedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewWrapper = document.createElement('div');
+                    previewWrapper.classList.add('preview-item');
+                    previewWrapper.draggable = true;
+                    previewWrapper.dataset.index = index;
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = `Pré-visualização da imagem ${index + 1}`;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.classList.add('remove-image-btn');
+                    removeBtn.innerHTML = `<i class="fas fa-times"></i>`;
+                    removeBtn.dataset.index = index; // Armazena o índice para fácil remoção
+                    
+                    const imageNumber = document.createElement('span');
+                    imageNumber.classList.add('image-number');
+                    imageNumber.textContent = `${index + 1}º`;
+
+                    previewWrapper.appendChild(img);
+                    previewWrapper.appendChild(removeBtn);
+                    previewWrapper.appendChild(imageNumber);
+                    imagePreviewsContainer.appendChild(previewWrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            imagePreviewsContainer.classList.add('hidden');
+        }
+    }
+    
+    let dragSrcEl = null;
+    function handleDragStart(e) {
+        this.style.opacity = '0.4';
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+    function handleDragEnter(e) {
+        this.classList.add('drag-over-item');
+    }
+    function handleDragLeave(e) {
+        this.classList.remove('drag-over-item');
+    }
+    function handleDrop(e) {
+        e.stopPropagation();
+        if (dragSrcEl !== this) {
+            const dragIndex = parseInt(dragSrcEl.dataset.index, 10);
+            const dropIndex = parseInt(this.dataset.index, 10);
+            
+            // Reordena o array de arquivos
+            const tempFile = uploadedFiles[dragIndex];
+            uploadedFiles.splice(dragIndex, 1);
+            uploadedFiles.splice(dropIndex, 0, tempFile);
+
+            renderImagePreviews(); // Renderiza a nova ordem
+        }
+        this.classList.remove('drag-over-item');
+        return false;
+    }
+    function handleDragEnd(e) {
+        this.style.opacity = '1';
+        document.querySelectorAll('.preview-item').forEach(item => {
+            item.classList.remove('drag-over-item');
+        });
+    }
+
+    if (imageUploadLabel) {
+        ['dragover', 'dragleave'].forEach(event => {
+            imageUploadLabel.addEventListener(event, e => e.preventDefault(), false);
+        });
+        imageUploadLabel.addEventListener('dragover', () => {
+            imageUploadLabel.classList.add('drag-over');
+        });
+        imageUploadLabel.addEventListener('dragleave', () => {
+            imageUploadLabel.classList.remove('drag-over');
+        });
+        imageUploadLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUploadLabel.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+        productImageInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+            e.target.value = '';
+        });
+        imagePreviewsContainer.addEventListener('click', (e) => {
+            const removeBtn = e.target.closest('.remove-image-btn');
+            if (removeBtn) {
+                const indexToRemove = parseInt(removeBtn.dataset.index, 10);
+                uploadedFiles.splice(indexToRemove, 1);
+                renderImagePreviews();
+            }
+        });
+
+        // Adiciona listeners de drag and drop para os itens de pré-visualização
+        imagePreviewsContainer.addEventListener('dragstart', (e) => {
+            if (e.target.closest('.preview-item')) {
+                handleDragStart.call(e.target.closest('.preview-item'), e);
+            }
+        });
+        imagePreviewsContainer.addEventListener('dragover', (e) => {
+            const dropTarget = e.target.closest('.preview-item');
+            if (dropTarget) {
+                handleDragOver.call(dropTarget, e);
+            }
+        });
+        imagePreviewsContainer.addEventListener('dragenter', (e) => {
+            const dropTarget = e.target.closest('.preview-item');
+            if (dropTarget) {
+                handleDragEnter.call(dropTarget, e);
+            }
+        });
+        imagePreviewsContainer.addEventListener('dragleave', (e) => {
+            const dropTarget = e.target.closest('.preview-item');
+            if (dropTarget) {
+                handleDragLeave.call(dropTarget, e);
+            }
+        });
+        imagePreviewsContainer.addEventListener('drop', (e) => {
+            const dropTarget = e.target.closest('.preview-item');
+            if (dropTarget) {
+                handleDrop.call(dropTarget, e);
+            }
+        });
+        imagePreviewsContainer.addEventListener('dragend', (e) => {
+            const dragTarget = e.target.closest('.preview-item');
+            if (dragTarget) {
+                handleDragEnd.call(dragTarget, e);
+            }
+        });
+    }
+
+    // ==============================================================================
+    // LÓGICA DE SUBMISSÃO E CARGA DE DADOS (Restante do Código)
+    // ==============================================================================
 
     // Lógica para carregar os dados das APIs
     async function fetchDashboardData(timeRange = '30d') {
         try {
-            const response = await fetch(`${API_DASHBOARD_URL}?timeRange=${timeRange}`);
-            if (!response.ok) {
-                throw new Error('Erro ao buscar dados do dashboard.');
-            }
-            const data = await response.json();
+            // Requisições assíncronas em paralelo para melhor performance
+            const [dashboardResponse, visitsResponse] = await Promise.all([
+                fetch(`${API_DASHBOARD_URL}?timeRange=${timeRange}`),
+                fetch(`${API_VISITS_URL}?timeRange=${timeRange}`)
+            ]);
+
+            const dashboardData = dashboardResponse.ok ? await dashboardResponse.json() : { kpis: [], recentSales: [] };
+            const visitsData = visitsResponse.ok ? await visitsResponse.json() : { totalVisits: 0, dailyVisits: [] };
             
-            renderKPIs(data.kpis);
-            renderSalesTable(data.recentSales);
+            renderKPIs(dashboardData.kpis, visitsData.totalVisits);
+            renderSalesTable(dashboardData.recentSales);
+            renderVisitsChart(visitsData.dailyVisits);
         } catch (error) {
             exibirMensagem(`Não foi possível carregar os dados do dashboard: ${error.message}`, 'danger');
             console.error(error);
         }
     }
+    
+    function renderVisitsChart(dailyVisits) {
+        // Lógica de renderização do gráfico de visitas com Recharts
+        const chartContainer = document.getElementById('chart-container');
+        if (!chartContainer || !window.Recharts || !window.Recharts.LineChart) {
+            console.error("Recharts não está disponível ou o contêiner do gráfico não foi encontrado.");
+            return;
+        }
+
+        const data = dailyVisits.map(item => ({
+            name: item.date,
+            Visitas: item.count
+        }));
+
+        const {
+            LineChart,
+            Line,
+            XAxis,
+            YAxis,
+            CartesianGrid,
+            Tooltip,
+            Legend,
+            ResponsiveContainer
+        } = window.Recharts;
+        
+        const chartElement = React.createElement(
+            ResponsiveContainer, {
+                width: '100%',
+                height: '100%'
+            },
+            React.createElement(
+                LineChart, {
+                    data: data,
+                    margin: {
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5
+                    }
+                },
+                React.createElement(CartesianGrid, {
+                    strokeDasharray: '3 3'
+                }),
+                React.createElement(XAxis, {
+                    dataKey: 'name'
+                }),
+                React.createElement(YAxis, null),
+                React.createElement(Tooltip, null),
+                React.createElement(Legend, null),
+                React.createElement(Line, {
+                    type: 'monotone',
+                    dataKey: 'Visitas',
+                    stroke: '#82ca9d',
+                    activeDot: {
+                        r: 8
+                    }
+                })
+            )
+        );
+
+        ReactDOM.render(chartElement, chartContainer);
+    }
+
 
     async function fetchProductsAndUsersAndBrands() {
         try {
@@ -308,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetBtn) {
             const filterId = targetBtn.dataset.filterId;
             const filterName = targetBtn.dataset.filterName;
-            if (confirm(`Tem certeza que deseja excluir o filtro "${filterName}"?`)) {
+            if (window.confirm(`Tem certeza que deseja excluir o filtro "${filterName}"?`)) {
                 try {
                     const response = await fetch(`${API_FILTERS_URL}/${filterId}`, {
                         method: 'DELETE'
@@ -372,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         // Extrai os filtros selecionados
-        const selectedFilterIds = Array.from(document.querySelectorAll('#product-filters-container input[name="filters"]:checked')).map(checkbox => parseInt(checkbox.value));
+        const selectedFilterIds = Array.from(document.querySelectorAll('#filters-product-container input[name="filters"]:checked')).map(checkbox => parseInt(checkbox.value));
         const selectedBrand = allFilters.find(f => selectedFilterIds.includes(f.id) && f.type === 'brand');
 
         const formData = new FormData();
@@ -392,9 +646,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formData.append('product_data', JSON.stringify(productData));
         
-        const images = document.getElementById('product-image').files;
-        for (let i = 0; i < images.length; i++) {
-            formData.append('images', images[i]);
+        // Adiciona as imagens do array de arquivos no FormData
+        if (uploadedFiles.length === 0) {
+            exibirMensagem('Por favor, adicione pelo menos uma imagem.', 'danger');
+            return;
+        }
+
+        for (let i = 0; i < uploadedFiles.length; i++) {
+            formData.append('images', uploadedFiles[i]);
         }
         
         try {
@@ -412,8 +671,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     imagePreviewsContainer.innerHTML = '';
                     imagePreviewsContainer.classList.add('hidden');
                 }
+                // Reseta a lista de arquivos
+                uploadedFiles = [];
                 // Desmarca todos os checkboxes após o envio
-                document.querySelectorAll('#product-filters-container input[name="filters"]').forEach(checkbox => {
+                document.querySelectorAll('#filters-product-container input[name="filters"]').forEach(checkbox => {
                     checkbox.checked = false;
                 });
                 fetchProductsAndUsersAndBrands(); // Atualiza todas as tabelas
@@ -432,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetBtn.classList.contains('delete')) {
             const productId = targetBtn.dataset.itemId;
             const productName = targetBtn.dataset.itemName;
-            if (confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
+            if (window.confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
                 try {
                     const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
                         method: 'DELETE'
@@ -451,26 +712,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-    
-    // Lidar com a pré-visualização de imagens
-    if (productImageInput) {
-        productImageInput.addEventListener('change', (e) => {
-            imagePreviewsContainer.innerHTML = '';
-            const files = e.target.files;
-            if (files.length > 0) {
-                imagePreviewsContainer.classList.remove('hidden');
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        imagePreviewsContainer.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            } else {
-                imagePreviewsContainer.classList.add('hidden');
-            }
+
+    // Lida com o botão "Limpar Filtros"
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+            document.querySelectorAll('#filters-product-container input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
         });
     }
 
