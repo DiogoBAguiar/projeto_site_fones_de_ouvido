@@ -1,6 +1,6 @@
 # app/routes/admin.py
 # Este Blueprint lida com as rotas de gerenciamento e o painel de controle.
-# Corrigido para garantir o funcionamento do CRUD de produtos e filtros.
+# Corrigido para garantir o funcionamento do CRUD de produtos e filtros e o dashboard.
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
 from app.models.product import Product
@@ -58,20 +58,6 @@ def admin_logout():
     return redirect(url_for('public.home'))
 
 # ==============================================================================
-# FUNÇÕES DE LEITURA DE CSV
-# ==============================================================================
-
-def read_csv_data(filepath, time_range):
-    """Lê um arquivo CSV e filtra por timeRange usando pandas."""
-    try:
-        df = pd.read_csv(filepath)
-        filtered_df = df[df['timeRange'] == time_range]
-        return filtered_df.to_dict('records')
-    except Exception as e:
-        print(f"Erro ao ler o arquivo CSV {filepath}: {e}")
-        return []
-
-# ==============================================================================
 # BLUEPRINT DA API DE ADMINISTRAÇÃO
 # ==============================================================================
 admin_api_bp = Blueprint('admin_api', __name__, url_prefix='/api/admin')
@@ -103,20 +89,24 @@ def add_product():
 
         if not product_data_json:
             return jsonify({"error": "Dados do produto ausentes."}), 400
-
+        
+        # Deserializa a string JSON para um dicionário
         product_data = json.loads(product_data_json)
         
+        # Cria a pasta do produto para salvar as imagens
+        product_name_sanitized = secure_filename(product_data['name']).replace(' ', '_')
+        product_image_folder = os.path.join(UPLOAD_FOLDER, product_name_sanitized)
+        os.makedirs(product_image_folder, exist_ok=True)
+        
         image_paths = []
-        if images:
-            product_folder_name = secure_filename(product_data['name']).replace(' ', '_')
-            product_image_folder = os.path.join(UPLOAD_FOLDER, product_folder_name)
-            os.makedirs(product_image_folder, exist_ok=True)
-            for image in images:
-                filename = secure_filename(image.filename)
-                image_path = os.path.join(product_image_folder, filename)
-                image.save(image_path)
-                image_paths.append(f'/static/uploads/{product_folder_name}/{filename}')
+        for image in images:
+            filename = secure_filename(image.filename)
+            image_path = os.path.join(product_image_folder, filename)
+            image.save(image_path)
+            # Salva o caminho relativo para ser usado no frontend
+            image_paths.append(f'/static/uploads/{product_name_sanitized}/{filename}')
 
+        # Cria a instância do novo produto com os dados do formulário
         new_product = Product(
             id=data_manager.get_next_id(data_manager.PRODUCTS_CSV),
             name=product_data['name'],
@@ -125,16 +115,22 @@ def add_product():
             description=product_data['description'],
             status=product_data['status'],
             images=image_paths,
-            seller_id=current_user.id
+            specs=None, # O formulário não coleta 'specs'
+            seller_id=current_user.id,
+            filters=product_data.get('filters', []) # Adiciona a lista de IDs de filtro, com fallback
         )
 
+        # Salva o produto no arquivo CSV
         data_manager.save_product(new_product)
 
         return jsonify({"message": "Produto adicionado com sucesso!", "product": new_product.to_dict()}), 201
     except json.JSONDecodeError:
-        return jsonify({"error": "Dados JSON do produto mal formatados."}), 400
+        return jsonify({"error": "Dados JSON do produto mal formatados. Verifique se o formato está correto."}), 400
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        # Exibe o erro no console do servidor para depuração
+        print(f"Erro ao adicionar produto: {str(e)}")
+        return jsonify({"error": f"Ocorreu um erro interno ao adicionar o produto: {str(e)}"}), 500
+
 
 @admin_api_bp.route('/products/<int:product_id>', methods=['DELETE'])
 @login_required
@@ -195,14 +191,20 @@ def get_dashboard_data():
     
     time_range = request.args.get('timeRange', '30d')
     
-    kpis_data = read_csv_data('kpis.csv', time_range)
-    analytics_data = read_csv_data('analytics.csv', time_range)
-    recent_sales_data = read_csv_data('recent_sales.csv', time_range)
+    # Chamada corrigida para as funções do data_manager
+    kpis_data = data_manager.get_kpis(time_range)
+    analytics_data = data_manager.get_analytics_data(time_range)
+    recent_sales_data = data_manager.get_recent_sales(time_range)
+    
+    # Adiciona a contagem de visitas
+    total_visits = data_manager.get_visits_count(time_range)
 
+    # Retorna o JSON com todos os dados
     dashboard_data = {
         "kpis": kpis_data,
         "analytics": analytics_data,
-        "recentSales": recent_sales_data
+        "recentSales": recent_sales_data,
+        "totalVisits": total_visits
     }
     
     return jsonify(dashboard_data)
