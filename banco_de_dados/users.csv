@@ -1,2 +1,3 @@
 id,username,email,password_hash,role,profile_picture,date_joined
-1,teste,teste@teste.com,scrypt:32768:8:1$lCSJktROgFxCXcph$6ebd777e893de7312a03f8f3a278e9f1486fea0be86f14f4b737270b3de2f665e03c4036048ca31079227ebf9aeee6df605332ac78be7e5730222a86b2bd7380,admin,,2025-08-20T00:51:50.648024
+1,teste,teste@teste.com,scrypt:32768:8:1$2q8wPPLpWxt09oKM$6651e4539991e317151473935aafd362c2fdd0236d2be4d86e747ad935e88cfe4ef7b898e1d590341c49f2831f199f7214e96f8b1e69dfdab9701b0144be11bc,admin,,2025-08-21T13:59:18.170505
+2,Diogo,diogo.brunoaguiar@hotmail.com,scrypt:32768:8:1$4dNEGlfg7PPZZc9g$58a82af86a94d115c59b37321e0267c1dbe8556f16d3086db2bd85f7c11247a05316f5e3f6a0f623015dfacd1573b5db0a771cbfd3b0e427adac758d8f649fea,user,,2025-08-21T18:56:25.709459

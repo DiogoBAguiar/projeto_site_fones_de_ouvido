@@ -1,7 +1,6 @@
 # app/utils/data_manager.py
 # Este módulo contém funções utilitárias para ler e escrever em arquivos CSV,
 # agindo como a camada de persistência para a aplicação.
-# Refatorado para adicionar a lógica de contagem de visitas.
 
 import csv
 import os
@@ -27,13 +26,16 @@ RECENT_SALES_CSV = os.path.join(DATA_FOLDER, 'recent_sales.csv')
 FILTER_ORDER = ['brand', 'type', 'color', 'connectivity']
 
 # Define a lista de campos para cada arquivo CSV para garantir consistência
+# Adicionado 'filters' para garantir que o campo seja reconhecido
 PRODUCTS_FIELDNAMES = ['id', 'name', 'brand', 'price', 'status', 'images', 'description', 'specs', 'seller_id', 'filters']
 USERS_FIELDNAMES = ['id', 'username', 'email', 'password_hash', 'role', 'profile_picture', 'date_joined']
 FILTERS_FIELDNAMES = ['id', 'name', 'type']
 REVIEWS_FIELDNAMES = ['id', 'rating', 'comment', 'media_url', 'date_posted', 'user_id', 'product_id']
 VISITS_FIELDNAMES = ['id', 'timestamp']
 
+
 def read_csv(filepath):
+    # ... (código existente) ...
     """
     Lê um arquivo CSV e retorna uma lista de dicionários.
     Retorna uma lista vazia se o arquivo não existir.
@@ -49,6 +51,7 @@ def read_csv(filepath):
     return data
 
 def write_csv(filepath, data, fieldnames):
+    # ... (código existente) ...
     """
     Escreve uma lista de dicionários em um arquivo CSV.
     """
@@ -58,6 +61,7 @@ def write_csv(filepath, data, fieldnames):
         writer.writerows(data)
 
 def get_next_id(filepath):
+    # ... (código existente) ...
     """
     Determina o próximo ID disponível para um novo registro em um arquivo CSV.
     """
@@ -75,6 +79,7 @@ def get_next_id(filepath):
 # ==============================================================================
 # FUNÇÕES PARA VISITAS (VISITS)
 # ==============================================================================
+# ... (código existente) ...
 def create_visits_file():
     """Cria o arquivo CSV de visitas se ele não existir."""
     if not os.path.exists(VISITS_CSV):
@@ -157,6 +162,7 @@ def get_daily_visits(time_range):
 # ==============================================================================
 # FUNÇÕES PARA USUÁRIOS (USERS)
 # ==============================================================================
+# ... (código existente) ...
 
 def get_users():
     """
@@ -269,6 +275,7 @@ def delete_product(product_id):
 # ==============================================================================
 # FUNÇÕES PARA FILTROS (FILTERS)
 # ==============================================================================
+# ... (código existente) ...
 
 def get_filters():
     """
@@ -303,7 +310,7 @@ def delete_filter(filter_id):
 # ==============================================================================
 # FUNÇÕES PARA AVALIAÇÕES (REVIEWS)
 # ==============================================================================
-
+# ... (código existente) ...
 def get_reviews():
     """
     Lê o arquivo de avaliações e retorna uma lista de objetos Review.

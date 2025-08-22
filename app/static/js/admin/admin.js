@@ -622,69 +622,69 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Lida com a submissão do formulário de adicionar produto
+    // SUBSTITUA A FUNÇÃO addProductForm.addEventListener EXISTENTE POR ESTA:
+
     addProductForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // Extrai os filtros selecionados
-        const selectedFilterIds = Array.from(document.querySelectorAll('#filters-product-container input[name="filters"]:checked')).map(checkbox => parseInt(checkbox.value));
-        const selectedBrand = allFilters.find(f => selectedFilterIds.includes(f.id) && f.type === 'brand');
+     e.preventDefault(); // Impede o envio padrão do formulário que recarrega a página
 
-        const formData = new FormData();
-        const productData = {
-            name: document.getElementById('product-name').value,
-            price: parseFloat(document.getElementById('product-price').value),
-            description: document.getElementById('product-description').value,
-            status: document.getElementById('product-status').value,
-            brand: selectedBrand ? selectedBrand.name : null,
-            filters: selectedFilterIds
-        };
-        
-        if (!productData.brand) {
-            exibirMensagem('Por favor, selecione uma marca para o produto.', 'danger');
-            return;
-        }
+     // 1. Cria um objeto FormData, que é o formato correto para enviar arquivos e dados juntos.
+     const formData = new FormData();
+    
+     // 2. Coleta os dados de texto do formulário
+     const selectedFilterIds = Array.from(document.querySelectorAll('#filters-product-container input[name="filters"]:checked')).map(checkbox => parseInt(checkbox.value));
+    const selectedBrand = allFilters.find(f => selectedFilterIds.includes(f.id) && f.type === 'brand');
 
-        formData.append('product_data', JSON.stringify(productData));
-        
-        // Adiciona as imagens do array de arquivos no FormData
-        if (uploadedFiles.length === 0) {
-            exibirMensagem('Por favor, adicione pelo menos uma imagem.', 'danger');
-            return;
-        }
+     // 3. Valida se a marca e as imagens foram selecionadas (feedback rápido para o usuário)
+     if (!selectedBrand) {
+        exibirMensagem('Por favor, selecione uma marca para o produto.', 'danger');
+        return;
+     }
+     if (uploadedFiles.length === 0) {
+        exibirMensagem('Por favor, adicione pelo menos uma imagem.', 'danger');
+        return;
+     }
 
-        for (let i = 0; i < uploadedFiles.length; i++) {
-            formData.append('images', uploadedFiles[i]);
-        }
+     // 4. Agrupa todos os dados de texto em um único objeto.
+     const productData = {
+        name: document.getElementById('product-name').value,
+        price: parseFloat(document.getElementById('product-price').value),
+        description: document.getElementById('product-description').value,
+        status: document.getElementById('product-status').value,
+        brand: selectedBrand.name,
+        filters: selectedFilterIds
+     };
+    
+     // 5. Adiciona o objeto de texto ao FormData, mas como uma STRING no formato JSON.
+     // O backend irá ler esta string e decodificá-la.
+     formData.append('product_data', JSON.stringify(productData));
+    
+     // 6. Adiciona cada arquivo de imagem que o usuário selecionou ao FormData.
+     uploadedFiles.forEach(file => {
+        formData.append('images', file); // A chave 'images' deve ser a mesma no backend
+     });
+    
+     // 7. Envia o FormData para a API usando fetch.
+     try {
+        const response = await fetch(API_PRODUCTS_URL, {
+            method: 'POST',
+            body: formData // Note que não definimos 'Content-Type', o navegador faz isso por nós.
+        });
         
-        try {
-            const response = await fetch(API_PRODUCTS_URL, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                exibirMensagem(result.message, 'success');
-                addProductForm.reset();
-                if (imagePreviewsContainer) {
-                    imagePreviewsContainer.innerHTML = '';
-                    imagePreviewsContainer.classList.add('hidden');
-                }
-                // Reseta a lista de arquivos
-                uploadedFiles = [];
-                // Desmarca todos os checkboxes após o envio
-                document.querySelectorAll('#filters-product-container input[name="filters"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                fetchProductsAndUsersAndBrands(); // Atualiza todas as tabelas
-            } else {
-                exibirMensagem(result.error, 'danger');
-            }
-        } catch (error) {
-            exibirMensagem('Erro de conexão ao tentar adicionar o produto.', 'danger');
-            console.error(error);
+        const result = await response.json();
+        
+        if (response.ok) {
+            exibirMensagem(result.message, 'success');
+            addProductForm.reset(); // Limpa os campos do formulário
+            uploadedFiles = []; // Limpa o array de arquivos
+            if(imagePreviewsContainer) imagePreviewsContainer.innerHTML = ''; // Limpa a pré-visualização de imagens
+            fetchProductsAndUsersAndBrands(); // Atualiza a tabela de produtos na página
+        } else {
+            exibirMensagem(result.error, 'danger');
         }
+     } catch (error) {
+        exibirMensagem('Erro de conexão ao tentar adicionar o produto.', 'danger');
+        console.error(error);
+    }
     });
     
     // Lida com a exclusão de produtos

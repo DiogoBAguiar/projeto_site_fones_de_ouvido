@@ -1,6 +1,10 @@
 id,name,type
-1,Apple,brand
 2,Samsung,brand
-3,Preto,color
-4,Fio,connectivity
-5,Intra-auricular,type
+3,Motorola,brand
+4,Intra-auricular,type
+5,Preto,color
+6,Branco,color
+7,Bluetooth,connectivity
+10,Fio,connectivity
+11,Apple,brand
+12,Sony,brand

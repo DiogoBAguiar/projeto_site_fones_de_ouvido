@@ -93,6 +93,11 @@ def add_product():
         # Deserializa a string JSON para um dicionário
         product_data = json.loads(product_data_json)
         
+        # --- Validação dos dados do produto ---
+        required_fields = ['name', 'price', 'description', 'status', 'brand', 'filters']
+        if not all(field in product_data for field in required_fields):
+            return jsonify({"error": "Dados do produto incompletos."}), 400
+        
         # Cria a pasta do produto para salvar as imagens
         product_name_sanitized = secure_filename(product_data['name']).replace(' ', '_')
         product_image_folder = os.path.join(UPLOAD_FOLDER, product_name_sanitized)
@@ -115,9 +120,9 @@ def add_product():
             description=product_data['description'],
             status=product_data['status'],
             images=image_paths,
-            specs=None, # O formulário não coleta 'specs'
-            seller_id=current_user.id,
-            filters=product_data.get('filters', []) # Adiciona a lista de IDs de filtro, com fallback
+            specs=None,
+            seller_id=current_user.id, # Pega o ID do usuário logado
+            filters=product_data.get('filters', [])
         )
 
         # Salva o produto no arquivo CSV
@@ -135,6 +140,7 @@ def add_product():
 @admin_api_bp.route('/products/<int:product_id>', methods=['DELETE'])
 @login_required
 def remove_product(product_id):
+    # ... (código existente) ...
     """Rota de API para remover um produto do CSV pelo ID."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
@@ -148,6 +154,7 @@ def remove_product(product_id):
 @admin_api_bp.route('/users', methods=['GET'])
 @login_required
 def get_users():
+    # ... (código existente) ...
     """Rota de API para obter todos os usuários do CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
@@ -161,6 +168,7 @@ def get_users():
 @admin_api_bp.route('/brands', methods=['GET'])
 @login_required
 def get_brands():
+    # ... (código existente) ...
     """
     Rota de API para obter todas as marcas únicas do CSV.
     Ajustado para ler do arquivo de filtros.
@@ -182,6 +190,7 @@ dashboard_api_bp = Blueprint('dashboard_api', __name__, url_prefix='/api/dashboa
 @dashboard_api_bp.route('/', methods=['GET'])
 @login_required
 def get_dashboard_data():
+    # ... (código existente) ...
     """
     Rota de API para obter os dados do dashboard com base no timeRange.
     Os dados são lidos dos arquivos CSV.
@@ -215,6 +224,7 @@ def get_dashboard_data():
 @admin_api_bp.route('/filters', methods=['GET'])
 @login_required
 def get_filters():
+    # ... (código existente) ...
     """Rota de API para obter todos os filtros ativos do CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
@@ -227,6 +237,7 @@ def get_filters():
 @admin_api_bp.route('/filters', methods=['POST'])
 @login_required
 def add_filter():
+    # ... (código existente) ...
     """Rota de API para adicionar um novo filtro ao CSV."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
@@ -258,6 +269,7 @@ def add_filter():
 @admin_api_bp.route('/filters/<int:filter_id>', methods=['DELETE'])
 @login_required
 def remove_filter(filter_id):
+    # ... (código existente) ...
     """Rota de API para remover um filtro do CSV pelo ID."""
     if current_user.role != 'admin':
         return jsonify({"error": "Acesso não autorizado."}), 403
