@@ -18,19 +18,52 @@
 </head>
 <body>
 
+    <!-- HEADER DO PAINEL ADMIN ATUALIZADO -->
+    <header class="admin-header">
+        <a href="{{ url_for('public.home') }}" class="header-logo">
+            <i data-lucide="headphones"></i>
+            <span>Decibell Admin</span>
+        </a>
+        <div class="search-container">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="product-search-input" placeholder="Buscar por nome do produto...">
+        </div>
+        <div class="header-user-container">
+            <button class="header-user" id="admin-profile-btn">
+                <img src="{{ current_user.profile_picture or url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto do Admin" class="admin-avatar">
+                <span>{{ current_user.username }}</span>
+                <i data-lucide="chevron-down" class="dropdown-arrow"></i>
+            </button>
+            <!-- Menu Dropdown do Perfil -->
+            <div class="admin-dropdown-menu" id="admin-dropdown">
+                <a href="{{ url_for('user.profile') }}" class="dropdown-item">
+                    <i data-lucide="user-circle"></i> Meu Perfil
+                </a>
+                <button class="dropdown-item theme-toggle" id="theme-toggle">
+                    <div class="theme-icon-wrapper">
+                        <i data-lucide="sun" class="sun-icon"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </div>
+                    Alternar Tema
+                </button>
+                <div class="dropdown-divider"></div>
+                <a href="{{ url_for('admin_page.admin_logout') }}" class="dropdown-item dropdown-item-logout">
+                    <i data-lucide="log-out"></i> Sair
+                </a>
+            </div>
+        </div>
+    </header>
+
     <main class="container">
-        <header>
-            <h1 class="header-title">Painel de Administração</h1>
-            <nav class="tabs">
-                <button class="tab-link active" data-view="products-view">Gerenciar Produtos</button>
-                <button class="tab-link" data-view="filters-view">Gerenciar Filtros</button>
-            </nav>
-        </header>
+        <nav class="tabs">
+            <button class="tab-link active" data-view="products-view">Gerenciar Produtos</button>
+            <button class="tab-link" data-view="filters-view">Gerenciar Filtros</button>
+        </nav>
 
         <!-- Seção de Gerenciamento de Produtos -->
         <section id="products-view" class="admin-section active">
             <div class="section-header">
-                <p class="text-secondary">Adicione, edite ou remova os produtos do seu catálogo.</p>
+                <h2 class="section-title">Todos os Produtos</h2>
                 <button class="btn btn-primary" id="add-product-btn">
                     <i data-lucide="plus" class="btn-icon"></i>
                     Adicionar Produto
@@ -47,9 +80,7 @@
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="products-table-body">
-                        <!-- Linhas da tabela serão inseridas aqui via JavaScript -->
-                    </tbody>
+                    <tbody id="products-table-body"></tbody>
                 </table>
             </div>
         </section>
@@ -83,9 +114,7 @@
                                 <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="filters-table-body">
-                            <!-- Dados inseridos via JS -->
-                        </tbody>
+                        <tbody id="filters-table-body"></tbody>
                     </table>
                 </div>
              </div>
@@ -125,12 +154,9 @@
                     <label for="product-description">Descrição</label>
                     <textarea id="product-description" class="form-textarea" rows="4"></textarea>
                 </div>
-                <!-- Container para o acordeão de filtros -->
                 <div class="form-group">
                     <label>Filtros</label>
-                    <div id="product-filters-accordion">
-                        <!-- O acordeão de filtros será inserido aqui pelo JS -->
-                    </div>
+                    <div id="product-filters-accordion"></div>
                 </div>
                 <div class="form-group">
                     <label>Imagens</label>
@@ -152,6 +178,8 @@
         <div class="loader"></div>
     </div>
 
+    <!-- SCRIPTS -->
+    <script src="{{ url_for('static', filename='js/admin/admin_ui.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin/admin.js') }}"></script>
 </body>
 </html>
