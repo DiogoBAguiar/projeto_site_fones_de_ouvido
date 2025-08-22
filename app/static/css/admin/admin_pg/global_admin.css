@@ -183,7 +183,6 @@ header {
     border-radius: 8px;
 }
 
-/* --- MELHORIAS NOS BOTÕES DE AÇÃO --- */
 .action-btns {
     display: flex;
     gap: 0.5rem;
@@ -194,16 +193,16 @@ header {
     border-radius: 6px;
     cursor: pointer;
     color: var(--text-secondary-light);
-    padding: 0.5rem 0.75rem; /* Ajustado para acomodar texto */
+    padding: 0.5rem 0.75rem;
     display: flex;
     align-items: center;
-    gap: 0.25rem; /* Espaço entre ícone e texto */
+    gap: 0.25rem;
     font-size: 0.9rem;
     font-weight: 500;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 .action-btn i {
-    width: 14px; /* Ícone um pouco menor */
+    width: 14px;
     height: 14px;
 }
 .action-btn:hover {
@@ -393,15 +392,64 @@ header {
     100% { transform: rotate(360deg); }
 }
 
-/* Estilos para o container de checkboxes de filtro */
+/* --- MELHORIAS NO ACORDEÃO DE FILTROS --- */
+.filter-accordion-group {
+    position: relative; /* Necessário para o posicionamento absoluto do painel */
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+.filter-accordion-header {
+    width: 100%;
+    background-color: #f5f5f5;
+    padding: 0.75rem 1rem;
+    border: none;
+    text-align: left;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+}
+.filter-accordion-header::after {
+    content: '+';
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+.filter-accordion-header.active::after {
+    transform: rotate(45deg);
+}
+.filter-accordion-panel {
+    position: absolute; /* Chave da mudança: sobrepõe o conteúdo */
+    z-index: 10;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px); /* Posiciona logo abaixo do header */
+    
+    background-color: var(--card-bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    
+    padding: 1rem;
+    
+    /* Animação de aparecimento */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+.filter-accordion-panel.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
 .checkbox-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
-    background-color: #f5f5f5;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-light);
 }
 .checkbox-container label {
     display: flex;

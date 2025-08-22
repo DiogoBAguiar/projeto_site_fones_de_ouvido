@@ -31,7 +31,7 @@ window.addEventListener('load', () => {
     const productBrandSelect = document.getElementById('product-brand');
     const productStatusSelect = document.getElementById('product-status');
     const productDescriptionInput = document.getElementById('product-description');
-    const productFiltersContainer = document.getElementById('product-filters-checkboxes');
+    const productFiltersAccordion = document.getElementById('product-filters-accordion');
     
     // Upload de Imagens
     const dropZone = document.getElementById('drop-zone');
@@ -116,7 +116,7 @@ window.addEventListener('load', () => {
         const id = productIdInput.value;
         const isEditing = !!id;
 
-        const selectedFilters = Array.from(productFiltersContainer.querySelectorAll('input:checked')).map(cb => parseInt(cb.value));
+        const selectedFilters = Array.from(productFiltersAccordion.querySelectorAll('input:checked')).map(cb => parseInt(cb.value));
 
         const productData = {
             name: productNameInput.value,
@@ -190,7 +190,7 @@ window.addEventListener('load', () => {
         productIdInput.value = '';
         imagePreviewContainer.innerHTML = '';
         uploadedFiles = [];
-        populateFilterCheckboxes(allFilters); // Sempre popula os filtros
+        populateFiltersAccordion(allFilters);
 
         if (product) {
             modalTitle.textContent = 'Editar Produto';
@@ -203,7 +203,7 @@ window.addEventListener('load', () => {
             
             if (product.filters) {
                 product.filters.forEach(filterId => {
-                    const checkbox = productFiltersContainer.querySelector(`input[value="${filterId}"]`);
+                    const checkbox = productFiltersAccordion.querySelector(`input[value="${filterId}"]`);
                     if (checkbox) checkbox.checked = true;
                 });
             }
@@ -275,7 +275,7 @@ window.addEventListener('load', () => {
             allFilters = filters;
             renderFiltersTable(filters);
             populateBrandDropdown(filters);
-            populateFilterCheckboxes(filters);
+            populateFiltersAccordion(filters);
         }
     }
     
@@ -284,14 +284,46 @@ window.addEventListener('load', () => {
         productBrandSelect.innerHTML = brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
     }
 
-    function populateFilterCheckboxes(filters) {
-        const types = filters.filter(f => f.type === 'type');
-        productFiltersContainer.innerHTML = types.map(f => `
-            <label>
-                <input type="checkbox" value="${f.id}">
-                ${f.name}
-            </label>
-        `).join('');
+    function populateFiltersAccordion(filters) {
+        productFiltersAccordion.innerHTML = '';
+        const filtersByType = filters.reduce((acc, filter) => {
+            if (filter.type !== 'brand') {
+                (acc[filter.type] = acc[filter.type] || []).push(filter);
+            }
+            return acc;
+        }, {});
+
+        for (const type in filtersByType) {
+            const group = document.createElement('div');
+            group.className = 'filter-accordion-group';
+            
+            const header = document.createElement('button');
+            header.type = 'button';
+            header.className = 'filter-accordion-header';
+            header.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+
+            const panel = document.createElement('div');
+            panel.className = 'filter-accordion-panel';
+            
+            const checkboxContainer = document.createElement('div');
+            checkboxContainer.className = 'checkbox-container';
+            checkboxContainer.innerHTML = filtersByType[type].map(f => `
+                <label>
+                    <input type="checkbox" value="${f.id}">
+                    ${f.name}
+                </label>
+            `).join('');
+            
+            panel.appendChild(checkboxContainer);
+            group.appendChild(header);
+            group.appendChild(panel);
+            productFiltersAccordion.appendChild(group);
+
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                panel.classList.toggle('show');
+            });
+        }
     }
 
     function setupEventListeners() {
