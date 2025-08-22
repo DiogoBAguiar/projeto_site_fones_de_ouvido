@@ -1,59 +1,90 @@
 # app/models/review.py
-# Define o modelo de dados para a tabela de avaliações.
-# Refatorado para ser um modelo de dados simples, compatível com arquivos CSV.
+# Define o modelo de dados para as avaliações de produtos.
 
 from datetime import datetime
+from typing import Dict, Any, Optional
 
 class Review:
     """
-    Modelo de dados para a tabela 'reviews'.
+    Representa uma avaliação (review) de um produto feita por um usuário.
 
-    Atributos:
-        id (int): A chave primária (ID da avaliação).
-        rating (int): A nota da avaliação (1 a 5).
-        comment (str): O comentário da avaliação.
-        media_url (str): O URL de uma foto ou vídeo, se houver.
-        date_posted (datetime): Data e hora da avaliação.
-        user_id (int): O ID do usuário que fez a avaliação.
-        product_id (int): O ID do produto avaliado.
+    Esta classe serve como um modelo de dados para manipular informações de avaliações
+    que são lidas e escritas no arquivo reviews.csv.
     """
-    def __init__(self, id, rating, comment, media_url, date_posted, user_id, product_id):
+    def __init__(self,
+                 id: Optional[int],
+                 rating: int,
+                 comment: str,
+                 media_url: Optional[str],
+                 date_posted: datetime,
+                 user_id: int,
+                 product_id: int):
+        """
+        Inicializa uma instância de Avaliação.
+
+        Args:
+            id (Optional[int]): O ID único da avaliação. Pode ser None para novas avaliações.
+            rating (int): A nota da avaliação (geralmente de 1 a 5).
+            comment (str): O texto do comentário.
+            media_url (Optional[str]): Um URL para uma imagem ou vídeo enviado com a avaliação.
+            date_posted (datetime): A data e hora em que a avaliação foi postada.
+            user_id (int): O ID do usuário que fez a avaliação.
+            product_id (int): O ID do produto que foi avaliado.
+        """
         self.id = id
         self.rating = rating
         self.comment = comment
         self.media_url = media_url
-        self.date_posted = date_posted
+        self.date_posted = date_posted or datetime.utcnow()
         self.user_id = user_id
         self.product_id = product_id
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """
-        Serializa o objeto Review para um dicionário, útil para salvar no CSV.
-        O campo 'date_posted' é convertido para uma string no formato ISO 8601.
+        Converte a instância da avaliação para um dicionário, ideal para salvar em CSV ou API.
+
+        Returns:
+            Dict[str, Any]: Um dicionário representando a avaliação.
         """
         return {
             'id': self.id,
             'rating': self.rating,
             'comment': self.comment,
-            'media_url': self.media_url,
-            'date_posted': self.date_posted.isoformat() if isinstance(self.date_posted, datetime) else self.date_posted,
+            'media_url': self.media_url or '', # Garante que não seja None
+            'date_posted': self.date_posted.isoformat(),
             'user_id': self.user_id,
             'product_id': self.product_id
         }
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: Dict[str, Any]) -> 'Review':
         """
-        Cria um objeto Review a partir de um dicionário, lido do CSV.
-        O campo 'date_posted' é convertido de volta para um objeto datetime.
+        Cria uma instância de Review a partir de um dicionário (geralmente de uma linha de CSV).
+
+        Args:
+            data (Dict[str, Any]): O dicionário com os dados da avaliação.
+
+        Returns:
+            Review: Uma nova instância da classe Review.
         """
+        # Converte a data de string ISO para objeto datetime, com fallback para o tempo atual.
+        try:
+            date_posted = datetime.fromisoformat(data.get('date_posted'))
+        except (ValueError, TypeError):
+            date_posted = datetime.utcnow()
+
         return cls(
-            id=int(data['id']),
-            rating=int(data['rating']),
-            comment=data.get('comment'),
+            id=int(data.get('id', 0)),
+            rating=int(data.get('rating', 0)),
+            comment=data.get('comment', ''),
             media_url=data.get('media_url'),
-            date_posted=datetime.fromisoformat(data['date_posted']) if 'date_posted' in data and data['date_posted'] else datetime.utcnow(),
-            user_id=int(data['user_id']),
-            product_id=int(data['product_id'])
+            date_posted=date_posted,
+            user_id=int(data.get('user_id', 0)),
+            product_id=int(data.get('product_id', 0))
         )
 
+    def __repr__(self) -> str:
+        """
+        Retorna uma representação legível do objeto, útil para fins de depuração.
+        """
+        return f"<Review id={self.id} product_id={self.product_id} rating={self.rating}>"

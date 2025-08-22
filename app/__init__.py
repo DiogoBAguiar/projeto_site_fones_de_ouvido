@@ -1,66 +1,61 @@
 # app/__init__.py
-# Este arquivo implementa o padrão de fábrica de aplicação.
-# Agora, ele é totalmente independente de um banco de dados e cria os arquivos CSV necessários.
+# Implementa o padrão de fábrica de aplicação (Application Factory).
 
 import os
-import csv
-from flask import Flask
-from config import Config
-from app.utils import data_manager # Importa para usar as constantes de caminho
+from flask import Flask, jsonify, request, redirect, url_for
+from flask_login import LoginManager
+from config import config
 
-def create_app(config_class=Config):
+# Instancia as extensões do Flask fora da fábrica
+login_manager = LoginManager()
+login_manager.login_view = 'public.login'
+login_manager.login_message_category = 'info'
+
+@login_manager.unauthorized_handler
+def unauthorized():
     """
-    Fábrica de aplicação para criar a instância do Flask.
+    Handler customizado para acessos não autorizados.
+    Se a requisição for para uma API, retorna um erro JSON.
+    Caso contrário, redireciona para a página de login.
     """
-    app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
-    
-    # Carrega as configurações da classe Config.
-    app.config.from_object(config_class)
-    
-    # Cria a pasta para arquivos estáticos e CSVs se ela não existir.
-    data_folder = os.path.join(app.root_path, '..', 'banco_de_dados')
-    if not os.path.exists(data_folder):
-        os.makedirs(data_folder)
-        
-    # ==============================================================================
-    # CRIAÇÃO AUTOMÁTICA DE ARQUIVOS CSV
-    # ==============================================================================
-    def create_csv_if_not_exists(filepath, fieldnames):
-        if not os.path.exists(filepath):
-            with open(filepath, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-    
-    # Cria os arquivos principais
-    create_csv_if_not_exists(data_manager.USERS_CSV, data_manager.USERS_FIELDNAMES)
-    create_csv_if_not_exists(data_manager.PRODUCTS_CSV, data_manager.PRODUCTS_FIELDNAMES)
-    create_csv_if_not_exists(data_manager.REVIEWS_CSV, data_manager.REVIEWS_FIELDNAMES)
-    create_csv_if_not_exists(data_manager.FILTERS_CSV, data_manager.FILTERS_FIELDNAMES)
+    if request.path.startswith('/api/'):
+        return jsonify(error="Autenticação necessária para acessar este recurso."), 401
+    return redirect(url_for('public.login'))
 
-    # Cria os arquivos do dashboard
-    create_csv_if_not_exists(os.path.join(data_manager.DATA_FOLDER, 'kpis.csv'), ['timeRange', 'metric', 'value', 'description', 'changeType'])
-    create_csv_if_not_exists(os.path.join(data_manager.DATA_FOLDER, 'analytics.csv'), ['timeRange', 'date', 'sales', 'visits'])
-    create_csv_if_not_exists(os.path.join(data_manager.DATA_FOLDER, 'recent_sales.csv'), ['timeRange', 'email', 'amount'])
 
-    # ==============================================================================
-    # REGISTRO DE BLUEPRINTS E IMPORTAÇÃO DE MODELOS
-    # ==============================================================================
-    
-    # Os modelos ainda serão importados, mas apenas para que o Flask-Login
-    # saiba onde procurar a classe User.
-    from app.models import user, product, review
-    from app.models import filter as filter_model
+def create_app(config_name):
+    """
+    Fábrica de Aplicação: cria e configura uma instância da aplicação Flask.
+    """
+    app = Flask(__name__)
 
-    # Importa os Blueprints de cada arquivo de rota.
-    from app.routes.public import public_bp
-    from app.routes.user import user_bp
-    from app.routes.admin import admin_page_bp, admin_api_bp, dashboard_api_bp
+    # 1. Carrega a configuração
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
+
+    # 2. Inicializa as extensões
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        from .utils import data_manager
+        return data_manager.get_user_by_id(user_id)
+
+    # Garante que a pasta de uploads exista
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+
+    # 3. Registra os Blueprints
+    from .routes.public import public_bp as public_blueprint
+    app.register_blueprint(public_blueprint)
+
+    from .routes.user import user_bp as user_blueprint
+    app.register_blueprint(user_blueprint, url_prefix='/user')
+
+    from .routes.admin import admin_page_bp as admin_page_blueprint
+    app.register_blueprint(admin_page_blueprint, url_prefix='/admin')
     
-    # Registra os Blueprints na aplicação.
-    app.register_blueprint(public_bp)
-    app.register_blueprint(user_bp)
-    app.register_blueprint(admin_page_bp)
-    app.register_blueprint(admin_api_bp)
-    app.register_blueprint(dashboard_api_bp)
-    
+    from .routes.admin import admin_api_bp as admin_api_blueprint
+    app.register_blueprint(admin_api_blueprint, url_prefix='/api/admin')
+
     return app

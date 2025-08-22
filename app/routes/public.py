@@ -1,153 +1,146 @@
 # app/routes/public.py
-# Este Blueprint lida com as rotas acessíveis ao público.
-# Refatorado para usar arquivos CSV em vez de um banco de dados e contar visitas.
+# Lida com as rotas públicas da aplicação, como home, login e visualização de produtos.
 
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
-from app.models.user import User # Importa o modelo de Usuário
-from app.models.product import Product # Importa o modelo de Produto
-from app.utils import data_manager
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-import json
-from datetime import datetime
 
-# Cria o Blueprint com o nome 'public'.
+from app.models.user import User
+from app.utils import data_manager
+
+# Cria o Blueprint para agrupar as rotas públicas.
 public_bp = Blueprint('public', __name__)
 
-# Nova rota para registrar visitas
+
 @public_bp.before_app_request
 def before_request():
-    """
-    Registra uma visita a cada requisição de página que não seja uma API ou arquivo estático.
-    """
-    # Exclui rotas de API e arquivos estáticos da contagem
+    """Registra uma visita antes de cada requisição, exceto para rotas de API e arquivos estáticos."""
+    # Evita contar requisições para a API ou para arquivos como CSS e JS.
     if request.path.startswith('/api/') or request.path.startswith('/static/'):
         return
-
-    # A função de registro de visita será implementada no data_manager
     data_manager.register_visit()
+
+
+# --- ROTAS DE PÁGINAS (HTML) ---
 
 @public_bp.route('/')
 def home():
-    """Rota para a página inicial."""
+    """Renderiza a página inicial."""
     return render_template('public/index.html')
 
 @public_bp.route('/products')
 def products():
-    """Rota para a página de produtos, listando-os do CSV."""
+    """Renderiza a página de listagem de todos os produtos."""
     return render_template('public/products.html')
 
 @public_bp.route('/products-details/<int:product_id>')
 def products_details(product_id):
-    """Rota para a página de produtos detalhada."""
-    # Busca um produto específico pelo ID do CSV
+    """Renderiza a página de detalhes de um produto específico."""
     product = data_manager.get_product_by_id(product_id)
     if product:
         return render_template('public/products-details.html', product=product)
-    else:
-        flash("Produto não encontrado.", "danger")
-        return redirect(url_for('public.products'))
+    
+    # Se o produto não for encontrado, redireciona para a lista de produtos com uma mensagem.
+    flash("Produto não encontrado.", "danger")
+    return redirect(url_for('public.products'))
 
 @public_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Rota para a página de login."""
+    """Lida com o login do usuário."""
     if current_user.is_authenticated:
         return redirect(url_for('public.home'))
+
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('senha')
         user = data_manager.get_user_by_email(email)
-        # Verifica se o usuário existe e se a senha está correta
+
         if user and check_password_hash(user.password_hash, password):
             login_user(user, remember=True)
-            flash('Login bem-sucedido!', 'success')
-            return redirect(url_for('public.home'))
+            # Redireciona para a página que o usuário tentou acessar antes do login, ou para a home.
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('public.home'))
         else:
-            flash('Email ou senha inválidos.', 'danger')
+            flash('Login inválido. Verifique seu email e senha.', 'danger')
+
     return render_template('public/login.html')
 
 @public_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    """Rota para a página de registro."""
+    """Lida com o registro de um novo usuário."""
     if current_user.is_authenticated:
         return redirect(url_for('public.home'))
+
     if request.method == 'POST':
-        email = request.form.get('email')
         username = request.form.get('nome')
+        email = request.form.get('email')
         password = request.form.get('senha')
-        
-        # Verifica se o email já está em uso
-        user_exists = data_manager.get_user_by_email(email)
-        if user_exists:
-            flash('Este email já está cadastrado.', 'danger')
+
+        if data_manager.get_user_by_email(email):
+            flash('Este email já está cadastrado. Tente fazer login.', 'warning')
             return redirect(url_for('public.register'))
-        
-        # Cria um novo usuário com a senha hasheada
+
         hashed_password = generate_password_hash(password)
         new_user = User(
-            id=data_manager.get_next_id(data_manager.USERS_CSV),
+            id=None,  # O data_manager cuidará de gerar o novo ID
             username=username,
             email=email,
             password_hash=hashed_password,
             role='user'
         )
+        data_manager.save_user(new_user)
         
-        try:
-            data_manager.save_user(new_user)
-            flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
-            return redirect(url_for('public.login'))
-        except Exception as e:
-            flash(f'Ocorreu um erro no cadastro: {str(e)}', 'danger')
-    
+        flash('Cadastro realizado com sucesso! Faça o login para continuar.', 'success')
+        return redirect(url_for('public.login'))
+
     return render_template('public/register.html')
 
 @public_bp.route('/logout')
 @login_required
 def logout():
-    """Rota para fazer logout do usuário."""
+    """Faz o logout do usuário logado."""
     logout_user()
-    flash('Você foi desconectado.', 'info')
+    flash('Você foi desconectado com segurança.', 'info')
     return redirect(url_for('public.home'))
 
-@public_bp.route('/api/produtos/destaques', methods=['GET'])
+
+# --- ROTAS DE API PÚBLICA (JSON) ---
+
+@public_bp.route('/api/products')
+def get_all_products():
+    """API: Retorna todos os produtos para a página de listagem."""
+    try:
+        products = data_manager.get_products()
+        # O frontend espera um campo 'type', que pode ser derivado dos filtros.
+        # Por simplicidade, adicionamos um valor padrão se não houver lógica de filtro.
+        all_filters = {f.id: f for f in data_manager.get_filters()}
+        
+        products_list = []
+        for p in products:
+            product_dict = p.to_dict(simplify=True)
+            # Lógica para determinar o 'tipo' do produto a partir de seus filtros associados
+            # Esta é uma implementação de exemplo.
+            product_type = "Geral"
+            if p.filters:
+                for filter_id in p.filters:
+                    if filter_id in all_filters and all_filters[filter_id].type == 'type':
+                        product_type = all_filters[filter_id].name
+                        break
+            product_dict['type'] = product_type
+            products_list.append(product_dict)
+            
+        return jsonify(products_list)
+    except Exception as e:
+        print(f"Erro na API get_all_products: {e}")
+        return jsonify({"error": "Não foi possível carregar os produtos."}), 500
+
+@public_bp.route('/api/products/featured')
 def get_featured_products():
-    """
-    Rota de API para obter uma lista de produtos em destaque do CSV.
-    """
+    """API: Retorna até 4 produtos marcados como 'Em destaque' para a página inicial."""
     try:
         all_products = data_manager.get_products()
         featured_products = [p for p in all_products if p.status == 'Em destaque']
-        
-        products_list = []
-        for product in featured_products[:4]:
-            products_list.append({
-                'id': product.id,
-                'name': product.name,
-                'description': product.description,
-                'price': product.price,
-                'images': product.images,
-                'status': product.status
-            })
-        return jsonify(products_list)
+        return jsonify([p.to_dict(simplify=True) for p in featured_products[:4]])
     except Exception as e:
-        return jsonify({"error": "Ocorreu um erro ao buscar os produtos em destaque."}), 500
-
-@public_bp.route('/api/products', methods=['GET'])
-def get_all_products():
-    """Rota de API para obter todos os produtos do CSV."""
-    try:
-        all_products = data_manager.get_products()
-        products_list = []
-        for product in all_products:
-            products_list.append({
-                'id': product.id,
-                'name': product.name,
-                'brand': product.brand,
-                'price': product.price,
-                'status': product.status,
-                'images': product.images,
-                'type': 'Tipo 1' # Atributo mockado
-            })
-        return jsonify(products_list)
-    except Exception as e:
-        return jsonify({"error": "Ocorreu um erro ao buscar os produtos."}), 500
+        print(f"Erro na API get_featured_products: {e}")
+        return jsonify({"error": "Não foi possível carregar os produtos em destaque."}), 500

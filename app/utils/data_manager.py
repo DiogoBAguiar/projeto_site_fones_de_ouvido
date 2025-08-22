@@ -1,7 +1,6 @@
 # app/utils/data_manager.py
-# Este módulo contém funções utilitárias para ler e escrever em arquivos CSV,
-# agindo como a camada de persistência para a aplicação.
-# Refatorado para adicionar a lógica de contagem de visitas.
+# Módulo para gerenciar a leitura e escrita de dados em arquivos CSV.
+# Refatorado para remover a dependência do pandas e otimizar as operações.
 
 import csv
 import os
@@ -10,440 +9,226 @@ from datetime import datetime, timedelta
 from app.models.user import User
 from app.models.product import Product
 from app.models.review import Review
-import pandas as pd
+from app.models.filter import Filter
 
-# Define a pasta e os caminhos dos arquivos de dados
+# --- CONFIGURAÇÃO DE CAMINHOS E CABEÇALHOS ---
+
+# Define a pasta base para os arquivos de dados (banco_de_dados)
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'banco_de_dados')
+
+# Define os caminhos completos para cada arquivo CSV
 USERS_CSV = os.path.join(DATA_FOLDER, 'users.csv')
 PRODUCTS_CSV = os.path.join(DATA_FOLDER, 'products.csv')
 REVIEWS_CSV = os.path.join(DATA_FOLDER, 'reviews.csv')
 FILTERS_CSV = os.path.join(DATA_FOLDER, 'filters.csv')
 VISITS_CSV = os.path.join(DATA_FOLDER, 'visits.csv')
-KPI_CSV = os.path.join(DATA_FOLDER, 'kpis.csv')
-ANALYTICS_CSV = os.path.join(DATA_FOLDER, 'analytics.csv')
-RECENT_SALES_CSV = os.path.join(DATA_FOLDER, 'recent_sales.csv')
 
-# Define a ordem dos filtros para garantir consistência
-FILTER_ORDER = ['brand', 'type', 'color', 'connectivity']
-
-# Define a lista de campos para cada arquivo CSV para garantir consistência
-<<<<<<< HEAD
-# Adicionado 'filters' para garantir que o campo seja reconhecido
-=======
->>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
-PRODUCTS_FIELDNAMES = ['id', 'name', 'brand', 'price', 'status', 'images', 'description', 'specs', 'seller_id', 'filters']
+# Define os cabeçalhos (nomes dos campos) para cada arquivo CSV.
+# Isso garante consistência ao criar e escrever nos arquivos.
 USERS_FIELDNAMES = ['id', 'username', 'email', 'password_hash', 'role', 'profile_picture', 'date_joined']
-FILTERS_FIELDNAMES = ['id', 'name', 'type']
+PRODUCTS_FIELDNAMES = ['id', 'name', 'brand', 'price', 'status', 'images', 'description', 'specs', 'seller_id', 'filters']
 REVIEWS_FIELDNAMES = ['id', 'rating', 'comment', 'media_url', 'date_posted', 'user_id', 'product_id']
-VISITS_FIELDNAMES = ['id', 'timestamp']
-<<<<<<< HEAD
+FILTERS_FIELDNAMES = ['id', 'name', 'type']
+VISITS_FIELDNAMES = ['timestamp'] # Simplificado, o ID não é necessário aqui
 
+# --- FUNÇÕES UTILITÁRIAS GENÉRICAS ---
 
-def read_csv(filepath):
-    # ... (código existente) ...
-=======
-
-def read_csv(filepath):
->>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
-    """
-    Lê um arquivo CSV e retorna uma lista de dicionários.
-    Retorna uma lista vazia se o arquivo não existir.
-    """
-    data = []
+def _read_csv(filepath):
+    """Lê um arquivo CSV e retorna uma lista de dicionários. Retorna lista vazia se não existir."""
     if not os.path.exists(filepath):
-        return data
-        
-    with open(filepath, mode='r', newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            data.append(row)
-    return data
-
-def write_csv(filepath, data, fieldnames):
-<<<<<<< HEAD
-    # ... (código existente) ...
-=======
->>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
-    """
-    Escreve uma lista de dicionários em um arquivo CSV.
-    """
-    with open(filepath, mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(data)
-
-def get_next_id(filepath):
-<<<<<<< HEAD
-    # ... (código existente) ...
-=======
->>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
-    """
-    Determina o próximo ID disponível para um novo registro em um arquivo CSV.
-    """
-    data = read_csv(filepath)
-    if data:
-        try:
-            # Encontra o ID máximo na lista de dicionários
-            last_id = max(int(row['id']) for row in data)
-            return last_id + 1
-        except (ValueError, KeyError):
-            # Lida com casos onde 'id' não é um número ou não existe
-            return 1
-    return 1
-
-# ==============================================================================
-# FUNÇÕES PARA VISITAS (VISITS)
-<<<<<<< HEAD
-=======
-# ==============================================================================
-def create_visits_file():
-    """Cria o arquivo CSV de visitas se ele não existir."""
-    if not os.path.exists(VISITS_CSV):
-        with open(VISITS_CSV, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=VISITS_FIELDNAMES)
-            writer.writeheader()
-
-def register_visit():
-    """Registra uma visita com data e hora atuais no CSV."""
-    create_visits_file()
-    visits_data = read_csv(VISITS_CSV)
-    new_id = get_next_id(VISITS_CSV)
-    
-    new_visit = {
-        'id': new_id,
-        'timestamp': datetime.utcnow().isoformat()
-    }
-    
-    visits_data.append(new_visit)
-    write_csv(VISITS_CSV, visits_data, VISITS_FIELDNAMES)
-
-def get_visits_count(time_range):
-    """
-    Calcula a contagem de visitantes para um período específico.
-    """
-    create_visits_file()
-    visits = read_csv(VISITS_CSV)
-
-    if not visits:
-        return 0
-    
-    df = pd.DataFrame(visits)
-    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
-    
-    # Mapeia o time_range para o timedelta
-    delta_map = {
-        '24h': timedelta(hours=24),
-        '7d': timedelta(days=7),
-        '30d': timedelta(days=30),
-        '12m': timedelta(days=365)
-    }
-    
-    now = datetime.utcnow().replace(tzinfo=None)
-    start_time = now - delta_map.get(time_range, timedelta(days=30))
-    
-    filtered_visits = df[(df['timestamp'].dt.tz_localize(None) >= start_time)]
-    
-    return len(filtered_visits)
-
-def get_daily_visits(time_range):
-    """
-    Retorna a contagem de visitas por dia para um período.
-    """
-    create_visits_file()
-    visits = read_csv(VISITS_CSV)
-    
-    if not visits:
+        # Garante que o arquivo exista com o cabeçalho correto se for um dos arquivos principais
+        _ensure_file_exists(filepath)
         return []
-    
-    df = pd.DataFrame(visits)
-    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
-    
-    delta_map = {
-        '24h': timedelta(hours=24),
-        '7d': timedelta(days=7),
-        '30d': timedelta(days=30),
-        '12m': timedelta(days=365)
-    }
-    
-    now = datetime.utcnow().replace(tzinfo=None)
-    start_time = now - delta_map.get(time_range, timedelta(days=30))
-    
-    filtered_visits = df[(df['timestamp'].dt.tz_localize(None) >= start_time)]
-    
-    visits_by_day = filtered_visits.groupby(filtered_visits['timestamp'].dt.date).size().reset_index(name='count')
-    visits_by_day['date'] = visits_by_day['timestamp'].astype(str)
-    
-    return visits_by_day[['date', 'count']].to_dict('records')
-
-# ==============================================================================
-# FUNÇÕES PARA USUÁRIOS (USERS)
->>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
-# ==============================================================================
-# ... (código existente) ...
-def create_visits_file():
-    """Cria o arquivo CSV de visitas se ele não existir."""
-    if not os.path.exists(VISITS_CSV):
-        with open(VISITS_CSV, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=VISITS_FIELDNAMES)
-            writer.writeheader()
-
-def register_visit():
-    """Registra uma visita com data e hora atuais no CSV."""
-    create_visits_file()
-    visits_data = read_csv(VISITS_CSV)
-    new_id = get_next_id(VISITS_CSV)
-    
-    new_visit = {
-        'id': new_id,
-        'timestamp': datetime.utcnow().isoformat()
-    }
-    
-    visits_data.append(new_visit)
-    write_csv(VISITS_CSV, visits_data, VISITS_FIELDNAMES)
-
-def get_visits_count(time_range):
-    """
-    Calcula a contagem de visitantes para um período específico.
-    """
-    create_visits_file()
-    visits = read_csv(VISITS_CSV)
-
-    if not visits:
-        return 0
-    
-    df = pd.DataFrame(visits)
-    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
-    
-    # Mapeia o time_range para o timedelta
-    delta_map = {
-        '24h': timedelta(hours=24),
-        '7d': timedelta(days=7),
-        '30d': timedelta(days=30),
-        '12m': timedelta(days=365)
-    }
-    
-    now = datetime.utcnow().replace(tzinfo=None)
-    start_time = now - delta_map.get(time_range, timedelta(days=30))
-    
-    filtered_visits = df[(df['timestamp'].dt.tz_localize(None) >= start_time)]
-    
-    return len(filtered_visits)
-
-def get_daily_visits(time_range):
-    """
-    Retorna a contagem de visitas por dia para um período.
-    """
-    create_visits_file()
-    visits = read_csv(VISITS_CSV)
-    
-    if not visits:
+    try:
+        with open(filepath, mode='r', newline='', encoding='utf-8') as file:
+            return list(csv.DictReader(file))
+    except (IOError, csv.Error) as e:
+        print(f"Erro ao ler o arquivo CSV {filepath}: {e}")
         return []
-    
-    df = pd.DataFrame(visits)
-    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
-    
-    delta_map = {
-        '24h': timedelta(hours=24),
-        '7d': timedelta(days=7),
-        '30d': timedelta(days=30),
-        '12m': timedelta(days=365)
+
+def _write_csv(filepath, data, fieldnames):
+    """Escreve uma lista de dicionários em um arquivo CSV, sobrescrevendo o conteúdo."""
+    try:
+        with open(filepath, mode='w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(data)
+    except (IOError, csv.Error) as e:
+        print(f"Erro ao escrever no arquivo CSV {filepath}: {e}")
+
+def _get_next_id(filepath):
+    """Calcula o próximo ID disponível para um novo registro."""
+    data = _read_csv(filepath)
+    if not data:
+        return 1
+    # Converte os IDs para inteiros e encontra o maior valor
+    max_id = max(int(row.get('id', 0)) for row in data)
+    return max_id + 1
+
+def _ensure_file_exists(filepath):
+    """Cria um arquivo CSV com o cabeçalho apropriado se ele não existir."""
+    if os.path.exists(filepath):
+        return
+
+    # Mapeia o caminho do arquivo para o seu respectivo cabeçalho
+    filename_to_fieldnames = {
+        USERS_CSV: USERS_FIELDNAMES,
+        PRODUCTS_CSV: PRODUCTS_FIELDNAMES,
+        REVIEWS_CSV: REVIEWS_FIELDNAMES,
+        FILTERS_CSV: FILTERS_FIELDNAMES,
+        VISITS_CSV: VISITS_FIELDNAMES,
     }
     
-    now = datetime.utcnow().replace(tzinfo=None)
-    start_time = now - delta_map.get(time_range, timedelta(days=30))
-    
-    filtered_visits = df[(df['timestamp'].dt.tz_localize(None) >= start_time)]
-    
-    visits_by_day = filtered_visits.groupby(filtered_visits['timestamp'].dt.date).size().reset_index(name='count')
-    visits_by_day['date'] = visits_by_day['timestamp'].astype(str)
-    
-    return visits_by_day[['date', 'count']].to_dict('records')
+    fieldnames = filename_to_fieldnames.get(filepath)
+    if fieldnames:
+        # Cria a pasta 'banco_de_dados' se ela não existir
+        os.makedirs(DATA_FOLDER, exist_ok=True)
+        # Escreve apenas o cabeçalho no novo arquivo
+        _write_csv(filepath, [], fieldnames)
 
-# ==============================================================================
-# FUNÇÕES PARA USUÁRIOS (USERS)
-# ==============================================================================
-# ... (código existente) ...
+# --- FUNÇÕES DE GERENCIAMENTO DE USUÁRIOS ---
 
 def get_users():
-    """
-    Lê o arquivo de usuários e retorna uma lista de objetos User.
-    """
-    users_data = read_csv(USERS_CSV)
-    return [User(
-        id=int(row['id']),
-        username=row['username'],
-        email=row['email'],
-        password_hash=row['password_hash'],
-        role=row['role'],
-        profile_picture=row.get('profile_picture'),
-        date_joined=datetime.fromisoformat(row['date_joined']) if row.get('date_joined') else datetime.utcnow()
-    ) for row in users_data]
-
-def get_user_by_email(email):
-    """
-    Encontra um usuário por email.
-    """
-    users = get_users()
-    for user in users:
-        if user.email == email:
-            return user
-    return None
+    """Retorna uma lista de todos os usuários como objetos User."""
+    users_data = _read_csv(USERS_CSV)
+    return [User.from_dict(row) for row in users_data]
 
 def get_user_by_id(user_id):
-    """
-    Encontra um usuário por ID.
-    """
-    users = get_users()
-    for user in users:
-        if str(user.id) == str(user_id):
-            return user
+    """Busca um usuário pelo ID."""
+    users_data = _read_csv(USERS_CSV)
+    for row in users_data:
+        if str(row.get('id')) == str(user_id):
+            return User.from_dict(row)
+    return None
+
+def get_user_by_email(email):
+    """Busca um usuário pelo email."""
+    users_data = _read_csv(USERS_CSV)
+    for row in users_data:
+        if row.get('email') == email:
+            return User.from_dict(row)
     return None
 
 def save_user(user):
-    """
-    Salva um novo usuário no arquivo CSV.
-    """
-    users = read_csv(USERS_CSV)
-    users.append(user.to_dict())
-    write_csv(USERS_CSV, users, USERS_FIELDNAMES)
+    """Salva um novo usuário ou atualiza um existente."""
+    users_data = _read_csv(USERS_CSV)
+    user_dict = user.to_dict()
     
-def update_user(user):
-    """
-    Atualiza um usuário existente no arquivo CSV.
-    """
-    users = read_csv(USERS_CSV)
-    updated = False
-    for i, u in enumerate(users):
-        if int(u['id']) == int(user.id):
-            users[i] = user.to_dict()
-            updated = True
+    # Verifica se o usuário já existe para atualização
+    user_found = False
+    for i, existing_user in enumerate(users_data):
+        if str(existing_user.get('id')) == str(user.id):
+            users_data[i] = user_dict
+            user_found = True
             break
-    if updated:
-        write_csv(USERS_CSV, users, USERS_FIELDNAMES)
+            
+    if not user_found:
+        users_data.append(user_dict)
+        
+    _write_csv(USERS_CSV, users_data, USERS_FIELDNAMES)
 
-# ==============================================================================
-# FUNÇÕES PARA PRODUTOS (PRODUCTS)
-# ==============================================================================
+# --- FUNÇÕES DE GERENCIAMENTO DE PRODUTOS ---
 
 def get_products():
-    """
-    Lê o arquivo de produtos e retorna uma lista de objetos Product.
-    """
-    products_data = read_csv(PRODUCTS_CSV)
+    """Retorna uma lista de todos os produtos como objetos Product."""
+    products_data = _read_csv(PRODUCTS_CSV)
     return [Product.from_dict(row) for row in products_data]
 
 def get_product_by_id(product_id):
-    """
-    Encontra um produto por ID.
-    """
-    products = get_products()
-    for product in products:
-        if str(product.id) == str(product_id):
-            return product
+    """Busca um produto pelo ID."""
+    products_data = _read_csv(PRODUCTS_CSV)
+    for row in products_data:
+        if str(row.get('id')) == str(product_id):
+            return Product.from_dict(row)
     return None
 
 def save_product(product):
-    """
-    Salva um novo produto no arquivo CSV.
-    """
-    products_data = read_csv(PRODUCTS_CSV)
-    products_data.append(product.to_dict())
-    write_csv(PRODUCTS_CSV, products_data, PRODUCTS_FIELDNAMES)
+    """Salva um novo produto ou atualiza um existente."""
+    products_data = _read_csv(PRODUCTS_CSV)
+    product_dict = product.to_dict()
 
-def update_product(product):
-    """
-    Atualiza um produto existente no arquivo CSV.
-    """
-    products_data = read_csv(PRODUCTS_CSV)
-    updated = False
+    product_found = False
     for i, p in enumerate(products_data):
-        if int(p['id']) == int(product.id):
-            products_data[i] = product.to_dict()
-            updated = True
+        if str(p.get('id')) == str(product.id):
+            products_data[i] = product_dict
+            product_found = True
             break
-    if updated:
-        write_csv(PRODUCTS_CSV, products_data, PRODUCTS_FIELDNAMES)
     
-def delete_product(product_id):
-    """
-    Deleta um produto do arquivo CSV.
-    """
-    products_data = read_csv(PRODUCTS_CSV)
-    updated_products = [p for p in products_data if int(p['id']) != int(product_id)]
-    write_csv(PRODUCTS_CSV, updated_products, PRODUCTS_FIELDNAMES)
+    if not product_found:
+        product.id = _get_next_id(PRODUCTS_CSV)
+        products_data.append(product.to_dict())
+        
+    _write_csv(PRODUCTS_CSV, products_data, PRODUCTS_FIELDNAMES)
 
-# ==============================================================================
-# FUNÇÕES PARA FILTROS (FILTERS)
-# ==============================================================================
-<<<<<<< HEAD
-# ... (código existente) ...
-=======
->>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
+def delete_product(product_id):
+    """Deleta um produto pelo ID."""
+    products_data = _read_csv(PRODUCTS_CSV)
+    # Filtra a lista, mantendo apenas os produtos cujo ID não corresponde
+    products_to_keep = [p for p in products_data if str(p.get('id')) != str(product_id)]
+    
+    if len(products_to_keep) < len(products_data):
+        _write_csv(PRODUCTS_CSV, products_to_keep, PRODUCTS_FIELDNAMES)
+        return True # Indica que um produto foi deletado
+    return False # Indica que nenhum produto foi encontrado/deletado
+
+# --- FUNÇÕES DE GERENCIAMENTO DE FILTROS ---
 
 def get_filters():
-    """
-    Lê o arquivo de filtros e retorna uma lista de dicionários.
-    """
-    return read_csv(FILTERS_CSV)
+    """Retorna uma lista de todos os filtros como objetos Filter."""
+    filters_data = _read_csv(FILTERS_CSV)
+    return [Filter.from_dict(row) for row in filters_data]
 
-def get_filters_by_order():
-    """
-    Lê os filtros e os retorna ordenados pela ordem definida.
-    """
-    filters = get_filters()
-    order_map = {filter_type: i for i, filter_type in enumerate(FILTER_ORDER)}
-    return sorted(filters, key=lambda f: order_map.get(f['type'], len(FILTER_ORDER)))
+def save_filter(filter_obj):
+    """Salva um novo filtro."""
+    filters_data = _read_csv(FILTERS_CSV)
+    filter_obj.id = _get_next_id(FILTERS_CSV)
+    filters_data.append(filter_obj.to_dict())
+    _write_csv(FILTERS_CSV, filters_data, FILTERS_FIELDNAMES)
 
-def save_filter(filter_data):
-    """
-    Salva um novo filtro no arquivo CSV.
-    """
-    filters = get_filters()
-    filters.append(filter_data)
-    write_csv(FILTERS_CSV, filters, FILTERS_FIELDNAMES)
-    
 def delete_filter(filter_id):
-    """
-    Deleta um filtro do arquivo CSV.
-    """
-    filters = get_filters()
-    updated_filters = [f for f in filters if int(f['id']) != int(filter_id)]
-    write_csv(FILTERS_CSV, updated_filters, FILTERS_FIELDNAMES)
+    """Deleta um filtro pelo ID."""
+    filters_data = _read_csv(FILTERS_CSV)
+    filters_to_keep = [f for f in filters_data if str(f.get('id')) != str(filter_id)]
+    
+    if len(filters_to_keep) < len(filters_data):
+        _write_csv(FILTERS_CSV, filters_to_keep, FILTERS_FIELDNAMES)
+        return True
+    return False
 
-# ==============================================================================
-# FUNÇÕES PARA AVALIAÇÕES (REVIEWS)
-# ==============================================================================
-# ... (código existente) ...
-def get_reviews():
-    """
-    Lê o arquivo de avaliações e retorna uma lista de objetos Review.
-    """
-    reviews_data = read_csv(REVIEWS_CSV)
-    return [Review.from_dict(row) for row in reviews_data]
+# --- FUNÇÕES DE ANÁLISE E VISITAS (SEM PANDAS) ---
 
-def get_reviews_by_product_id(product_id):
-    """
-    Encontra avaliações por ID do produto.
-    """
-    reviews = get_reviews()
-    return [r for r in reviews if str(r.product_id) == str(product_id)]
+def register_visit():
+    """Registra o timestamp de uma nova visita."""
+    _ensure_file_exists(VISITS_CSV)
+    try:
+        with open(VISITS_CSV, 'a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow([datetime.utcnow().isoformat()])
+    except IOError as e:
+        print(f"Erro ao registrar visita: {e}")
 
-def save_review(review):
-    """
-    Salva uma nova avaliação no arquivo CSV.
-    """
-    reviews_data = read_csv(REVIEWS_CSV)
-    reviews_data.append(review.to_dict())
-    write_csv(REVIEWS_CSV, reviews_data, REVIEWS_FIELDNAMES)
+def get_visits_count(time_range_str):
+    """Calcula o número de visitas em um determinado período de tempo (ex: '7d', '30d')."""
+    visits_data = _read_csv(VISITS_CSV)
+    if not visits_data:
+        return 0
 
-def delete_review(review_id):
-    """
-    Deleta uma avaliação do arquivo CSV.
-    """
-    reviews_data = read_csv(REVIEWS_CSV)
-    updated_reviews = [r for r in reviews_data if int(r['id']) != int(review_id)]
-<<<<<<< HEAD
-    write_csv(REVIEWS_CSV, updated_reviews, REVIEWS_FIELDNAMES)
-=======
-    write_csv(REVIEWS_CSV, updated_reviews, REVIEWS_FIELDNAMES)
->>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
+    now = datetime.utcnow()
+    
+    # Mapeia a string do período para um objeto timedelta
+    range_map = {'24h': 1, '7d': 7, '30d': 30, '12m': 365}
+    days = range_map.get(time_range_str, 30) # Padrão de 30 dias
+    start_time = now - timedelta(days=days)
+    
+    count = 0
+    for row in visits_data:
+        try:
+            # Tenta converter o timestamp para datetime e compara
+            visit_time = datetime.fromisoformat(row['timestamp'])
+            if visit_time >= start_time:
+                count += 1
+        except (ValueError, KeyError):
+            # Ignora linhas com timestamp mal formatado ou ausente
+            continue
+            
+    return count

@@ -1,82 +1,116 @@
 # app/models/product.py
-# Este arquivo define o modelo de dados para os produtos.
-# Refatorado para ser um modelo de dados simples, compatível com arquivos CSV.
+# Define o modelo de dados para os produtos da aplicação.
 
 import json
-from datetime import datetime
+from typing import List, Dict, Any, Optional
 
 class Product:
     """
-    Modelo de dados para os produtos.
+    Representa um produto no catálogo da loja.
 
-    Atributos:
-        id (int): A chave primária (ID do produto).
-        name (str): O nome do produto.
-        brand (str): A marca do produto.
-        price (float): O preço do produto.
-        status (str): O status do produto (por exemplo, "em estoque").
-        images (list): Uma lista de strings com os caminhos das imagens.
-        description (str): A descrição detalhada do produto.
-        specs (str): Especificações técnicas do produto, formatadas como texto ou JSON.
-        seller_id (int): O ID do usuário que adicionou o produto.
-        filters (list): Uma lista de IDs de filtros associados ao produto.
+    Esta classe serve como um modelo de dados para manipular informações de produtos
+    que são lidas e escritas em arquivos CSV.
     """
-    def __init__(self, id, name, brand, price, status, images, description, specs, seller_id, filters=None):
+    def __init__(self,
+                 id: Optional[int],
+                 name: str,
+                 brand: str,
+                 price: float,
+                 status: str,
+                 images: List[str],
+                 description: str,
+                 specs: str,
+                 seller_id: int,
+                 filters: Optional[List[int]] = None):
+        """
+        Inicializa uma instância de Produto.
+
+        Args:
+            id (Optional[int]): O ID único do produto. Pode ser None para novos produtos.
+            name (str): O nome do produto.
+            brand (str): A marca do produto.
+            price (float): O preço do produto.
+            status (str): O status (ex: 'Em estoque', 'Em destaque').
+            images (List[str]): Uma lista de caminhos URL para as imagens do produto.
+            description (str): A descrição detalhada do produto.
+            specs (str): As especificações técnicas do produto.
+            seller_id (int): O ID do usuário que vende/cadastrou o produto.
+            filters (Optional[List[int]]): Uma lista de IDs de filtros associados.
+        """
         self.id = id
         self.name = name
         self.brand = brand
         self.price = price
         self.status = status
-        self.images = images
+        self.images = images if images is not None else []
         self.description = description
         self.specs = specs
         self.seller_id = seller_id
-        # Garante que 'filters' seja sempre uma lista
         self.filters = filters if filters is not None else []
-    
-    def to_dict(self):
+
+    def to_dict(self, simplify: bool = False) -> Dict[str, Any]:
         """
-        Serializa o objeto Product para um dicionário, útil para salvar no CSV.
-        Os campos 'images' e 'filters' são convertidos para uma string JSON.
+        Converte a instância do produto para um dicionário.
+
+        Args:
+            simplify (bool): Se True, retorna uma versão simplificada do dicionário,
+                             adequada para listagens públicas na API.
+
+        Returns:
+            Dict[str, Any]: Um dicionário representando o produto.
         """
-        return {
+        data = {
             'id': self.id,
             'name': self.name,
             'brand': self.brand,
             'price': self.price,
             'status': self.status,
-            'images': json.dumps(self.images),
-            'description': self.description,
-            'specs': self.specs,
-            'seller_id': self.seller_id,
-            'filters': json.dumps(self.filters)
+            'images': self.images,
         }
+        if not simplify:
+            # Para salvar no CSV ou para visualizações detalhadas, serializa tudo
+            data.update({
+                'description': self.description,
+                'specs': self.specs,
+                'seller_id': self.seller_id,
+                'filters': self.filters
+            })
+            # Converte listas para string JSON para armazenamento no CSV
+            data['images'] = json.dumps(self.images)
+            data['filters'] = json.dumps(self.filters)
+        return data
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: Dict[str, Any]) -> 'Product':
         """
-        Cria um objeto Product a partir de um dicionário, lido do CSV.
-        Os campos 'images' e 'filters' são convertidos de uma string JSON para uma lista.
+        Cria uma instância de Produto a partir de um dicionário (geralmente de uma linha de CSV).
+
+        Args:
+            data (Dict[str, Any]): O dicionário com os dados do produto.
+
+        Returns:
+            Product: Uma nova instância da classe Product.
         """
+        # Tenta carregar 'images' e 'filters' de uma string JSON, com fallback para lista vazia.
         try:
-            images = json.loads(data['images']) if data.get('images') else []
+            images = json.loads(data.get('images', '[]'))
         except (json.JSONDecodeError, TypeError):
             images = []
 
         try:
-            filters = json.loads(data['filters']) if data.get('filters') else []
+            filters = json.loads(data.get('filters', '[]'))
         except (json.JSONDecodeError, TypeError):
             filters = []
 
         return cls(
             id=int(data['id']),
-            name=data['name'],
-            brand=data['brand'],
-            price=float(data['price']),
-            status=data['status'],
+            name=data.get('name', 'Nome Indisponível'),
+            brand=data.get('brand', 'Marca Indisponível'),
+            price=float(data.get('price', 0.0)),
+            status=data.get('status', 'Indisponível'),
+            description=data.get('description', ''),
+            specs=data.get('specs', ''),
+            seller_id=int(data.get('seller_id', 0)),
             images=images,
-            description=data.get('description'),
-            specs=data.get('specs'),
-            seller_id=int(data['seller_id']),
             filters=filters
         )

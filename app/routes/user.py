@@ -1,89 +1,95 @@
 # app/routes/user.py
-# Este Blueprint lida com as rotas específicas para usuários autenticados.
-# Refatorado para usar arquivos CSV em vez de um banco de dados,
-# e para incluir a lógica de atualização de perfil.
+# Lida com as rotas para usuários autenticados, como a página de perfil.
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+import os
+from flask import (
+    Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
+)
 from flask_login import login_required, current_user
-from app.models.user import User
-from app.utils import data_manager
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
-import os
 
-# Cria o Blueprint com o nome 'user' e um prefixo de URL.
-user_bp = Blueprint('user', __name__, url_prefix='/user')
+from app.utils import data_manager
 
-# Define o caminho para a pasta de uploads
-UPLOAD_FOLDER = 'app/static/uploads/profile_pictures'
+# Cria o Blueprint para agrupar as rotas de usuário.
+# O prefixo '/user' já é definido no app/__init__.py ao registrar o blueprint.
+user_bp = Blueprint('user', __name__)
+
+
+# --- ROTAS DE PÁGINAS (HTML) ---
 
 @user_bp.route('/profile')
 @login_required
 def profile():
-    """Rota para a página de perfil do usuário."""
-    # A página de perfil será renderizada com base nos dados do usuário logado.
+    """Renderiza a página de perfil do usuário."""
     return render_template('user/profile.html')
+
 
 @user_bp.route('/profile/update', methods=['POST'])
 @login_required
 def update_profile():
-    """Rota de API para atualizar as informações do perfil do usuário."""
+    """Processa a atualização dos dados do perfil do usuário."""
     try:
+        # Coleta os dados do formulário
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        
-        # Garante que as informações obrigatórias estão presentes
-        if not username or not email:
-            flash('Nome de usuário e email são obrigatórios.', 'danger')
+        confirm_password = request.form.get('confirm_password')
+        profile_picture_file = request.files.get('profile_picture')
+
+        # Validação dos dados
+        if email != current_user.email and data_manager.get_user_by_email(email):
+            flash('O novo email informado já está em uso por outra conta.', 'danger')
             return redirect(url_for('user.profile'))
 
-        # Lógica para alterar a senha
+        if password and password != confirm_password:
+            flash('As novas senhas não coincidem.', 'danger')
+            return redirect(url_for('user.profile'))
+
+        # Atualiza os dados do objeto 'current_user'
+        current_user.username = username
+        current_user.email = email
+
+        # Se uma nova senha foi fornecida, atualiza o hash
         if password:
-            hashed_password = generate_password_hash(password)
-            current_user.password_hash = hashed_password
+            current_user.password_hash = generate_password_hash(password)
+
+        # Se uma nova foto de perfil foi enviada, salva o arquivo
+        if profile_picture_file and profile_picture_file.filename != '':
+            # Cria um nome de arquivo seguro para evitar conflitos e problemas de segurança
+            filename = f"user_{current_user.id}_{secure_filename(profile_picture_file.filename)}"
+            save_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            
+            # Cria a pasta de uploads se não existir
+            os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+            
+            profile_picture_file.save(save_path)
+            # Salva o caminho relativo para ser usado no template HTML
+            current_user.profile_picture = f"/static/uploads/{filename}"
+
+        # Salva o objeto User atualizado no arquivo CSV
+        data_manager.save_user(current_user)
         
-        # Lógica para upload de foto de perfil
-        if 'profile_picture' in request.files:
-            file = request.files['profile_picture']
-            if file.filename != '':
-                os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-                filename = secure_filename(f'{current_user.id}_{file.filename}')
-                file_path = os.path.join(UPLOAD_FOLDER, filename)
-                file.save(file_path)
-                current_user.profile_picture = url_for('static', filename=f'uploads/profile_pictures/{filename}')
-        
-        # Cria um novo objeto User com as informações atualizadas
-        updated_user = User(
-            id=current_user.id,
-            username=username,
-            email=email,
-            password_hash=current_user.password_hash,
-            role=current_user.role,
-            profile_picture=current_user.profile_picture,
-            date_joined=current_user.date_joined
-        )
-        
-        # Atualiza o arquivo CSV de usuários
-        data_manager.update_user(updated_user)
-        
-        flash('Perfil atualizado com sucesso!', 'success')
-        return redirect(url_for('user.profile'))
-    
+        flash('Seu perfil foi atualizado com sucesso!', 'success')
+
     except Exception as e:
-        flash(f'Ocorreu um erro ao atualizar o perfil: {str(e)}', 'danger')
-        return redirect(url_for('user.profile'))
+        flash(f'Ocorreu um erro inesperado ao atualizar o perfil: {e}', 'danger')
+    
+    return redirect(url_for('user.profile'))
 
-@user_bp.route('/cart')
-@login_required
-def cart():
-    """Rota para a página de carrinho do usuário."""
-    # Lógica do carrinho aqui...
-    return render_template('user/cart.html')
 
-@user_bp.route('/api/profile', methods=['GET'])
+# --- ROTAS DE API DO USUÁRIO (JSON) ---
+
+@user_bp.route('/api/profile')
 @login_required
-def get_user_profile():
-    """Rota de API para obter os dados do perfil do usuário logado."""
-    user_data = current_user.to_dict()
-    return jsonify(user_data)
+def get_profile_data():
+    """API: Retorna os dados do perfil do usuário logado em formato JSON."""
+    if current_user.is_authenticated:
+        return jsonify({
+            "id": current_user.id,
+            "username": current_user.username,
+            "email": current_user.email,
+            "profile_picture": current_user.profile_picture,
+            "date_joined": current_user.date_joined.isoformat()
+        })
+    return jsonify({"error": "Usuário não autenticado"}), 401

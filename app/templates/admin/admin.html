@@ -3,571 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Administração Decibell</title>
-    <!-- Inclui a biblioteca de ícones Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Inclui a fonte Inter do Google Fonts -->
+    <title>Admin Decibell</title>
+    
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --fundo-claro: #f0f2f5;
-            --texto-claro: #1a1a1a;
-            --card-claro: #ffffff;
-            --borda-claro: #e0e0e0;
-            --primaria-claro: #2c3e50;
-            --secundaria-claro: #34495e;
-            --sombra-claro: rgba(0, 0, 0, 0.1);
-            --cor-link: #3498db;
-            --cor-link-hover: #2980b9;
-            --cor-sucesso: #22c55e;
-            --cor-erro: #ef4444;
-            --roxo-principal: #4c51bf;
-            --verde-sucesso: #22c55e;
-            --vermelho-erro: #ef4444;
-            --amarelo-alerta: #eab308;
-            --tag-fundo: #e0e7ff;
-            --tag-texto: #4338ca;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--fundo-claro);
-            color: var(--texto-claro);
-            line-height: 1.6;
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        /* Estilo da barra de rolagem */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #e5e7eb; }
-        ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide.min.js"></script>
 
-        .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .main-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 2rem; text-align: center; color: var(--primaria-claro); }
-        .card { background-color: var(--card-claro); border-radius: 1rem; box-shadow: 0 4px 6px var(--sombra-claro); padding: 1.5rem; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card:hover { box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15); transform: translateY(-2px); }
-
-        .tabs-container { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-        .tabs-list { display: flex; gap: 0.5rem; padding: 0.25rem; background-color: var(--borda-claro); border-radius: 0.5rem; }
-        .tab-trigger { background-color: transparent; color: var(--secundaria-claro); border: none; border-radius: 0.5rem; padding: 0.75rem 1.5rem; font-weight: 500; transition: background-color 0.3s, color 0.3s; cursor: pointer; }
-        .tab-trigger:hover { background-color: var(--borda-claro); }
-        .tab-trigger.active { background-color: var(--roxo-principal); color: white; box-shadow: 0 4px 6px rgba(76, 81, 191, 0.3); }
-        .btn-logout { background-color: #d32f2f; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 500; text-decoration: none; transition: background-color 0.3s ease; border: none; cursor: pointer; }
-        .btn-logout:hover { background-color: #c62828; }
-
-        .dashboard-content { display: flex; flex-direction: column; gap: 2rem; }
-        .kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
-        .kpi-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); }
-        .kpi-card.purple { background-color: var(--roxo-principal); }
-        .kpi-card.green { background-color: var(--verde-sucesso); }
-        .kpi-card.red { background-color: var(--vermelho-erro); }
-        .kpi-card.yellow { background-color: var(--amarelo-alerta); }
-        .kpi-card .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .kpi-card .value { font-size: 1.5rem; font-weight: 700; }
-        .kpi-card .label { font-size: 0.875rem; opacity: 0.9; }
-
-        .main-content, .bottom-sections, .tables-container { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
-        @media (min-width: 1024px) {
-            .main-content, .bottom-sections { grid-template-columns: 1fr 1fr; }
-        }
-
-        .analytics-chart-card { min-height: 300px; display: flex; align-items: center; justify-content: center; }
-        .recent-sales-card h3, .card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
-
-        table { width: 100%; border-collapse: collapse; }
-        thead { background-color: #f9fafb; }
-        th, td { padding: 0.75rem 1.5rem; text-align: left; border-bottom: 1px solid var(--borda-claro); }
-        th { font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
-        tbody tr:last-child td { border-bottom: none; }
-
-        /* Estilos aprimorados para a área de upload de imagens */
-        .file-upload-label { 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer; 
-            padding: 2rem;
-            border: 2px dashed var(--borda-claro);
-            border-radius: 0.75rem;
-            color: var(--primaria-claro);
-            transition: border-color 0.3s, background-color 0.3s; 
-            text-align: center;
-        }
-        .file-upload-label:hover, .file-upload-label.drag-over {
-            border-color: var(--roxo-principal);
-            background-color: rgba(76, 81, 191, 0.1);
-        }
-        .file-upload-label .upload-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--primaria-claro);
-        }
-        .file-upload-label .upload-text {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        .file-upload-label .upload-subtext {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-
-        .form-input, .form-textarea, .form-select { 
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--borda-claro);
-            border-radius: 0.5rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            background-color: #f9fafb;
-        }
-        .form-input:focus, .form-textarea:focus, .form-select:focus { 
-            border-color: var(--roxo-principal);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(76, 81, 191, 0.2); 
-        }
-
-        .form-button { 
-            width: 100%; 
-            padding: 0.75rem; 
-            margin-top: 1rem; 
-            background-color: var(--roxo-principal); 
-            color: white; 
-            border: none; 
-            border-radius: 0.5rem; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: background-color 0.3s; 
-        }
-        .form-button:hover { 
-            background-color: var(--secundaria-claro); 
-        }
-
-        .product-image-previews-container { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 1rem; /* Aumentado o espaçamento */
-            margin-top: 1rem;
-        }
-        .preview-item {
-            position: relative;
-            width: 120px; /* Tamanho fixo para as miniaturas */
-            height: 120px;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            cursor: grab;
-            transition: transform 0.2s ease;
-        }
-        .preview-item:active {
-            cursor: grabbing;
-        }
-        .preview-item.drag-over-item {
-            border: 2px dashed var(--roxo-principal);
-            transform: scale(1.05);
-        }
-        .preview-item img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            display: block;
-        }
-        .preview-item .image-number {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 9999px;
-        }
-        .remove-image-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: var(--vermelho-erro);
-            color: white;
-            border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        .remove-image-btn:hover {
-            opacity: 1;
-        }
-
-        .hidden { display: none; }
-        
-        /* Estilos para a seção de filtros */
-        .filter-section-title {
-            font-weight: 600;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            color: var(--primaria-claro);
-        }
-        
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem; /* gap-3 */
-            padding: 0.75rem; /* p-3 */
-            background-color: #ffffff;
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
-            width: 100%;
-            max-width: 60rem; /* max-w-5xl */
-        }
-        
-        /* Estilos responsivos para telas maiores (a partir de 768px) */
-        @media (min-width: 768px) {
-            .container {
-                flex-direction: row;
-                gap: 1rem; /* md:gap-4 */
-            }
-            body {
-                padding: 2rem; /* md:p-8 */
-            }
-        }
-        
-        /* Estilos para cada coluna de filtro */
-        .filter-column {
-            flex: 1;
-            min-width: 120px;
-            position: relative;
-        }
-        
-        /* Estilos do cabeçalho de cada filtro (título e ícone) */
-        .filter-header {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 0.25rem; /* pb-1 */
-            margin-bottom: 0.25rem; /* mb-1 */
-            border-bottom: 1px solid #3b82f6; /* border-b border-blue-500 */
-        }
-        
-        .filter-header h3 {
-            font-weight: bold;
-            font-size: 0.875rem; /* text-sm */
-            color: #1f2937; /* text-gray-800 */
-        }
-        
-        .chevron {
-            font-size: 1rem; /* text-base */
-            color: #6b7280; /* text-gray-500 */
-            transition: transform 0.2s ease-out;
-        }
-        
-        .chevron.rotate {
-            transform: rotate(180deg);
-        }
-        
-        /* Estilos para o menu flutuante (dropdown) */
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-5px);
-            transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
-            background-color: #ffffff;
-            border-radius: 0.375rem; /* rounded-md */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-            padding: 0.5rem; /* p-2 */
-            margin-top: 0.25rem; /* mt-1 */
-        }
-        
-        .dropdown-menu.open {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-        /* Estilos para as opções de checkbox dentro do menu */
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem; /* space-y-2 */
-            font-size: 0.875rem; /* text-sm */
-        }
-        
-        .option-item {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .option-item label {
-            margin-left: 0.375rem; /* ml-1.5 */
-            color: #4b5563; /* text-gray-700 */
-            transition: color 0.2s duration-200;
-        }
-
-        .option-item:hover label {
-            color: #3b82f6; /* group-hover:text-blue-600 */
-        }
-
-        /* Estilos para o checkbox real (oculto) e a sua estilização */
-        .option-item input[type="checkbox"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 0.75rem; /* w-3 */
-            height: 0.75rem; /* h-3 */
-            border: 1px solid #d1d5db; /* border-gray-300 */
-            background-color: #f3f4f6; /* bg-gray-100 */
-            border-radius: 0.125rem;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .option-item input[type="checkbox"]:checked {
-            background-color: #3b82f6; /* text-blue-600 */
-            border-color: #3b82f6;
-        }
-        
-        .option-item input[type="checkbox"]:checked::after {
-            content: '';
-            display: block;
-            width: 0.3rem;
-            height: 0.6rem;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-            margin-left: 1px;
-            margin-top: -3px;
-        }
-
-        /* Estilos para as caixas de cores */
-        .color-box {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        /* Estilos para a animação das caixas de cores ao serem clicadas */
-        .option-item input[type="checkbox"]:checked + label .color-box {
-            transform: scale(1.2);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-        }
-
-        /* Estilos para o botão Limpar Filtros */
-        .clear-button-container {
-            margin-top: 1rem; /* mt-4 */
-            display: flex;
-            justify-content: center;
-        }
-
-        #clear-filters {
-            padding: 0.25rem 0.75rem; /* px-3 py-1 */
-            background-color: #3b82f6; /* bg-blue-600 */
-            color: white;
-            border-radius: 9999px; /* rounded-full */
-            font-size: 0.875rem; /* text-sm */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-            transition: all 0.3s ease-in-out;
-            border: none;
-            cursor: pointer;
-        }
-
-        #clear-filters:hover {
-            background-color: #2563eb; /* hover:bg-blue-700 */
-            transform: scale(1.05); /* hover:scale-105 */
-        }
-        
-    </style>
-    <!-- Recharts CDN para gráficos -->
-    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/global_admin.css') }}">
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <h1 class="main-title">Painel de Administração Decibell</h1>
+    <main class="container">
+        <header>
+            <h1 class="header-title">Painel de Administração</h1>
+            <nav class="tabs">
+                <button class="tab-link active" data-view="products-view">Gerenciar Produtos</button>
+                <button class="tab-link" data-view="filters-view">Gerenciar Filtros</button>
+            </nav>
+        </header>
 
-        <!-- Tabs para seleção do período e botão de sair -->
-        <div class="tabs-container">
-            <div class="tabs-list">
-                <button class="tab-trigger active" data-value="30d">30 Dias</button>
-                <button class="tab-trigger" data-value="24h">24 Horas</button>
-                <button class="tab-trigger" data-value="7d">7 Dias</button>
-                <button class="tab-trigger" data-value="12m">12 Meses</button>
+        <!-- Seção de Gerenciamento de Produtos -->
+        <section id="products-view" class="admin-section active">
+            <div class="section-header">
+                <p class="text-secondary">Adicione, edite ou remova os produtos do seu catálogo.</p>
+                <button class="btn btn-primary" id="add-product-btn">
+                    <i data-lucide="plus" class="btn-icon"></i>
+                    Adicionar Produto
+                </button>
             </div>
-            <a href="{{ url_for('admin_page.admin_logout') }}" class="btn-logout">Sair</a>
-        </div>
-    
-        <div id="modal-message" class="modal-message"></div>
-
-        <!-- Conteúdo do Dashboard -->
-        <div id="dashboard-content" class="dashboard-content">
-            <!-- KPIs - Cards de Indicadores Chave de Performance -->
-            <div id="kpi-cards" class="kpi-cards">
-                <!-- Cards de KPI serão injetados pelo JS -->
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table-body">
+                        <!-- Linhas da tabela serão inseridas aqui via JavaScript -->
+                    </tbody>
+                </table>
             </div>
+        </section>
 
-            <div class="main-content">
-                <!-- Analytics Chart - Contêiner para o gráfico -->
-                <div id="analytics-chart" class="card analytics-chart-card">
-                    <h3>Vendas e Visitas</h3>
-                    <div id="chart-container" style="width: 100%; height: 300px;"></div>
-                </div>
-
-                <!-- Recent Sales - Tabela de Vendas Recentes -->
-                <div id="recent-sales" class="card recent-sales-card">
-                    <h3>Vendas Recentes</h3>
-                    <div style="overflow-x: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Email</th>
-                                    <th>Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Linhas da tabela de vendas serão injetadas pelo JS -->
-                            </tbody>
-                        </table>
+        <!-- Seção de Gerenciamento de Filtros -->
+        <section id="filters-view" class="admin-section">
+             <div class="grid-container">
+                <form class="form-card" id="add-filter-form">
+                    <h3 class="form-title">Adicionar Filtro</h3>
+                    <div class="form-group">
+                        <label for="filter-name">Nome do Filtro</label>
+                        <input type="text" id="filter-name" class="form-input" required>
                     </div>
+                    <div class="form-group">
+                        <label for="filter-type">Tipo de Filtro</label>
+                        <select id="filter-type" class="form-select">
+                            <option value="brand">Marca</option>
+                            <option value="type">Tipo</option>
+                            <option value="color">Cor</option>
+                            <option value="connectivity">Conectividade</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filters-table-body">
+                            <!-- Dados inseridos via JS -->
+                        </tbody>
+                    </table>
                 </div>
+             </div>
+        </section>
+    </main>
+
+    <!-- Modal para Adicionar/Editar Produto -->
+    <div id="product-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title">Adicionar Novo Produto</h2>
+                <button id="close-modal-btn" class="close-btn"><i data-lucide="x"></i></button>
             </div>
-
-            <div class="bottom-sections">
-                <!-- Adicionar Produto e Gerenciar Filtros -->
-                <div class="left-sections" style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <div class="card">
-                        <h3>Adicionar Produto</h3>
-                        <form id="add-product-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                            <input type="text" id="product-name" name="name" placeholder="Nome do Produto" required class="form-input">
-                            <input type="number" id="product-price" name="price" placeholder="Preço" step="0.01" required class="form-input">
-                            <textarea id="product-description" name="description" placeholder="Descrição do Produto" required class="form-textarea"></textarea>
-                            <input type="text" id="product-status" name="status" placeholder="Status (Ex: 'Em estoque')" required class="form-input">
-                            
-                            <!-- Título para a seção de filtros -->
-                            <h4 class="filter-section-title">Selecione os Filtros</h4>
-
-                            <!-- Seção de filtros com checkboxes. Conteúdo será gerado dinamicamente pelo JS -->
-                            <div class="container" id="filters-product-container">
-                                <!-- Os filtros serão injetados aqui via JS -->
-                            </div>
-                        
-                            <!-- Botão de Limpar Filtros -->
-                            <div class="clear-button-container">
-                                <button type="button" id="clear-filters">
-                                    Limpar Filtros
-                                </button>
-                            </div>
-                            
-                            <!-- Área de pré-visualização de imagens -->
-                            <h4 class="filter-section-title" style="margin-top: 1.5rem;">Pré-visualização de Imagens (Reordenáveis)</h4>
-                            <div id="product-image-previews-container" class="product-image-previews-container hidden"></div>
-
-                            <!-- Área de upload de imagens (agora com suporte a arrastar e soltar) -->
-                            <label for="product-image" id="image-upload-label" class="file-upload-label" style="margin-top: 1rem;">
-                                <i class="fas fa-camera upload-icon"></i>
-                                <span class="upload-text">Clique ou arraste e solte imagens aqui</span>
-                                <span class="upload-subtext">(máx. 15 arquivos)</span>
-                            </label>
-                            <input type="file" id="product-image" name="images" class="hidden" multiple accept="image/*">
-                            
-                            <button type="submit" class="form-button">Adicionar Produto</button>
-                        </form>
-                    </div>
-
-                    <div id="gerenciar-filtros" class="card">
-                        <h3>Gerenciar Filtros</h3>
-                        <form id="manage-filters-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                            <div>
-                                <label for="filter-type" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tipo de Filtro:</label>
-                                <select id="filter-type" name="filter-type" class="form-select">
-                                    <option value="brand">Marca</option>
-                                    <option value="type">Tipo de Fone</option>
-                                    <option value="color">Cor</option>
-                                    <option value="connectivity">Conectividade</option>
-                                </select>
-                            </div>
-                            <input type="text" id="filter-name" placeholder="Nome do Filtro (Ex: 'Decibell')" required class="form-input">
-                            <button type="submit" id="add-filter-btn" class="form-button">Adicionar Filtro</button>
-                        </form>
-                        <div style="margin-top: 1rem;">
-                            <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Filtros Ativos:</h4>
-                            <div id="active-filters-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
-                        </div>
-                    </div>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label for="product-name">Nome do Produto</label>
+                    <input type="text" id="product-name" class="form-input" required>
                 </div>
-
-                <!-- Product/Brand/User Tables - Contêineres de Tabelas -->
-                <div class="right-sections" style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <div id="products-table" class="card">
-                        <h3>Produtos</h3>
-                        <div style="overflow-x: auto;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Imagem</th>
-                                        <th>Nome</th>
-                                        <th>Preço</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="products-tbody">
-                                    <!-- Conteúdo será injetado pelo JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="brands-table" class="card">
-                        <h3>Marcas</h3>
-                        <div style="overflow-x: auto;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Nome da Marca</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="brands-tbody">
-                                    <!-- Conteúdo será injetado pelo JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="users-table" class="card">
-                        <h3>Usuários</h3>
-                        <div style="overflow-x: auto;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Nome do Usuário</th>
-                                        <th>Email</th>
-                                        <th>Data de Cadastro</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-tbody">
-                                    <!-- Conteúdo será injetado pelo JS -->
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="form-group">
+                    <label for="product-price">Preço (R$)</label>
+                    <input type="number" id="product-price" class="form-input" step="0.01" min="0" required>
+                </div>
+                 <div class="form-group">
+                    <label for="product-brand">Marca</label>
+                    <select id="product-brand" class="form-select" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="product-status">Status</label>
+                    <select id="product-status" class="form-select">
+                        <option value="Em estoque">Em estoque</option>
+                        <option value="Em destaque">Em destaque</option>
+                        <option value="Esgotado">Esgotado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descrição</label>
+                    <textarea id="product-description" class="form-textarea" rows="4"></textarea>
+                </div>
+                <!-- Nova seção para os filtros -->
+                <div class="form-group">
+                    <label>Filtros (Tipo)</label>
+                    <div id="product-filters-checkboxes" class="checkbox-container">
+                        <!-- Checkboxes dos filtros serão inseridos aqui -->
                     </div>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label>Imagens</label>
+                    <div id="drop-zone">
+                        <p>Arraste e solte arquivos ou clique para selecionar</p>
+                        <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div id="image-preview"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-btn" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Produto</button>
+                </div>
+            </form>
         </div>
     </div>
-    <!-- Script para adicionar interatividade ao Painel de Administração -->
+    
+    <div id="loader" class="loader-overlay" style="display: none;">
+        <div class="loader"></div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/admin/admin.js') }}"></script>
 </body>
 </html>
