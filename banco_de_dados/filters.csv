@@ -1,5 +1,6 @@
 id,name,type
 2,Samsung,brand
+<<<<<<< HEAD
 3,Motorola,brand
 4,Intra-auricular,type
 5,Preto,color
@@ -8,3 +9,8 @@ id,name,type
 10,Fio,connectivity
 11,Apple,brand
 12,Sony,brand
+=======
+3,Preto,color
+4,Fio,connectivity
+5,Intra-auricular,type
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b

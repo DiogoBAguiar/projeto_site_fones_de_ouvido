@@ -625,7 +625,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // SUBSTITUA A FUNÇÃO addProductForm.addEventListener EXISTENTE POR ESTA:
 
     addProductForm.addEventListener('submit', async (e) => {
+<<<<<<< HEAD
      e.preventDefault(); // Impede o envio padrão do formulário que recarrega a página
+=======
+        e.preventDefault();
+        
+        // Extrai os filtros selecionados
+        const selectedFilterIds = Array.from(document.querySelectorAll('#filters-product-container input[name="filters"]:checked')).map(checkbox => parseInt(checkbox.value));
+        const selectedBrand = allFilters.find(f => selectedFilterIds.includes(f.id) && f.type === 'brand');
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
 
      // 1. Cria um objeto FormData, que é o formato correto para enviar arquivos e dados juntos.
      const formData = new FormData();
@@ -670,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             body: formData // Note que não definimos 'Content-Type', o navegador faz isso por nós.
         });
         
+<<<<<<< HEAD
         const result = await response.json();
         
         if (response.ok) {
@@ -680,6 +689,46 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchProductsAndUsersAndBrands(); // Atualiza a tabela de produtos na página
         } else {
             exibirMensagem(result.error, 'danger');
+=======
+        // Adiciona as imagens do array de arquivos no FormData
+        if (uploadedFiles.length === 0) {
+            exibirMensagem('Por favor, adicione pelo menos uma imagem.', 'danger');
+            return;
+        }
+
+        for (let i = 0; i < uploadedFiles.length; i++) {
+            formData.append('images', uploadedFiles[i]);
+        }
+        
+        try {
+            const response = await fetch(API_PRODUCTS_URL, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                exibirMensagem(result.message, 'success');
+                addProductForm.reset();
+                if (imagePreviewsContainer) {
+                    imagePreviewsContainer.innerHTML = '';
+                    imagePreviewsContainer.classList.add('hidden');
+                }
+                // Reseta a lista de arquivos
+                uploadedFiles = [];
+                // Desmarca todos os checkboxes após o envio
+                document.querySelectorAll('#filters-product-container input[name="filters"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                fetchProductsAndUsersAndBrands(); // Atualiza todas as tabelas
+            } else {
+                exibirMensagem(result.error, 'danger');
+            }
+        } catch (error) {
+            exibirMensagem('Erro de conexão ao tentar adicionar o produto.', 'danger');
+            console.error(error);
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
         }
      } catch (error) {
         exibirMensagem('Erro de conexão ao tentar adicionar o produto.', 'danger');

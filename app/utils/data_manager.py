@@ -1,6 +1,7 @@
 # app/utils/data_manager.py
 # Este módulo contém funções utilitárias para ler e escrever em arquivos CSV,
 # agindo como a camada de persistência para a aplicação.
+# Refatorado para adicionar a lógica de contagem de visitas.
 
 import csv
 import os
@@ -26,16 +27,24 @@ RECENT_SALES_CSV = os.path.join(DATA_FOLDER, 'recent_sales.csv')
 FILTER_ORDER = ['brand', 'type', 'color', 'connectivity']
 
 # Define a lista de campos para cada arquivo CSV para garantir consistência
+<<<<<<< HEAD
 # Adicionado 'filters' para garantir que o campo seja reconhecido
+=======
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
 PRODUCTS_FIELDNAMES = ['id', 'name', 'brand', 'price', 'status', 'images', 'description', 'specs', 'seller_id', 'filters']
 USERS_FIELDNAMES = ['id', 'username', 'email', 'password_hash', 'role', 'profile_picture', 'date_joined']
 FILTERS_FIELDNAMES = ['id', 'name', 'type']
 REVIEWS_FIELDNAMES = ['id', 'rating', 'comment', 'media_url', 'date_posted', 'user_id', 'product_id']
 VISITS_FIELDNAMES = ['id', 'timestamp']
+<<<<<<< HEAD
 
 
 def read_csv(filepath):
     # ... (código existente) ...
+=======
+
+def read_csv(filepath):
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
     """
     Lê um arquivo CSV e retorna uma lista de dicionários.
     Retorna uma lista vazia se o arquivo não existir.
@@ -51,7 +60,10 @@ def read_csv(filepath):
     return data
 
 def write_csv(filepath, data, fieldnames):
+<<<<<<< HEAD
     # ... (código existente) ...
+=======
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
     """
     Escreve uma lista de dicionários em um arquivo CSV.
     """
@@ -61,7 +73,10 @@ def write_csv(filepath, data, fieldnames):
         writer.writerows(data)
 
 def get_next_id(filepath):
+<<<<<<< HEAD
     # ... (código existente) ...
+=======
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
     """
     Determina o próximo ID disponível para um novo registro em um arquivo CSV.
     """
@@ -78,6 +93,91 @@ def get_next_id(filepath):
 
 # ==============================================================================
 # FUNÇÕES PARA VISITAS (VISITS)
+<<<<<<< HEAD
+=======
+# ==============================================================================
+def create_visits_file():
+    """Cria o arquivo CSV de visitas se ele não existir."""
+    if not os.path.exists(VISITS_CSV):
+        with open(VISITS_CSV, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=VISITS_FIELDNAMES)
+            writer.writeheader()
+
+def register_visit():
+    """Registra uma visita com data e hora atuais no CSV."""
+    create_visits_file()
+    visits_data = read_csv(VISITS_CSV)
+    new_id = get_next_id(VISITS_CSV)
+    
+    new_visit = {
+        'id': new_id,
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    
+    visits_data.append(new_visit)
+    write_csv(VISITS_CSV, visits_data, VISITS_FIELDNAMES)
+
+def get_visits_count(time_range):
+    """
+    Calcula a contagem de visitantes para um período específico.
+    """
+    create_visits_file()
+    visits = read_csv(VISITS_CSV)
+
+    if not visits:
+        return 0
+    
+    df = pd.DataFrame(visits)
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+    
+    # Mapeia o time_range para o timedelta
+    delta_map = {
+        '24h': timedelta(hours=24),
+        '7d': timedelta(days=7),
+        '30d': timedelta(days=30),
+        '12m': timedelta(days=365)
+    }
+    
+    now = datetime.utcnow().replace(tzinfo=None)
+    start_time = now - delta_map.get(time_range, timedelta(days=30))
+    
+    filtered_visits = df[(df['timestamp'].dt.tz_localize(None) >= start_time)]
+    
+    return len(filtered_visits)
+
+def get_daily_visits(time_range):
+    """
+    Retorna a contagem de visitas por dia para um período.
+    """
+    create_visits_file()
+    visits = read_csv(VISITS_CSV)
+    
+    if not visits:
+        return []
+    
+    df = pd.DataFrame(visits)
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+    
+    delta_map = {
+        '24h': timedelta(hours=24),
+        '7d': timedelta(days=7),
+        '30d': timedelta(days=30),
+        '12m': timedelta(days=365)
+    }
+    
+    now = datetime.utcnow().replace(tzinfo=None)
+    start_time = now - delta_map.get(time_range, timedelta(days=30))
+    
+    filtered_visits = df[(df['timestamp'].dt.tz_localize(None) >= start_time)]
+    
+    visits_by_day = filtered_visits.groupby(filtered_visits['timestamp'].dt.date).size().reset_index(name='count')
+    visits_by_day['date'] = visits_by_day['timestamp'].astype(str)
+    
+    return visits_by_day[['date', 'count']].to_dict('records')
+
+# ==============================================================================
+# FUNÇÕES PARA USUÁRIOS (USERS)
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
 # ==============================================================================
 # ... (código existente) ...
 def create_visits_file():
@@ -275,7 +375,10 @@ def delete_product(product_id):
 # ==============================================================================
 # FUNÇÕES PARA FILTROS (FILTERS)
 # ==============================================================================
+<<<<<<< HEAD
 # ... (código existente) ...
+=======
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
 
 def get_filters():
     """
@@ -339,4 +442,8 @@ def delete_review(review_id):
     """
     reviews_data = read_csv(REVIEWS_CSV)
     updated_reviews = [r for r in reviews_data if int(r['id']) != int(review_id)]
+<<<<<<< HEAD
     write_csv(REVIEWS_CSV, updated_reviews, REVIEWS_FIELDNAMES)
+=======
+    write_csv(REVIEWS_CSV, updated_reviews, REVIEWS_FIELDNAMES)
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b

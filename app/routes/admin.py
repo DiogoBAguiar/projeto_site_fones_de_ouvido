@@ -93,11 +93,14 @@ def add_product():
         # Deserializa a string JSON para um dicionário
         product_data = json.loads(product_data_json)
         
+<<<<<<< HEAD
         # --- Validação dos dados do produto ---
         required_fields = ['name', 'price', 'description', 'status', 'brand', 'filters']
         if not all(field in product_data for field in required_fields):
             return jsonify({"error": "Dados do produto incompletos."}), 400
         
+=======
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
         # Cria a pasta do produto para salvar as imagens
         product_name_sanitized = secure_filename(product_data['name']).replace(' ', '_')
         product_image_folder = os.path.join(UPLOAD_FOLDER, product_name_sanitized)
@@ -120,9 +123,15 @@ def add_product():
             description=product_data['description'],
             status=product_data['status'],
             images=image_paths,
+<<<<<<< HEAD
             specs=None,
             seller_id=current_user.id, # Pega o ID do usuário logado
             filters=product_data.get('filters', [])
+=======
+            specs=None, # O formulário não coleta 'specs'
+            seller_id=current_user.id,
+            filters=product_data.get('filters', []) # Adiciona a lista de IDs de filtro, com fallback
+>>>>>>> 1b4e935136347d77e107e7a9d2ac5221539c0e8b
         )
 
         # Salva o produto no arquivo CSV
