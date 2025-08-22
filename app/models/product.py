@@ -19,8 +19,9 @@ class Product:
         description (str): A descrição detalhada do produto.
         specs (str): Especificações técnicas do produto, formatadas como texto ou JSON.
         seller_id (int): O ID do usuário que adicionou o produto.
+        filters (list): Uma lista de IDs de filtros associados ao produto.
     """
-    def __init__(self, id, name, brand, price, status, images, description, specs, seller_id):
+    def __init__(self, id, name, brand, price, status, images, description, specs, seller_id, filters=None):
         self.id = id
         self.name = name
         self.brand = brand
@@ -30,11 +31,13 @@ class Product:
         self.description = description
         self.specs = specs
         self.seller_id = seller_id
+        # Garante que 'filters' seja sempre uma lista
+        self.filters = filters if filters is not None else []
     
     def to_dict(self):
         """
         Serializa o objeto Product para um dicionário, útil para salvar no CSV.
-        O campo 'images' é convertido para uma string JSON.
+        Os campos 'images' e 'filters' são convertidos para uma string JSON.
         """
         return {
             'id': self.id,
@@ -45,19 +48,26 @@ class Product:
             'images': json.dumps(self.images),
             'description': self.description,
             'specs': self.specs,
-            'seller_id': self.seller_id
+            'seller_id': self.seller_id,
+            'filters': json.dumps(self.filters)
         }
 
     @classmethod
     def from_dict(cls, data):
         """
         Cria um objeto Product a partir de um dicionário, lido do CSV.
-        O campo 'images' é convertido de uma string JSON para uma lista.
+        Os campos 'images' e 'filters' são convertidos de uma string JSON para uma lista.
         """
         try:
-            images = json.loads(data['images']) if data['images'] else []
+            images = json.loads(data['images']) if data.get('images') else []
         except (json.JSONDecodeError, TypeError):
             images = []
+
+        try:
+            filters = json.loads(data['filters']) if data.get('filters') else []
+        except (json.JSONDecodeError, TypeError):
+            filters = []
+
         return cls(
             id=int(data['id']),
             name=data['name'],
@@ -67,5 +77,6 @@ class Product:
             images=images,
             description=data.get('description'),
             specs=data.get('specs'),
-            seller_id=int(data['seller_id'])
+            seller_id=int(data['seller_id']),
+            filters=filters
         )

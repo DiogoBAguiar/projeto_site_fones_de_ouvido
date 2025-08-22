@@ -1,6 +1,6 @@
 # app/routes/public.py
 # Este Blueprint lida com as rotas acessíveis ao público.
-# Refatorado para usar arquivos CSV em vez de um banco de dados.
+# Refatorado para usar arquivos CSV em vez de um banco de dados e contar visitas.
 
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from app.models.user import User # Importa o modelo de Usuário
@@ -9,9 +9,23 @@ from app.utils import data_manager
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+from datetime import datetime
 
 # Cria o Blueprint com o nome 'public'.
 public_bp = Blueprint('public', __name__)
+
+# Nova rota para registrar visitas
+@public_bp.before_app_request
+def before_request():
+    """
+    Registra uma visita a cada requisição de página que não seja uma API ou arquivo estático.
+    """
+    # Exclui rotas de API e arquivos estáticos da contagem
+    if request.path.startswith('/api/') or request.path.startswith('/static/'):
+        return
+
+    # A função de registro de visita será implementada no data_manager
+    data_manager.register_visit()
 
 @public_bp.route('/')
 def home():
@@ -137,4 +151,3 @@ def get_all_products():
         return jsonify(products_list)
     except Exception as e:
         return jsonify({"error": "Ocorreu um erro ao buscar os produtos."}), 500
-
