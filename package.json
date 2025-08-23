@@ -1,0 +1,20 @@
+{
+  "name": "projeto_site_fones_de_ouvido",
+  "version": "1.0.0",
+  "description": "Site de vendas de fones de ouvido (Decibell)",
+  "homepage": "https://github.com/DiogoBAguiar/projeto_site_fones_de_ouvido#readme",
+  "bugs": {
+    "url": "https://github.com/DiogoBAguiar/projeto_site_fones_de_ouvido/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DiogoBAguiar/projeto_site_fones_de_ouvido.git"
+  },
+  "license": "ISC",
+  "author": "DiogoBAguiar , cggabriel12 , itechbr",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
