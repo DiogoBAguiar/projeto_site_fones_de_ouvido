@@ -11,14 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide-static@0.378.0/lucide.min.js"></script>
+    
+    <!-- Chart.js para os gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/global_admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/admin_stats.css') }}">
 </head>
 <body>
 
-    <!-- HEADER DO PAINEL ADMIN ATUALIZADO -->
     <header class="admin-header">
         <a href="{{ url_for('public.home') }}" class="header-logo">
             <i data-lucide="headphones"></i>
@@ -34,7 +37,6 @@
                 <span>{{ current_user.username }}</span>
                 <i data-lucide="chevron-down" class="dropdown-arrow"></i>
             </button>
-            <!-- Menu Dropdown do Perfil -->
             <div class="admin-dropdown-menu" id="admin-dropdown">
                 <a href="{{ url_for('user.profile') }}" class="dropdown-item">
                     <i data-lucide="user-circle"></i> Meu Perfil
@@ -58,6 +60,7 @@
         <nav class="tabs">
             <button class="tab-link active" data-view="products-view">Gerenciar Produtos</button>
             <button class="tab-link" data-view="filters-view">Gerenciar Filtros</button>
+            <button class="tab-link" data-view="stats-view">Estatísticas</button>
         </nav>
 
         <!-- Seção de Gerenciamento de Produtos -->
@@ -118,6 +121,50 @@
                     </table>
                 </div>
              </div>
+        </section>
+        
+        <!-- Seção de Estatísticas -->
+        <section id="stats-view" class="admin-section">
+            <div class="section-header">
+                <h2 class="section-title">Estatísticas Gerais</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="users"></i></div>
+                    <div class="stat-info">
+                        <p class="stat-title">Total de Usuários</p>
+                        <h3 class="stat-value" id="total-users-stat">0</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="package"></i></div>
+                    <div class="stat-info">
+                        <p class="stat-title">Total de Produtos</p>
+                        <h3 class="stat-value" id="total-products-stat">0</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="mouse-pointer-click"></i></div>
+                    <div class="stat-info">
+                        <p class="stat-title">Total de Visitas (Último Ano)</p>
+                        <h3 class="stat-value" id="total-visits-stat">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title" id="visits-chart-title">Visitas Diárias (Últimos 7 Dias)</h3>
+                    <div class="chart-filters" id="visits-chart-filters">
+                        <button class="chart-filter-btn active" data-period="day">Diário</button>
+                        <button class="chart-filter-btn" data-period="week">Semanal</button>
+                        <button class="chart-filter-btn" data-period="month">Mensal</button>
+                        <button class="chart-filter-btn" data-period="year">Anual</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="visitsChart"></canvas>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -181,5 +228,6 @@
     <!-- SCRIPTS -->
     <script src="{{ url_for('static', filename='js/admin/admin_ui.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin/admin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin/admin_stats.js') }}"></script>
 </body>
 </html>

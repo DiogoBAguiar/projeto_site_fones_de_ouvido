@@ -1,0 +1,162 @@
+/*------------------------------------*
+ * #ESTILOS DA PÁGINA DE ESTATÍSTICAS
+ *------------------------------------*/
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background-color: var(--card-bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: 16px; /* Aumentei o arredondamento */
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 12px var(--shadow-light); /* Sombra mais suave */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+body.dark-mode .stat-card {
+    background-color: var(--card-bg-dark);
+    border-color: var(--border-dark);
+    box-shadow: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.07);
+}
+
+.stat-icon {
+    background-image: linear-gradient(45deg, var(--accent-light), var(--accent-hover-light)); /* Adicionado gradiente */
+    color: white;
+    width: 60px; /* Aumentei o tamanho */
+    height: 60px;
+    border-radius: 18px; /* Mais arredondado */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
+}
+
+.stat-icon i {
+    width: 28px; /* Ícone maior */
+    height: 28px;
+}
+
+.stat-title {
+    font-size: 1rem; /* Aumentei o tamanho */
+    font-weight: 500; /* Adicionei peso */
+    color: var(--text-secondary-light);
+    margin-bottom: 0.35rem;
+}
+
+body.dark-mode .stat-title {
+    color: var(--text-secondary-dark);
+}
+
+.stat-value {
+    font-size: 2.25rem; /* Aumentei o tamanho */
+    font-weight: 700;
+    color: var(--text-primary-light);
+    line-height: 1.1;
+}
+
+body.dark-mode .stat-value {
+    color: var(--text-primary-dark);
+}
+
+.chart-container {
+    background-color: var(--card-bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+body.dark-mode .chart-container {
+    background-color: var(--card-bg-dark);
+    border-color: var(--border-dark);
+    box-shadow: none;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem; /* Aumentei a margem */
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.chart-title {
+    font-size: 1.5rem; /* Aumentei o tamanho */
+    font-weight: 600;
+}
+
+/* --- MELHORIAS NOS BOTÕES --- */
+.chart-filters {
+    display: flex;
+    gap: 0.5rem;
+    background-color: #e9e9eb;
+    padding: 0.35rem;
+    border-radius: 999px; /* Estilo "pill" */
+    border: 1px solid var(--border-light);
+}
+
+body.dark-mode .chart-filters {
+    background-color: #2a2a2c;
+    border-color: #444;
+}
+
+.chart-filter-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    background-color: transparent;
+    border-radius: 999px; /* Botões arredondados */
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-secondary-light);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transição mais suave */
+}
+
+body.dark-mode .chart-filter-btn {
+    color: var(--text-secondary-dark);
+}
+
+.chart-filter-btn:hover:not(.active) {
+    color: var(--text-primary-light);
+    transform: translateY(-2px); /* Efeito de elevação */
+}
+
+body.dark-mode .chart-filter-btn:hover:not(.active) {
+    color: var(--text-primary-dark);
+}
+
+.chart-filter-btn.active {
+    background-color: var(--card-bg-light);
+    color: var(--accent-light);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.08);
+    transform: scale(1.05); /* Efeito de destaque */
+}
+
+body.dark-mode .chart-filter-btn.active {
+    background-color: #48484a;
+    color: var(--text-primary-dark);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* ATUALIZAÇÃO: Novo estilo para o container do canvas */
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+}
