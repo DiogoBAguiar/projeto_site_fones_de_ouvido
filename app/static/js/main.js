@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaCarrinho = document.getElementById('lista-carrinho');
     const carrinhoTotalValor = document.getElementById('carrinho-total-valor');
     const contadorCarrinho = document.getElementById('contador-carrinho');
+    const btnCheckout = document.getElementById('btn-checkout');
     
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
@@ -127,6 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (overlay) overlay.addEventListener('click', () => {
         if (carrinhoLateral.classList.contains('ativo')) toggleCarrinho('close');
     });
+    
+    if (btnCheckout) {
+        btnCheckout.addEventListener('click', () => {
+            window.location.href = '/checkout';
+        });
+    }
 
     renderizarCarrinho();
 

@@ -43,6 +43,13 @@ def products_details(product_id):
     flash("Produto não encontrado.", "danger")
     return redirect(url_for('public.products'))
 
+@public_bp.route('/checkout')
+@login_required
+def checkout():
+    """Renderiza a página de finalização de compra."""
+    return render_template('public/checkout.html')
+
+
 @public_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """Lida com o login do usuário."""

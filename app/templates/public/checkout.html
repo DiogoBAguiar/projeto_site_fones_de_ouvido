@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra - Decibell</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout/checkout.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="tema-claro">
+    <header class="cabecalho">
+        <div class="cabecalho-conteiner">
+            <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
+            <div class="nav-utilidades">
+                <div class="perfil-container">
+                    {% if current_user.is_authenticated %}
+                        <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
+                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
+                        </button>
+                    {% endif %}
+                    <div id="dropdown-perfil" class="dropdown-perfil">
+                        <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
+                        <button id="alternar-tema-dropdown">Configurações do Sistema</button>
+                        <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="checkout-container">
+        <div class="checkout-layout">
+            <!-- Coluna da direita: Formulários -->
+            <div class="form-column">
+                <h2>Informações de Entrega</h2>
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="name">Nome Completo</label>
+                        <input type="text" id="name" value="{{ current_user.username }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" value="{{ current_user.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Endereço</label>
+                        <input type="text" id="address" placeholder="Rua, Número, Bairro" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">Cidade</label>
+                            <input type="text" id="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">Estado</label>
+                            <input type="text" id="state" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="zip">CEP</label>
+                            <input type="text" id="zip" required>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Opções de Envio</h2>
+                    <div class="shipping-options">
+                        <label class="shipping-option">
+                            <input type="radio" name="shipping" value="15" checked>
+                            <div class="shipping-details">
+                                <span>Envio Normal (7-10 dias)</span>
+                                <span>R$ 15,00</span>
+                            </div>
+                        </label>
+                        <label class="shipping-option">
+                            <input type="radio" name="shipping" value="30">
+                            <div class="shipping-details">
+                                <span>Envio Expresso (2-4 dias)</span>
+                                <span>R$ 30,00</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <h2 class="section-title">Pagamento</h2>
+                    <div class="payment-tabs">
+                        <button class="tab-link active" data-tab="credit-card">Cartão de Crédito</button>
+                        <button class="tab-link" data-tab="pix">Pix</button>
+                    </div>
+
+                    <div id="credit-card-pane" class="tab-pane active">
+                        <p class="payment-warning">Esta é uma simulação. Não insira dados reais.</p>
+                        <div class="form-group">
+                            <label for="card-number">Número do Cartão</label>
+                            <input type="text" id="card-number" placeholder="0000 0000 0000 0000" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiry-date">Validade</label>
+                                <input type="text" id="expiry-date" placeholder="MM/AA" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvc">CVC</label>
+                                <input type="text" id="cvc" placeholder="123" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="pix-pane" class="tab-pane">
+                        <div class="pix-info">
+                            <img src="https://placehold.co/200x200/ffffff/000000?text=QR+Code+PIX" alt="QR Code para pagamento via Pix">
+                            <p>Escaneie o QR Code ou use o código abaixo para pagar com Pix.</p>
+                            <div class="pix-code">
+                                <span>00020126...</span>
+                                <button type="button" id="copy-pix-btn"><i class="far fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Coluna da esquerda: Resumo do Pedido -->
+            <div class="summary-column">
+                <h2>Resumo do Pedido</h2>
+                <div id="summary-items">
+                    <!-- Itens do carrinho serão inseridos aqui pelo JS -->
+                </div>
+                <div class="coupon-section">
+                    <input type="text" id="coupon-input" placeholder="Código do cupom">
+                    <button id="apply-coupon-btn">Aplicar</button>
+                </div>
+                <div class="summary-total">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal">R$ 0,00</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Frete</span>
+                        <span id="summary-shipping">R$ 15,00</span>
+                    </div>
+                    <div class="total-row" id="discount-row" style="display: none;">
+                        <span>Desconto</span>
+                        <span id="summary-discount">- R$ 0,00</span>
+                    </div>
+                    <div class="total-row final-total">
+                        <span>Total</span>
+                        <span id="summary-final-total">R$ 15,00</span>
+                    </div>
+                </div>
+                <button id="confirm-order-btn" class="btn-confirm">Confirmar Pedido</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Sucesso -->
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h2>Pedido Confirmado!</h2>
+            <p>Obrigado por comprar na Decibell. Você será redirecionado para a página inicial.</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+</body>
+</html>

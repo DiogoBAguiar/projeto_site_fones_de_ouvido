@@ -1,0 +1,78 @@
+/* --- Estilos da Página de Checkout --- */
+.checkout-container {
+    max-width: 1200px;
+    margin: 100px auto 4rem auto;
+    padding: 0 2rem;
+}
+
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+}
+
+/* --- Coluna de Formulários --- */
+.form-column h2, .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--primaria-claro);
+}
+.section-title { margin-top: 2rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-group input { width: 100%; padding: 0.75rem; border: 1px solid var(--borda-claro); border-radius: 8px; font-size: 1rem; }
+.form-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; }
+.payment-warning { font-size: 0.9rem; color: #e74c3c; margin-bottom: 1rem; }
+
+/* --- Opções de Envio --- */
+.shipping-options { display: flex; flex-direction: column; gap: 1rem; }
+.shipping-option { border: 1px solid var(--borda-claro); border-radius: 8px; padding: 1rem; display: flex; align-items: center; cursor: pointer; }
+.shipping-option input { margin-right: 1rem; }
+.shipping-details { display: flex; justify-content: space-between; width: 100%; }
+
+/* --- Abas de Pagamento --- */
+.payment-tabs { display: flex; border-bottom: 1px solid var(--borda-claro); margin-bottom: 1.5rem; }
+.tab-link { background: none; border: none; padding: 0.75rem 1rem; cursor: pointer; font-size: 1rem; color: var(--secundaria-claro); border-bottom: 3px solid transparent; }
+.tab-link.active { color: var(--primaria-claro); border-bottom-color: var(--primaria-claro); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* --- Pagamento com Pix --- */
+.pix-info { text-align: center; padding: 1rem; }
+.pix-info img { margin: 1rem auto; display: block; }
+.pix-code { display: flex; justify-content: center; align-items: center; background-color: var(--fundo-claro); padding: 0.5rem; border-radius: 8px; margin-top: 1rem; }
+.pix-code span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#copy-pix-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: 0.5rem; }
+
+/* --- Coluna de Resumo do Pedido --- */
+.summary-column { background-color: var(--card-claro); padding: 2rem; border-radius: 12px; border: 1px solid var(--borda-claro); height: fit-content; position: sticky; top: 100px; }
+.summary-column h2 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primaria-claro); border-bottom: 1px solid var(--borda-claro); padding-bottom: 1rem; }
+.summary-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.summary-item-info { display: flex; align-items: center; gap: 1rem; }
+.summary-item-info img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+.summary-item-name { font-weight: 500; }
+.summary-item-qty { color: var(--secundaria-claro); font-size: 0.9rem; }
+.summary-item-price { font-weight: 500; }
+
+/* --- Seção de Cupom --- */
+.coupon-section { display: flex; gap: 0.5rem; margin: 1.5rem 0; }
+#coupon-input { flex-grow: 1; padding: 0.75rem; border: 1px solid var(--borda-claro); border-radius: 8px; }
+#apply-coupon-btn { padding: 0.75rem 1rem; border: none; background-color: var(--secundaria-claro); color: #fff; border-radius: 8px; cursor: pointer; }
+
+.summary-total { border-top: 1px solid var(--borda-claro); padding-top: 1.5rem; margin-top: 1.5rem; }
+.total-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+#discount-row { color: #2ecc71; }
+.total-row.final-total { font-size: 1.2rem; font-weight: 600; margin-top: 1rem; }
+.btn-confirm { width: 100%; padding: 1rem; margin-top: 2rem; background-color: var(--primaria-claro); color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s; }
+.btn-confirm:hover { background-color: var(--secundaria-claro); }
+
+/* --- Modal de Sucesso --- */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-content { background-color: var(--card-claro); padding: 3rem; border-radius: 12px; text-align: center; }
+.success-icon { font-size: 4rem; color: #2ecc71; margin-bottom: 1rem; }
+
+/* --- Responsividade --- */
+@media (max-width: 900px) {
+    .checkout-layout { grid-template-columns: 1fr; }
+    .summary-column { grid-row: 1; position: static; }
+}
