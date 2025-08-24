@@ -136,7 +136,7 @@ def get_all_products():
                 'brand': p.brand,
                 'price': p.price,
                 'status': p.status,
-                'images': json.loads(full_product_dict.get('images', '[]')),
+                'images': p.images,
                 'description': p.description,
                 'type': product_type,
                 'filter_names': filter_names
@@ -154,7 +154,22 @@ def get_featured_products():
     try:
         all_products = data_manager.get_products()
         featured_products = [p for p in all_products if p.status == 'Em destaque']
-        return jsonify([p.to_dict(simplify=False) for p in featured_products[:4]])
+        
+        products_list = []
+        for p in featured_products[:4]:
+            # Constrói o dicionário manualmente para garantir que 'images' seja uma lista
+            product_dict = {
+                'id': p.id,
+                'name': p.name,
+                'brand': p.brand,
+                'price': p.price,
+                'status': p.status,
+                'images': p.images,  # Garante que seja uma lista para o JSON
+                'description': p.description,
+            }
+            products_list.append(product_dict)
+            
+        return jsonify(products_list)
     except Exception as e:
         print(f"Erro na API get_featured_products: {e}")
         return jsonify({"error": "Não foi possível carregar os produtos em destaque."}), 500

@@ -3,8 +3,8 @@
 
 import os
 import json
+import shutil
 from functools import wraps
-from datetime import datetime, timedelta
 from flask import (
     Blueprint, request, jsonify, render_template, redirect, url_for, flash, current_app
 )
@@ -80,17 +80,40 @@ def create_product():
     try:
         product_data = json.loads(request.form.get('product_data'))
         images = request.files.getlist('images')
+
+        # Passo 1: Cria o produto sem imagens para obter um ID
+        new_product = Product(
+            id=None, 
+            name=product_data['name'], 
+            brand=product_data['brand'], 
+            price=float(product_data['price']), 
+            status=product_data['status'], 
+            description=product_data['description'], 
+            images=[], 
+            specs="", 
+            seller_id=current_user.id, 
+            filters=product_data.get('filters', [])
+        )
+        saved_product = data_manager.save_product(new_product)
+        product_id = saved_product.id
+
+        # Passo 2: Processa e salva as imagens na pasta com o ID do produto
         image_paths = []
         if images:
-            product_name_sanitized = secure_filename(product_data['name'])
+            product_upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(product_id))
+            os.makedirs(product_upload_folder, exist_ok=True)
+            
             for image in images:
-                filename = f"{product_name_sanitized}_{secure_filename(image.filename)}"
-                save_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                filename = secure_filename(image.filename)
+                save_path = os.path.join(product_upload_folder, filename)
                 image.save(save_path)
-                image_paths.append(f"/static/uploads/{filename}")
-        new_product = Product(id=None, name=product_data['name'], brand=product_data['brand'], price=float(product_data['price']), status=product_data['status'], description=product_data['description'], images=image_paths, specs="", seller_id=current_user.id, filters=product_data.get('filters', []))
-        data_manager.save_product(new_product)
-        return jsonify({"message": "Produto criado com sucesso!", "product": new_product.to_dict()}), 201
+                image_paths.append(f"/static/uploads/{product_id}/{filename}")
+        
+        # Passo 3: Atualiza o produto com os caminhos das imagens e salva novamente
+        saved_product.images = image_paths
+        data_manager.save_product(saved_product)
+
+        return jsonify({"message": "Produto criado com sucesso!", "product": saved_product.to_dict()}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -101,23 +124,31 @@ def update_product(product_id):
         product = data_manager.get_product_by_id(product_id)
         if not product:
             return jsonify({"error": "Produto não encontrado"}), 404
+        
         product_data = json.loads(request.form.get('product_data'))
         images = request.files.getlist('images')
+
         product.name = product_data['name']
         product.brand = product_data['brand']
         product.price = float(product_data['price'])
         product.status = product_data['status']
         product.description = product_data['description']
         product.filters = product_data.get('filters', [])
+
         if images:
+            product_upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(product_id))
+            if os.path.exists(product_upload_folder):
+                shutil.rmtree(product_upload_folder) # Remove a pasta antiga de imagens
+            os.makedirs(product_upload_folder, exist_ok=True)
+            
             image_paths = []
-            product_name_sanitized = secure_filename(product_data['name'])
             for image in images:
-                filename = f"{product_name_sanitized}_{secure_filename(image.filename)}"
-                save_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                filename = secure_filename(image.filename)
+                save_path = os.path.join(product_upload_folder, filename)
                 image.save(save_path)
-                image_paths.append(f"/static/uploads/{filename}")
+                image_paths.append(f"/static/uploads/{product_id}/{filename}")
             product.images = image_paths
+        
         data_manager.save_product(product)
         return jsonify({"message": "Produto atualizado com sucesso!", "product": product.to_dict()})
     except Exception as e:
@@ -127,6 +158,9 @@ def update_product(product_id):
 @admin_required
 def delete_product(product_id):
     if data_manager.delete_product(product_id):
+        product_upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(product_id))
+        if os.path.exists(product_upload_folder):
+            shutil.rmtree(product_upload_folder) # Remove a pasta de imagens do produto
         return jsonify({"message": "Produto deletado com sucesso!"}), 204
     return jsonify({"error": "Produto não encontrado"}), 404
 
@@ -160,16 +194,11 @@ def delete_filter(filter_id):
 def get_stats():
     """API: Fornece dados calculados para a aba de estatísticas."""
     try:
-        period = request.args.get('period', 'day') # Pega o período da URL, padrão 'day'
-        
-        # Calcula totais que não mudam com o período
+        period = request.args.get('period', 'day')
         total_users = len(data_manager.get_users())
         total_products = len(data_manager.get_products())
         total_visits = data_manager.get_visits_count('12m')
-
-        # Busca visitas agrupadas pelo período solicitado
         visits_data = data_manager.get_visits_per_period(period)
-
         stats = {
             "total_users": total_users,
             "total_products": total_products,

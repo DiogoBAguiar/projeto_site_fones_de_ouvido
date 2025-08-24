@@ -51,7 +51,7 @@ def _write_csv(filepath, data, fieldnames):
     except Exception as e:
         print(f"Erro CRÍTICO ao escrever no arquivo CSV {filepath}: {e}")
 
-def _get_next_id(filepath):
+def get_next_id(filepath):
     """Calcula o próximo ID disponível para um novo registro."""
     data = _read_csv(filepath)
     if not data: return 1
@@ -115,24 +115,31 @@ def save_user(user):
             user_found = True
             break
     if not user_found:
-        user.id = _get_next_id(USERS_CSV)
+        user.id = get_next_id(USERS_CSV)
         users_data.append(user.to_dict())
     _write_csv(USERS_CSV, users_data, USERS_FIELDNAMES)
 
 def save_product(product):
-    """Salva um novo produto ou atualiza um existente."""
+    """Salva um novo produto ou atualiza um existente. Retorna o produto salvo."""
     products_data = _read_csv(PRODUCTS_CSV)
-    product_dict = product.to_dict()
     product_found = False
-    for i, p in enumerate(products_data):
-        if str(p.get('id')) == str(product.id):
-            products_data[i] = product_dict
-            product_found = True
-            break
+
+    # Se é uma atualização
+    if product.id is not None:
+        for i, p in enumerate(products_data):
+            if str(p.get('id')) == str(product.id):
+                products_data[i] = product.to_dict()
+                product_found = True
+                break
+    
+    # Se é um novo produto
     if not product_found:
-        product.id = _get_next_id(PRODUCTS_CSV)
+        if product.id is None: # Garante que é novo
+            product.id = get_next_id(PRODUCTS_CSV)
         products_data.append(product.to_dict())
+
     _write_csv(PRODUCTS_CSV, products_data, PRODUCTS_FIELDNAMES)
+    return product # Retorna o produto com o ID atribuído
     
 def delete_product(product_id):
     """Deleta um produto pelo ID."""
@@ -147,7 +154,7 @@ def delete_product(product_id):
 def save_filter(filter_obj):
     """Salva um novo filtro."""
     filters_data = _read_csv(FILTERS_CSV)
-    filter_obj.id = _get_next_id(FILTERS_CSV)
+    filter_obj.id = get_next_id(FILTERS_CSV)
     filters_data.append(filter_obj.to_dict())
     _write_csv(FILTERS_CSV, filters_data, FILTERS_FIELDNAMES)
 

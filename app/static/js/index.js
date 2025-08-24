@@ -1,7 +1,3 @@
-// index.js
-// Este script lida com a lógica principal da página inicial.
-// Refatorado para usar APIs e modularizar a lógica.
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Lógica de Alternância de Tema (Claro/Escuro) ---
@@ -124,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
             carrinho.push({ ...produto, quantidade: 1 });
         }
         renderizarCarrinho();
-        // Exibe uma mensagem de feedback
         exibirMensagem(`"${produto.name}" adicionado ao carrinho!`, 'success');
     }
 
@@ -186,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.perfil-container') && dropdownPerfil.classList.contains('ativo')) {
+        if (dropdownPerfil && !e.target.closest('.perfil-container') && dropdownPerfil.classList.contains('ativo')) {
             dropdownPerfil.classList.remove('ativo');
         }
     });
@@ -200,34 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (e) => {
         if (e.target === modalLogin) {
             modalLogin.style.display = 'none';
-        }
-    });
-
-    // --- Lógica do Modal de Produto ---
-    const modalProduto = document.getElementById('modal-produto');
-    const fecharModal = document.querySelector('.fechar-modal');
-    const modalImagem = document.querySelector('.modal-imagem');
-    const modalNome = document.querySelector('.modal-nome-produto');
-    const modalDescricao = document.querySelector('.modal-descricao-produto');
-    const modalPreco = document.querySelector('.modal-preco-produto');
-    const botaoAddCarrinhoModal = document.querySelector('.botao-add-carrinho-modal');
-    
-    let produtoSelecionado = null;
-
-    fecharModal.addEventListener('click', () => {
-        modalProduto.style.display = 'none';
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target === modalProduto) {
-            modalProduto.style.display = 'none';
-        }
-    });
-
-    botaoAddCarrinhoModal.addEventListener('click', () => {
-        if (produtoSelecionado) {
-            adicionarAoCarrinho(produtoSelecionado);
-            modalProduto.style.display = 'none';
         }
     });
 
@@ -255,119 +222,88 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================================================
     
     const destaqueContainer = document.querySelector('.produtos-destaque-container');
-    const gradeProdutos = destaqueContainer.querySelector('.grade-produtos');
-    const prevBtn = destaqueContainer.querySelector('.slider-btn.prev');
-    const nextBtn = destaqueContainer.querySelector('.slider-btn.next');
-    const API_FEATURED_URL = window.location.origin + "/api/products/featured";
+    if (destaqueContainer) {
+        const gradeProdutos = destaqueContainer.querySelector('.grade-produtos');
+        const prevBtn = destaqueContainer.querySelector('.slider-btn.prev');
+        const nextBtn = destaqueContainer.querySelector('.slider-btn.next');
+        const API_FEATURED_URL = window.location.origin + "/api/products/featured";
 
-    function setupSlider() {
-        const scrollWidth = gradeProdutos.scrollWidth;
-        const clientWidth = gradeProdutos.clientWidth;
+        function setupSlider() {
+            if (!gradeProdutos.querySelector('.cartao-produto')) return;
+            const scrollWidth = gradeProdutos.scrollWidth;
+            const clientWidth = gradeProdutos.clientWidth;
 
-        if (scrollWidth > clientWidth) {
-            prevBtn.style.display = 'flex';
-            nextBtn.style.display = 'flex';
-        } else {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-        }
-    }
-
-    prevBtn.addEventListener('click', () => {
-        const cardWidth = gradeProdutos.querySelector('.cartao-produto').offsetWidth;
-        gradeProdutos.scrollLeft -= (cardWidth + 32); // 32px é o gap
-    });
-
-    nextBtn.addEventListener('click', () => {
-        const cardWidth = gradeProdutos.querySelector('.cartao-produto').offsetWidth;
-        gradeProdutos.scrollLeft += (cardWidth + 32); // 32px é o gap
-    });
-
-    function renderFeaturedProducts(produtos) {
-        gradeProdutos.innerHTML = '';
-        if (produtos.length === 0) {
-            gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Nenhum produto em destaque encontrado.</p>';
-            return;
+            if (scrollWidth > clientWidth) {
+                prevBtn.style.display = 'flex';
+                nextBtn.style.display = 'flex';
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            }
         }
 
-        produtos.forEach(produto => {
-            const card = document.createElement('div');
-            card.classList.add('cartao-produto');
-            card.setAttribute('data-produto-id', produto.id);
-            card.innerHTML = `
-                <img src="${produto.images.length > 0 ? produto.images[0] : 'https://placehold.co/600x400/1a1a1a/FFFFFF?text=Sem+Imagem'}" alt="${produto.name}" class="imagem-produto">
-                <div class="info-produto">
-                    <h3 class="nome-produto">${produto.name}</h3>
-                    <p class="descricao-produto">${produto.description || 'Sem descrição.'}</p>
-                    <p class="preco-produto" data-preco="${produto.price}">R$ ${produto.price.toFixed(2).replace('.', ',')}</p>
-                    <button class="botao-add-carrinho" aria-label="Adicionar ${produto.name} ao carrinho" data-produto-id="${produto.id}">
-                        Adicionar ao Carrinho
-                    </button>
-                </div>
-            `;
-            gradeProdutos.appendChild(card);
-            
-            card.querySelector('.botao-add-carrinho').addEventListener('click', (e) => {
-                const produtoParaCarrinho = {
-                    id: produto.id,
-                    nome: produto.name,
-                    preco: produto.price,
-                    imagem: produto.images.length > 0 ? produto.images[0] : 'https://placehold.co/100',
-                };
-                adicionarAoCarrinho(produtoParaCarrinho);
-            });
-            
-            card.addEventListener('click', (e) => {
-                if (e.target.classList.contains('botao-add-carrinho')) {
-                    return;
-                }
-                
-                produtoSelecionado = {
-                    id: produto.id,
-                    nome: produto.name,
-                    descricao: produto.description,
-                    preco: produto.price,
-                    imagem: produto.images.length > 0 ? produto.images[0] : 'https://placehold.co/600x400/1a1a1a/FFFFFF?text=Sem+Imagem',
-                };
-    
-                modalImagem.src = produtoSelecionado.imagem;
-                modalNome.textContent = produtoSelecionado.nome;
-                modalDescricao.textContent = produtoSelecionado.descricao;
-                modalPreco.textContent = produtoSelecionado.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                
-                modalProduto.style.display = 'block';
-            });
+        prevBtn.addEventListener('click', () => {
+            const cardWidth = gradeProdutos.querySelector('.cartao-produto').offsetWidth;
+            gradeProdutos.scrollLeft -= (cardWidth + 32); // 32px é o gap
         });
 
-        // Após renderizar, verifica se o slider é necessário
-        setupSlider();
-    }
+        nextBtn.addEventListener('click', () => {
+            const cardWidth = gradeProdutos.querySelector('.cartao-produto').offsetWidth;
+            gradeProdutos.scrollLeft += (cardWidth + 32); // 32px é o gap
+        });
 
-    async function fetchFeaturedProducts() {
-        try {
-            const response = await fetch(API_FEATURED_URL);
-            if (!response.ok) {
-                throw new Error('Erro ao buscar produtos em destaque da API.');
+        function renderFeaturedProducts(produtos) {
+            gradeProdutos.innerHTML = '';
+            if (produtos.length === 0) {
+                gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Nenhum produto em destaque encontrado.</p>';
+                return;
             }
-            const produtos = await response.json();
-            renderFeaturedProducts(produtos);
-        } catch (error) {
-            console.error("Erro ao carregar produtos em destaque:", error);
-            gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Não foi possível carregar os produtos em destaque.</p>';
-        }
-    }
-    
-    function exibirMensagem(message, type = 'info') {
-        const modalMessage = document.getElementById('modal-message');
-        if (!modalMessage) return;
-        modalMessage.textContent = message;
-        modalMessage.className = `modal-message ${type}`;
-        modalMessage.style.display = 'block';
-        setTimeout(() => {
-            modalMessage.style.display = 'none';
-        }, 3000);
-    }
 
-    fetchFeaturedProducts();
-    window.addEventListener('resize', setupSlider); // Re-checa o slider ao redimensionar a janela
+            produtos.forEach(produto => {
+                const card = document.createElement('div');
+                card.classList.add('cartao-produto');
+                card.innerHTML = `
+                    <a href="/products-details/${produto.id}">
+                        <img src="${produto.images.length > 0 ? produto.images[0] : 'https://placehold.co/300'}" alt="${produto.name}" class="imagem-produto">
+                        <div class="info-produto">
+                            <h3 class="nome-produto">${produto.name}</h3>
+                            <p class="descricao-produto">${produto.description || ''}</p>
+                            <p class="preco-produto">R$ ${produto.price.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                    </a>
+                `;
+                gradeProdutos.appendChild(card);
+            });
+
+            setupSlider();
+        }
+
+        async function fetchFeaturedProducts() {
+            try {
+                const response = await fetch(API_FEATURED_URL);
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar produtos em destaque da API.');
+                }
+                const produtos = await response.json();
+                renderFeaturedProducts(produtos);
+            } catch (error) {
+                console.error("Erro ao carregar produtos em destaque:", error);
+                gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Não foi possível carregar os produtos em destaque.</p>';
+            }
+        }
+        
+        function exibirMensagem(message, type = 'info') {
+            const modalMessage = document.getElementById('modal-message');
+            if (!modalMessage) return;
+            modalMessage.textContent = message;
+            modalMessage.className = `modal-message ${type}`;
+            modalMessage.style.display = 'block';
+            setTimeout(() => {
+                modalMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        fetchFeaturedProducts();
+        window.addEventListener('resize', setupSlider);
+    }
 });
