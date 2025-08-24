@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Ajustado o caminho para o CSS global -->
+    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/products/products.css') }}">
 </head>
@@ -44,18 +44,14 @@
 
                 <!-- Menu de Perfil do Usuário -->
                 <div class="perfil-container">
-                    <!-- O conteúdo deste botão será definido via Jinja/Flask -->
                     {% if current_user.is_authenticated %}
-                        <!-- Se o usuário estiver logado, mostra a foto de perfil -->
                         <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
                             <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
                         </button>
                     {% else %}
-                        <!-- Se o usuário não estiver logado, mostra o botão de login -->
                         <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}">Login</a>
                     {% endif %}
                     
-                    <!-- Dropdown de Perfil -->
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         {% if current_user.is_authenticated %}
                             <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
@@ -96,9 +92,7 @@
             &times;
         </button>
         <h2>Seu Carrinho</h2>
-        <ul id="lista-carrinho" class="lista-carrinho">
-            <!-- Itens do carrinho serão adicionados aqui via JS -->
-        </ul>
+        <ul id="lista-carrinho" class="lista-carrinho"></ul>
         <div class="total-carrinho">
             <span>Total:</span>
             <span id="carrinho-total-valor">R$ 0,00</span>
@@ -112,129 +106,63 @@
     <!-- Conteúdo Principal -->
     <main class="conteudo-principal">
         <div class="container">
-            <!-- Filtros -->
-            <div class="filters">
-                <a href="{{ url_for('public.home') }}" class="back-to-index">
-                    <i class="fas fa-arrow-left"></i> Voltar
-                </a>
-                <h2>Filtros</h2>
-                <h3>Preço</h3>
-                <input type="range" min="0" max="10000" value="10000" id="priceRange">
-                <div class="price-display" id="priceDisplay"></div>
-                
-                <!-- Adicionado um container para os filtros para facilitar a renderização dinâmica -->
-                <div id="filters-container">
-                    <h3>Tipos</h3>
-                    <!-- Checkboxes serão gerados por JS -->
-                    <div id="type-filters"></div>
-                    
-                    <h3>Marca</h3>
-                    <!-- Checkboxes serão gerados por JS -->
-                    <div id="brand-filters"></div>
+            <section class="products-hero">
+                <h1 class="page-title">Coleção Decibell</h1>
+                <p class="page-subtitle">Tecnologia e design em perfeita harmonia. Descubra o som que vai transformar sua experiência.</p>
+            </section>
+
+            <div class="catalog-layout">
+                <!-- Filtros -->
+                <aside class="filters">
+                    <details class="filter-section">
+                        <summary>Preço</summary>
+                        <div class="filter-content">
+                            <div class="price-filter-toggle">
+                                <input type="checkbox" id="enablePriceFilter">
+                                <label for="enablePriceFilter">Ativar filtro de preço</label>
+                            </div>
+                            <input type="range" min="0" max="10000" value="10000" id="priceRange" class="price-slider" disabled>
+                            <div class="price-display" id="priceDisplay"></div>
+                        </div>
+                    </details>
+                    <details class="filter-section" id="type-filters-section">
+                        <summary>Tipos</summary>
+                        <div class="filter-content" id="type-filters"></div>
+                    </details>
+                    <details class="filter-section" id="brand-filters-section">
+                        <summary>Marca</summary>
+                        <div class="filter-content" id="brand-filters"></div>
+                    </details>
+                    <details class="filter-section" id="color-filters-section">
+                        <summary>Cor</summary>
+                        <div class="filter-content" id="color-filters"></div>
+                    </details>
+                    <details class="filter-section" id="connectivity-filters-section">
+                        <summary>Conectividade</summary>
+                        <div class="filter-content" id="connectivity-filters"></div>
+                    </details>
+                </aside>
+    
+                <div class="products-list-container">
+                    <div class="products" id="productList">
+                        <!-- Produtos serão gerados aqui via JS -->
+                    </div>
+                    <div class="pagination" id="pagination">
+                        <!-- Paginação será gerada aqui via JS -->
+                    </div>
                 </div>
             </div>
-
-            <div class="products-list-container">
-                <h1 class="page-title">Todos os Produtos</h1>
-                <div class="products" id="productList">
-                    <!-- Produtos serão gerados aqui via JS -->
-                </div>
-            </div>
-        </div>
-
-        <div class="pagination" id="pagination">
-            <!-- Paginação será gerada aqui via JS -->
         </div>
     </main>
 
     <!-- Rodapé -->
     <footer class="rodape">
         <div class="conteiner">
-            <div class="rodape-conteiner">
-                <div class="rodape-coluna">
-                    <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
-                    <p>A mais alta fidelidade sonora para seus ouvidos.</p>
-                    <div class="rodape-redes-sociais">
-                        <a href="#" aria-label="Siga-nos no Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="Siga-nos no Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="Siga-nos no Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Inscreva-se no Youtube"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                <div class="rodape-coluna">
-                    <h3>Navegação</h3>
-                    <ul>
-                        <li><a href="{{ url_for('public.products') }}">Produtos</a></li>
-                        <li><a href="#tipos-fones">Estilos</a></li>
-                        <li><a href="#sobre">Sobre</a></li>
-                        <li><a href="#depoimentos">Depoimentos</a></li>
-                    </ul>
-                </div>
-                <div class="rodape-coluna">
-                    <h3>Ajuda e Suporte</h3>
-                    <ul>
-                        <li><a href="#faq">FAQ</a></li>
-                        <li><a href="#">Contato</a></li>
-                        <li><a href="#">Termos de Uso</a></li>
-                        <li><a href="#">Política de Privacidade</a></li>
-                    </ul>
-                </div>
-                <div class="rodape-coluna">
-                    <h3>Newsletter</h3>
-                    <p>Receba ofertas e novidades por e-mail.</p>
-                    <form action="#" class="form-newsletter">
-                        <input type="email" placeholder="Seu e-mail" required>
-                        <button type="submit">Assinar</button>
-                    </form>
-                </div>
-            </div>
             <p class="rodape-copyright">&copy; 2025 Decibell. Todos os direitos reservados.</p>
         </div>
     </footer>
     
-    <!-- Modal de Produto -->
-    <div id="modal-produto" class="modal">
-        <div class="conteudo-modal">
-            <span class="fechar-modal" aria-label="Fechar">&times;</span>
-            <img src="" alt="" class="modal-imagem">
-            <div class="modal-detalhes">
-                <h3 class="modal-nome-produto"></h3>
-                <p class="modal-descricao-produto"></p>
-                <p class="modal-preco-produto"></p>
-                <button class="botao-add-carrinho-modal">Adicionar ao Carrinho</button>
-            </div>
-        </div>
-    </div>    
-    <!-- Modal de Login -->
-    <div id="modal-login" class="modal">
-        <div class="conteudo-modal-login">
-            <span class="fechar-modal-login">&times;</span>
-            <div class="header-modal">
-                <h2>Entrar na Decibell</h2>
-            </div>
-            <form id="form-login" class="form-login" action="{{ url_for('public.login') }}" method="post">
-                <div class="input-grupo">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="input-grupo">
-                    <label for="senha">Senha</label>
-                    <input type="password" id="senha" name="senha" required>
-                </div>
-                <button type="submit" class="btn-login-modal">Entrar</button>
-                <p class="link-recuperar-senha"><a href="#">Esqueceu a senha?</a></p>
-                <hr>
-                <button type="button" class="btn-login-google">
-                    <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo">
-                    Entrar com o Google
-                </button>
-            </form>
-            <div class="footer-modal">
-                <p>Ainda não tem uma conta? <a href="{{ url_for('public.register') }}">Cadastre-se</a></p>
-            </div>
-        </div>
-    </div>
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/products.js') }}"></script>
 </body>
 </html>

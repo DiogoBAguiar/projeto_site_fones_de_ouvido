@@ -1,13 +1,35 @@
 /* Seção de Destaque (Hero) */
 .secao-destaque {
-    background-image: var(--gradiente-escuro);
     color: #ffffff;
-    height: 100vh;
+    height: 100vh;    
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    position: relative; /* Necessário para o posicionamento do canvas */
+    overflow: hidden; /* Garante que o canvas não transborde */
+    background-color: #1a1a1a; /* Cor de fundo para o modo escuro */
+
+}
+
+/* Canvas para a animação de fundo */
+#hero-animation-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Fica atrás do conteúdo */
+}
+
+/* Conteúdo da seção de destaque */
+.destaque-content {
+    position: relative;
+    z-index: 2; /* Fica na frente do canvas */
+    padding: 2rem;
+    background-color: rgba(0, 0, 0, 0.3); /* Fundo semi-transparente para legibilidade */
+    border-radius: 12px;
 }
 
 .titulo-destaque {

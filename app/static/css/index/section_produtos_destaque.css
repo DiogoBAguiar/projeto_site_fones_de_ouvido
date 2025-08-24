@@ -1,11 +1,28 @@
-/* Seção de Produtos em Destaque */
+
+.produtos-destaque-container {
+    position: relative;
+    max-width: 1200px; /* Limita a largura do carrossel */
+    margin: 0px auto;
+    padding: 5px 50px; /* Espaço para os botões */
+}
+
 .grade-produtos {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex; /* Alterado de grid para flex */
     gap: 2rem;
+    overflow-x: auto; /* Permite a rolagem horizontal */
+    scroll-behavior: smooth;
+    padding-bottom: 1rem; /* Espaço para a barra de rolagem não sobrepor a sombra */
+    /* Esconde a barra de rolagem */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.grade-produtos::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
 }
 
 .cartao-produto {
+    flex: 0 0 300px; /* Define um tamanho fixo para os cards */
     background-color: var(--card-claro);
     border-radius: 12px;
     overflow: hidden;
@@ -13,15 +30,14 @@
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.cartao-produto:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 8px 15px var(--sombra-claro);
-}
+
 
 .imagem-produto {
-    width: 100%;
+    width: 93%;
     height: 200px;
     object-fit: cover;
+    margin: 10px;
+    border-radius: 10px;
 }
 
 .info-produto {
@@ -36,6 +52,13 @@
 .descricao-produto {
     color: var(--secundaria-claro);
     margin-bottom: 1rem;
+    /* Limita o texto da descrição para evitar que o card cresça muito */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.5em; /* Garante altura mínima para 2 linhas */
 }
 
 .preco-produto {
@@ -48,7 +71,7 @@
 .botao-add-carrinho {
     width: 100%;
     padding: 0.75rem;
-    background: var(--primaria-claro);
+    background: var(--cor-link);
     color: #ffffff;
     border: none;
     border-radius: 50px;
@@ -59,6 +82,47 @@
 }
 
 .botao-add-carrinho:hover {
-    background-color: var(--secundaria-claro);
-    transform: scale(1.05);
+    background-color: var(--cor-link-hover);
+    transform: scale(1.01);
+}
+
+/* Estilos dos botões do slider */
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--borda-claro);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primaria-claro);
+    cursor: pointer;
+    z-index: 10;
+    display: none; /* Escondido por padrão */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.slider-btn:hover {
+    background-color: #fff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.tema-escuro .slider-btn {
+    background-color: rgba(44, 46, 48, 0.8);
+    color: var(--texto-claro);
+    border-color: var(--borda-claro);
+}
+
+.slider-btn.prev {
+    left: 10px;
+}
+
+.slider-btn.next {
+    right: 10px;
 }

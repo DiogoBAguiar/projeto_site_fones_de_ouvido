@@ -15,7 +15,7 @@
 @import url(./modal_login.css);
 /* Paleta de cores */
 :root {
-    --fundo-claro: #f0f2f5;
+    --fundo-claro: linear-gradient(to right, #e0e2e5, #f0f2f5); /* Gradiente para o tema claro */
     --texto-claro: #1a1a1a;
     --card-claro: #ffffff;
     --borda-claro: #e0e0e0;
@@ -32,7 +32,7 @@
 .tema-escuro {
     background: var(--gradiente-escuro);
     color: #ffffff;
-    --fundo-claro: #1a1a1a;
+    --fundo-claro: #1a1a1a; /* Mantido para elementos que usam cor sólida */
     --texto-claro: #f0f2f5;
     --card-claro: #2c2e30;
     --borda-claro: #3a3d40;
@@ -56,8 +56,8 @@ html {
 
 body {
     font-family: poppins, sans-serif;
-    transition: background-color 0.3s, color 0.3s;
-    background-color: var(--fundo-claro);
+    transition: background 0.3s, color 0.3s;
+    background: var(--fundo-claro); /* Alterado para 'background' para aplicar o gradiente */
     color: var(--texto-claro);
 }
 

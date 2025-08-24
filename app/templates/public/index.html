@@ -117,15 +117,19 @@
     <main class="conteudo-principal">
         <!-- Seção de Destaque (Hero) -->
         <section id="destaque" class="secao secao-destaque oculta">
-            <h1 class="titulo-destaque">
-                Decibell <br> Som em sua forma mais pura
-            </h1>
-            <p class="subtitulo-destaque">
-                Descubra a coleção de áudio que redefine a excelência.
-            </p>
-            <a href="{{ url_for('public.products') }}" class="botao-destaque">
-                Explorar Produtos
-            </a>
+            <!-- Canvas para a animação de fundo -->
+            <canvas id="hero-animation-canvas"></canvas>
+            <div class="destaque-content">
+                <h1 class="titulo-destaque">
+                    Decibell <br> Som em sua forma mais pura
+                </h1>
+                <p class="subtitulo-destaque">
+                    Descubra a coleção de áudio que redefine a excelência.
+                </p>
+                <a href="{{ url_for('public.products') }}" class="botao-destaque">
+                    Explorar Produtos
+                </a>
+            </div>
         </section>
 
         <!-- Seção de Banners -->
@@ -181,8 +185,12 @@
         <!-- Seção de Produtos em Destaque -->
         <section id="produtos-destaque" class="secao secao-produtos-destaque oculta">
             <h2 class="titulo-secao">Produtos em Destaque</h2>
-            <div class="grade-produtos">
-                <!-- Os produtos serão injetados aqui via JavaScript. -->
+            <div class="produtos-destaque-container">
+                <button class="slider-btn prev" aria-label="Anterior">&lt;</button>
+                <div class="grade-produtos">
+                    <!-- Os produtos serão injetados aqui via JavaScript. -->
+                </div>
+                <button class="slider-btn next" aria-label="Próximo">&gt;</button>
             </div>
         </section>
 
@@ -363,5 +371,6 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/hero-animation.js') }}"></script>
 </body>
 </html>

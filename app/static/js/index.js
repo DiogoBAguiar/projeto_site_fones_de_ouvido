@@ -174,35 +174,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnPerfil) {
         btnPerfil.addEventListener('click', (e) => {
-            // A lógica de autenticação é controlada pelo Jinja no HTML.
-            // O JavaScript apenas lida com o comportamento do dropdown.
             e.preventDefault();
             const isLoggedIn = btnPerfil.tagName === 'BUTTON';
             
             if (isLoggedIn) {
                 dropdownPerfil.classList.toggle('ativo');
             } else {
-                // Se não estiver logado, redireciona para a página de login
                 window.location.href = btnPerfil.href;
             }
         });
     }
 
-    // Fecha o dropdown se o usuário clicar fora
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.perfil-container') && dropdownPerfil.classList.contains('ativo')) {
             dropdownPerfil.classList.remove('ativo');
         }
     });
 
-    // Adiciona evento para fechar o modal de login
     if (fecharModalLogin) {
         fecharModalLogin.addEventListener('click', () => {
             modalLogin.style.display = 'none';
         });
     }
 
-    // Fecha o modal se o usuário clicar fora
     window.addEventListener('click', (e) => {
         if (e.target === modalLogin) {
             modalLogin.style.display = 'none';
@@ -257,16 +251,42 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarCarrinho();
     
     // ==============================================================================
-    // FUNÇÕES PARA PRODUTOS EM DESTAQUE
+    // FUNÇÕES PARA PRODUTOS EM DESTAQUE (AGORA COM SLIDER)
     // ==============================================================================
     
-    const destaqueContainer = document.querySelector('#produtos-destaque .grade-produtos');
-    const API_FEATURED_URL = window.location.origin + "/api/produtos/destaques";
+    const destaqueContainer = document.querySelector('.produtos-destaque-container');
+    const gradeProdutos = destaqueContainer.querySelector('.grade-produtos');
+    const prevBtn = destaqueContainer.querySelector('.slider-btn.prev');
+    const nextBtn = destaqueContainer.querySelector('.slider-btn.next');
+    const API_FEATURED_URL = window.location.origin + "/api/products/featured";
+
+    function setupSlider() {
+        const scrollWidth = gradeProdutos.scrollWidth;
+        const clientWidth = gradeProdutos.clientWidth;
+
+        if (scrollWidth > clientWidth) {
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
+        } else {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        }
+    }
+
+    prevBtn.addEventListener('click', () => {
+        const cardWidth = gradeProdutos.querySelector('.cartao-produto').offsetWidth;
+        gradeProdutos.scrollLeft -= (cardWidth + 32); // 32px é o gap
+    });
+
+    nextBtn.addEventListener('click', () => {
+        const cardWidth = gradeProdutos.querySelector('.cartao-produto').offsetWidth;
+        gradeProdutos.scrollLeft += (cardWidth + 32); // 32px é o gap
+    });
 
     function renderFeaturedProducts(produtos) {
-        destaqueContainer.innerHTML = '';
+        gradeProdutos.innerHTML = '';
         if (produtos.length === 0) {
-            destaqueContainer.innerHTML = '<p class="text-center text-gray-500">Nenhum produto em destaque encontrado.</p>';
+            gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Nenhum produto em destaque encontrado.</p>';
             return;
         }
 
@@ -285,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </div>
             `;
-            destaqueContainer.appendChild(card);
+            gradeProdutos.appendChild(card);
             
             card.querySelector('.botao-add-carrinho').addEventListener('click', (e) => {
                 const produtoParaCarrinho = {
@@ -318,6 +338,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalProduto.style.display = 'block';
             });
         });
+
+        // Após renderizar, verifica se o slider é necessário
+        setupSlider();
     }
 
     async function fetchFeaturedProducts() {
@@ -330,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderFeaturedProducts(produtos);
         } catch (error) {
             console.error("Erro ao carregar produtos em destaque:", error);
-            destaqueContainer.innerHTML = '<p class="text-center text-gray-500">Não foi possível carregar os produtos em destaque.</p>';
+            gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Não foi possível carregar os produtos em destaque.</p>';
         }
     }
     
@@ -346,4 +369,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchFeaturedProducts();
+    window.addEventListener('resize', setupSlider); // Re-checa o slider ao redimensionar a janela
 });

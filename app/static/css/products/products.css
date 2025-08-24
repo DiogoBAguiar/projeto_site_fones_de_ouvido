@@ -1,152 +1,187 @@
-/* --- Melhorias no Layout Principal --- */
+/* --- Layout Principal da Página de Produtos --- */
 .conteudo-principal {
-    padding: 2rem 0; /* padding horizontal zero, o .container já tem a largura máxima */
-    background-color: var(--fundo-claro);
-    color: var(--texto-claro);
-    min-height: 80vh; /* Garante que a página tenha uma altura mínima */
-    margin-top: 50px;
+    padding: 4rem 0;
+    margin-top: 65px;
 }
 
 .container {
-    display: flex;
-    gap: 30px; /* Adiciona espaçamento entre filtros e produtos */
-    max-width: 1400px; /* Limita a largura máxima do container */
-    width: 90%;
+    max-width: 1400px;
+    width: 95%;
     margin: 0 auto;
 }
 
-/* --- Melhorias nos Filtros (Sidebar) --- */
-.filters {
-    flex-basis: 300px; /* Define uma largura base fixa para os filtros */
-    flex-shrink: 0; /* Impede que os filtros encolham em telas maiores */
-    padding: 25px;
-    background-color: var(--card-claro); /* Usa a cor de fundo do card para os filtros */
-    border-radius: 12px;
-    box-shadow: 0 4px 12px var(--sombra-claro); /* Adiciona sombra para destaque */
+.products-hero {
+    text-align: center;
+    margin-bottom: 4rem;
 }
 
-.filters h2, .filters h3 {
-    border-bottom: 2px solid var(--borda-claro);
-    padding-bottom: 10px;
-    margin-top: 25px;
-    margin-bottom: 15px;
+.page-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
     color: var(--primaria-claro);
+    letter-spacing: -0.02em;
 }
 
-.filters input[type="range"] {
-    width: 100%; /* Ocupa 100% da largura do contêiner de filtros */
-    margin: 15px 0;
-}
-
-.price-display {
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 20px;
+.page-subtitle {
+    font-size: 1.25rem;
     color: var(--secundaria-claro);
+    margin-top: 0.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.filters label {
-    display: block;
-    margin: 10px 0;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.filters input[type="checkbox"] {
-    margin-right: 10px;
-}
-
-/* --- Melhorias na Lista de Produtos --- */
-.products {
-    flex-grow: 1; /* Permite que os produtos ocupem o espaço restante */
+/* --- Layout da Grade Principal (Filtros + Produtos) --- */
+.catalog-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Usa auto-fit para preencher o espaço */
-    gap: 20px; /* Espaçamento entre os cards */
-    padding: 0; /* Remove padding duplicado */
+    grid-template-columns: 280px 1fr;
+    gap: 3rem;
+    align-items: flex-start; /* Alinha os itens no topo */
 }
 
-.product {
-    background-color: var(--card-claro);
-    border-radius: 12px; /* Aumenta a borda para um visual mais moderno */
-    box-shadow: 0 4px 12px var(--sombra-claro);
-    padding: 20px;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transições mais suaves */
-    height: auto; /* Permite que a altura se ajuste ao conteúdo */
+/* --- Estilos dos Filtros (Fixo na lateral) --- */
+.filters {
+    position: sticky;
+    top: 85px; /* Altura do header (65px) + 20px de espaço */
+    height: calc(100vh - 105px); /* Altura da tela menos o espaço do topo */
+    overflow-y: auto; /* Adiciona scroll se o conteúdo dos filtros for maior que a tela */
+    padding-right: 1rem; /* Espaço para a barra de scroll não colar no conteúdo */
+}
+
+.filter-section {
+    border-bottom: 1px solid var(--borda-claro);
+    margin-bottom: 0.5rem; /* Reduz o espaçamento entre as seções */
+    position: relative; /* Necessário para o posicionamento do conteúdo */
+}
+.filter-section summary {
+    font-size: 1.1rem; /* Reduz o tamanho da fonte do título */
+    font-weight: 600;
+    padding: 0.75rem 0.5rem; /* Reduz o padding */
+    cursor: pointer;
+    list-style: none;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
+    align-items: center;
+}
+.filter-section summary::-webkit-details-marker { display: none; }
+.filter-section summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+.filter-section[open] summary::after { transform: rotate(45deg); }
+
+/* Estilo de sobreposição animado para o conteúdo do filtro */
+.filter-content { 
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--card-claro);
+    border: 1px solid var(--borda-claro);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    padding: 1rem;
+    z-index: 20;
+    /* Animação */
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
 }
 
-.product a {
+/* Mostra o conteúdo quando a seção está aberta */
+.filter-section[open] > .filter-content {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.price-filter-toggle { display: flex; align-items: center; margin-bottom: 1rem; }
+.price-filter-toggle label { cursor: pointer; }
+.price-filter-toggle input { margin-right: 0.5rem; }
+.price-slider { width: 100%; cursor: pointer; }
+.price-slider:disabled { opacity: 0.5; cursor: not-allowed; }
+.price-display { font-weight: 500; text-align: center; margin-top: 0.5rem; color: var(--secundaria-claro); }
+
+#type-filters, #brand-filters, #color-filters, #connectivity-filters { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.5rem; /* Reduz o espaçamento entre os checkboxes */
+}
+#type-filters label, #brand-filters label, #color-filters label, #connectivity-filters label { 
+    cursor: pointer; 
+    font-size: 0.95rem; /* Reduz o tamanho da fonte */
+}
+#type-filters input, #brand-filters input, #color-filters input, #connectivity-filters input { 
+    margin-right: 0.5rem; 
+}
+
+/* --- Estilos da Grade de Produtos --- */
+.products {
+    display: grid;
+    /* ATUALIZAÇÃO: 'auto-fit' e 'justify-content' para evitar que os cards se estiquem */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    justify-content: center;
+}
+
+.product-card {
+    background-color: var(--card-claro);
+    border-radius: 24px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--borda-claro);
+    max-width: 350px; /* Adiciona uma largura máxima para o card */
+}
+.product-card a {
     text-decoration: none;
     color: inherit;
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 2rem;
 }
-
-.product:hover {
-    transform: translateY(-5px); /* Efeito de elevação sutil */
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* Sombra mais intensa no hover */
+.product-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 30px var(--sombra-claro);
 }
-
-.product img {
-    width: 100%;
-    height: 200px; /* Altura fixa para as imagens */
-    object-fit: contain; /* Ajusta a imagem sem cortá-la */
-    border-radius: 8px;
-    margin-bottom: 15px;
-}
-
-.product-info {
-    flex-grow: 1; /* Permite que as informações ocupem o espaço disponível */
+.product-image-wrapper {
+    flex-grow: 1;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    margin-bottom: 1.5rem;
+    min-height: 220px;
 }
-
+.product-card img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+}
 .product-name {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--primaria-claro);
-    margin: 0 0 5px;
-}
-
-.product-price {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 700;
+    color: var(--primaria-claro);
+}
+.product-price {
+    font-size: 1.1rem;
+    color: var(--secundaria-claro);
+    margin-top: 0.25rem;
+}
+.details-link {
+    margin-top: 1rem;
     color: var(--cor-link);
-    margin: 10px 0 15px;
-}
-
-.add-to-cart {
-    margin-top: auto;
-    background-color: var(--secundaria-claro); /* Usa uma cor mais escura */
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 1rem;
-    text-transform: uppercase;
     font-weight: 600;
-}
-
-.add-to-cart:hover {
-    background-color: var(--primaria-claro);
 }
 
 /* --- Paginação --- */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin: 30px 0;
+.pagination { 
+    display: flex; 
+    justify-content: center; 
+    gap: 10px; 
+    margin-top: 4rem; 
 }
-
 .pagination button {
     background-color: var(--card-claro);
     color: var(--secundaria-claro);
@@ -156,51 +191,53 @@
     cursor: pointer;
     transition: all 0.3s ease;
 }
-
-.pagination button:hover, .pagination button.active {
-    background-color: var(--secundaria-claro);
+.pagination button:hover,
+.pagination button.active {
+    background-color: var(--primaria-claro);
     color: #fff;
-    border-color: var(--secundaria-claro);
+    border-color: var(--primaria-claro);
 }
-
-/* --- Botão "Voltar para Página principal" --- */
-.back-to-index {
-    display: inline-block;
-    padding: 12px 25px;
-    margin-bottom: 20px;
-    background: var(--gradiente-escuro); /* Usa gradiente para um visual mais sofisticado */
-    color: white;
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    transition: background 0.5s ease;
-    text-align: center;
-    font-weight: 600;
-}
-
-.back-to-index:hover {
-    background: var(--gradiente-escuro-hover); /* Efeito de hover no gradiente */
-}
-
-.back-to-index a {
-    color: inherit;
-}
-
 
 /* --- Responsividade --- */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        gap: 20px; /* Reduz o espaçamento entre os elementos */
+@media (max-width: 900px) {
+    .catalog-layout {
+        grid-template-columns: 1fr;
     }
-
     .filters {
-        flex-basis: auto; /* Permite que a largura dos filtros se ajuste */
-        width: 100%;
-        margin-right: 0;
+        position: static; /* Remove o 'sticky' em telas menores */
+        height: auto;
+        overflow-y: visible;
     }
+    .filter-content {
+        position: static; /* Remove a sobreposição em telas menores */
+        display: block;
+        box-shadow: none;
+        border: none;
+        padding: 0 0.5rem 1rem 0.5rem;
+        opacity: 1;
+        transform: none;
+        visibility: visible;
+    }
+    .filter-section[open] > .filter-content {
+        display: block;
+    }
+}
 
-    .products {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Ajusta o grid para telas menores */
-    }
+/* --- Estilização da Barra de Rolagem dos Filtros --- */
+.filters::-webkit-scrollbar {
+    width: 8px;
+}
+
+.filters::-webkit-scrollbar-track {
+    background: transparent; /* Fundo da trilha */
+}
+
+.filters::-webkit-scrollbar-thumb {
+    background-color: var(--borda-claro); /* Cor da barra */
+    border-radius: 10px;
+    border: 2px solid var(--card-claro); /* Cria um preenchimento visual */
+}
+
+.filters::-webkit-scrollbar-thumb:hover {
+    background-color: var(--secundaria-claro); /* Cor da barra ao passar o mouse */
 }

@@ -66,11 +66,11 @@ class Product:
             'price': self.price,
             'status': self.status,
             'images': self.images,
+            'description': self.description, # CORREÇÃO: Adicionado ao dicionário base
         }
         if not simplify:
             # Para salvar no CSV ou para visualizações detalhadas, serializa tudo
             data.update({
-                'description': self.description,
                 'specs': self.specs,
                 'seller_id': self.seller_id,
                 'filters': self.filters

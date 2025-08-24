@@ -90,6 +90,13 @@ def get_user_by_id(user_id):
             return User.from_dict(row)
     return None
 
+def get_product_by_id(product_id):
+    """Busca um produto pelo ID."""
+    for row in _read_csv(PRODUCTS_CSV):
+        if str(row.get('id')) == str(product_id):
+            return Product.from_dict(row)
+    return None
+
 def get_user_by_email(email):
     """Busca um usuário pelo email."""
     for row in _read_csv(USERS_CSV):

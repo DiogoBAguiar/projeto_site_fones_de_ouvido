@@ -1,6 +1,7 @@
 # app/routes/public.py
 # Lida com as rotas públicas da aplicação, como home, login e visualização de produtos.
 
+import json
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,7 +16,6 @@ public_bp = Blueprint('public', __name__)
 @public_bp.before_app_request
 def before_request():
     """Registra uma visita antes de cada requisição, exceto para rotas de API e arquivos estáticos."""
-    # Evita contar requisições para a API ou para arquivos como CSS e JS.
     if request.path.startswith('/api/') or request.path.startswith('/static/'):
         return
     data_manager.register_visit()
@@ -40,7 +40,6 @@ def products_details(product_id):
     if product:
         return render_template('public/products-details.html', product=product)
     
-    # Se o produto não for encontrado, redireciona para a lista de produtos com uma mensagem.
     flash("Produto não encontrado.", "danger")
     return redirect(url_for('public.products'))
 
@@ -57,7 +56,6 @@ def login():
 
         if user and check_password_hash(user.password_hash, password):
             login_user(user, remember=True)
-            # Redireciona para a página que o usuário tentou acessar antes do login, ou para a home.
             next_page = request.args.get('next')
             return redirect(next_page or url_for('public.home'))
         else:
@@ -82,7 +80,7 @@ def register():
 
         hashed_password = generate_password_hash(password)
         new_user = User(
-            id=None,  # O data_manager cuidará de gerar o novo ID
+            id=None,
             username=username,
             email=email,
             password_hash=hashed_password,
@@ -111,23 +109,32 @@ def get_all_products():
     """API: Retorna todos os produtos para a página de listagem."""
     try:
         products = data_manager.get_products()
-        # O frontend espera um campo 'type', que pode ser derivado dos filtros.
-        # Por simplicidade, adicionamos um valor padrão se não houver lógica de filtro.
-        all_filters = {f.id: f for f in data_manager.get_filters()}
+        all_filters_map = {f.id: f for f in data_manager.get_filters()}
         
         products_list = []
         for p in products:
-            product_dict = p.to_dict(simplify=True)
-            # Lógica para determinar o 'tipo' do produto a partir de seus filtros associados
-            # Esta é uma implementação de exemplo.
+            full_product_dict = p.to_dict(simplify=False)
+            filter_ids = json.loads(full_product_dict.get('filters', '[]'))
+            filter_names = [all_filters_map[fid].name for fid in filter_ids if fid in all_filters_map]
+            
             product_type = "Geral"
-            if p.filters:
-                for filter_id in p.filters:
-                    if filter_id in all_filters and all_filters[filter_id].type == 'type':
-                        product_type = all_filters[filter_id].name
-                        break
-            product_dict['type'] = product_type
-            products_list.append(product_dict)
+            for fid in filter_ids:
+                if fid in all_filters_map and all_filters_map[fid].type == 'type':
+                    product_type = all_filters_map[fid].name
+                    break
+
+            simplified_dict = {
+                'id': p.id,
+                'name': p.name,
+                'brand': p.brand,
+                'price': p.price,
+                'status': p.status,
+                'images': json.loads(full_product_dict.get('images', '[]')),
+                'description': p.description,
+                'type': product_type,
+                'filter_names': filter_names
+            }
+            products_list.append(simplified_dict)
             
         return jsonify(products_list)
     except Exception as e:
@@ -140,7 +147,7 @@ def get_featured_products():
     try:
         all_products = data_manager.get_products()
         featured_products = [p for p in all_products if p.status == 'Em destaque']
-        return jsonify([p.to_dict(simplify=True) for p in featured_products[:4]])
+        return jsonify([p.to_dict(simplify=False) for p in featured_products[:4]])
     except Exception as e:
         print(f"Erro na API get_featured_products: {e}")
         return jsonify({"error": "Não foi possível carregar os produtos em destaque."}), 500
