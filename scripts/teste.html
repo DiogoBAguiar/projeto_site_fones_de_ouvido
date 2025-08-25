@@ -1,380 +1,1281 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filtros de Produto Compactos</title>
+    <title>Simulação de Robô - Rio Paraíba do Norte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilos gerais do corpo e layout principal */
-        body {
+        :root {
+            --bg-color: #f0f4f8;
+            --primary-color: #4a90e2;
+            --secondary-color: #66b5ff;
+            --text-color: #333;
+            --panel-bg: #fff;
+            --panel-border: #e2e8f0;
+            --success-color: #5cb85c;
+            --warning-color: #f0ad4e;
+            --danger-color: #d9534f;
+            --line-color: #4a90e2;
+            --robot-color: #333;
+            --obstacle-color: #f0ad4e;
+            --trash-color: #d9534f;
+            --sensor-color: #5cb85c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
             font-family: 'Inter', sans-serif;
-            background-color: #e5e7eb;
-            color: #333;
-            padding: 1rem; /* p-4 */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
             display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        .dashboard {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            background-color: var(--panel-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            min-height: 0;
+        }
+
+        .main-panel {
+            flex-grow: 1;
+            position: relative;
+            background-color: #f8fafc;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
         }
 
-        .container {
+        #mapCanvas {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0.5rem;
+            background-color: #e6f7ff;
+            cursor: crosshair;
+        }
+
+        .side-panel {
+            width: 300px;
+            background-color: var(--panel-bg);
+            border-radius: 0.75rem;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem; /* gap-3 */
-            padding: 0.75rem; /* p-3 */
-            background-color: #ffffff;
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
-            width: 100%;
-            max-width: 60rem; /* max-w-5xl */
+            gap: 1rem;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
         }
-        
-        /* Estilos responsivos para telas maiores (a partir de 768px) */
-        @media (min-width: 768px) {
-            .container {
-                flex-direction: row;
-                gap: 1rem; /* md:gap-4 */
-            }
-            body {
-                padding: 2rem; /* md:p-8 */
-            }
-        }
-        
-        /* Estilos para cada coluna de filtro */
-        .filter-column {
-            flex: 1;
-            min-width: 120px;
-            position: relative;
-        }
-        
-        /* Estilos do cabeçalho de cada filtro (título e ícone) */
-        .filter-header {
-            cursor: pointer;
+
+        .controls {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .controls h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .controls button {
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .controls button#startBtn { background-color: var(--success-color); color: white; }
+        .controls button#pauseBtn { background-color: var(--warning-color); color: white; }
+        .controls button#resetBtn { background-color: var(--danger-color); color: white; }
+        .controls button#baseBtn { background-color: var(--primary-color); color: white; }
+        .controls button#clearRouteBtn { background-color: #6c757d; color: white; }
+
+        .telemetry {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .telemetry h2 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .metric-header {
+            display: flex;
             justify-content: space-between;
-            padding-bottom: 0.25rem; /* pb-1 */
-            margin-bottom: 0.25rem; /* mb-1 */
-            border-bottom: 1px solid #3b82f6; /* border-b border-blue-500 */
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
-        
-        .filter-header h3 {
-            font-weight: bold;
-            font-size: 0.875rem; /* text-sm */
-            color: #1f2937; /* text-gray-800 */
+
+        .progress-bar {
+            height: 0.75rem;
+            background-color: var(--panel-border);
+            border-radius: 0.25rem;
+            overflow: hidden;
         }
-        
-        .chevron {
-            font-size: 1rem; /* text-base */
-            color: #6b7280; /* text-gray-500 */
-            transition: transform 0.2s ease-out;
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 0.25rem;
+            transition: width 0.3s ease-in-out;
         }
-        
-        .chevron.rotate {
-            transform: rotate(180deg);
+
+        #batteryFill { background-color: var(--success-color); }
+        #trashFill { background-color: var(--warning-color); }
+
+        #robotStatus {
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.5rem 0;
         }
-        
-        /* Estilos para o menu flutuante (dropdown) */
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-5px);
-            transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
-            background-color: #ffffff;
-            border-radius: 0.375rem; /* rounded-md */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-            padding: 0.5rem; /* p-2 */
-            margin-top: 0.25rem; /* mt-1 */
-        }
-        
-        .dropdown-menu.open {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-        /* Estilos para as opções de checkbox dentro do menu */
-        .options-list {
+
+        .log-panel {
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem; /* space-y-2 */
-            font-size: 0.875rem; /* text-sm */
-        }
-        
-        .option-item {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .option-item label {
-            margin-left: 0.375rem; /* ml-1.5 */
-            color: #4b5563; /* text-gray-700 */
-            transition: color 0.2s duration-200;
+            gap: 0.5rem;
+            overflow-y: auto;
+            border: 1px solid var(--panel-border);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            background-color: #f8fafc;
+            min-height: 100px;
         }
 
-        .option-item:hover label {
-            color: #3b82f6; /* group-hover:text-blue-600 */
+        .log-entry {
+            line-height: 1.4;
         }
 
-        /* Estilos para o checkbox real (oculto) e a sua estilização */
-        .option-item input[type="checkbox"] {
+        .log-entry.info { color: #4a90e2; }
+        .log-entry.success { color: #5cb85c; }
+        .log-entry.warning { color: #f0ad4e; }
+        .log-entry.error { color: #d9534f; }
+
+        #speedSliderContainer {
+            margin-top: 0.5rem;
+        }
+
+        #speedSliderContainer label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        #speedSlider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            background: var(--panel-border);
+            outline: none;
+            border-radius: 4px;
+        }
+
+        #speedSlider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 0.75rem; /* w-3 */
-            height: 0.75rem; /* h-3 */
-            border: 1px solid #d1d5db; /* border-gray-300 */
-            background-color: #f3f4f6; /* bg-gray-100 */
-            border-radius: 0.125rem;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .option-item input[type="checkbox"]:checked {
-            background-color: #3b82f6; /* text-blue-600 */
-            border-color: #3b82f6;
-        }
-        
-        .option-item input[type="checkbox"]:checked::after {
-            content: '';
-            display: block;
-            width: 0.3rem;
-            height: 0.6rem;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-            margin-left: 1px;
-            margin-top: -3px;
-        }
-
-        /* Estilos para as caixas de cores */
-        .color-box {
             width: 16px;
             height: 16px;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        /* Estilos para a animação das caixas de cores ao serem clicadas */
-        .option-item input[type="checkbox"]:checked + label .color-box {
-            transform: scale(1.2);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-        }
-
-        /* Estilos para o botão Limpar Filtros */
-        .clear-button-container {
-            margin-top: 1rem; /* mt-4 */
-            display: flex;
-            justify-content: center;
-        }
-
-        #clear-filters {
-            padding: 0.25rem 0.75rem; /* px-3 py-1 */
-            background-color: #3b82f6; /* bg-blue-600 */
-            color: white;
-            border-radius: 9999px; /* rounded-full */
-            font-size: 0.875rem; /* text-sm */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-            transition: all 0.3s ease-in-out;
-            border: none;
+            background: var(--primary-color);
             cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--panel-bg);
         }
 
-        #clear-filters:hover {
-            background-color: #2563eb; /* hover:bg-blue-700 */
-            transform: scale(1.05); /* hover:scale-105 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--panel-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #aaa;
+            line-height: 1;
+        }
+
+        .close-button:hover {
+            color: var(--text-color);
+        }
+
+        .modal h3 {
+            margin-top: 0;
+        }
+
+        .modal ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0 0;
+            text-align: left;
+        }
+        .modal ul li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--panel-border);
+        }
+        .modal ul li:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+            .dashboard {
+                flex-direction: column;
+            }
+            .side-panel {
+                width: 100%;
+            }
+            .controls {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .controls button {
+                flex: 1 1 45%;
+                margin: 0.25rem;
+            }
         }
     </style>
 </head>
-<body class="p-4 flex items-start justify-center">
+<body>
 
-    <div class="container">
-
-        <!-- Coluna para 'Marca' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="brand-content">
-                <h3>Marca</h3>
-                <span class="chevron">&#9660;</span>
+<div class="app-container">
+    <header>
+        <h1 style="text-align: center; font-size: 1.5rem; font-weight: 700;">Simulação de Navegação - Estuário do Rio Paraíba do Norte</h1>
+    </header>
+    <div class="main-content">
+        <div class="dashboard">
+            <!-- Painel Principal da Simulação -->
+            <div class="main-panel">
+                <canvas id="mapCanvas"></canvas>
             </div>
-            <div id="brand-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-apple" name="brand" value="Apple">
-                        <label for="brand-apple">Apple</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-sony" name="brand" value="Sony">
-                        <label for="brand-sony">Sony</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-jbl" name="brand" value="JBL">
-                        <label for="brand-jbl">JBL</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="brand-samsung" name="brand" value="Samsung">
-                        <label for="brand-samsung">Samsung</label>
+
+            <!-- Painel Lateral de Controle e Telemetria -->
+            <div class="side-panel">
+                <!-- Controles -->
+                <div class="controls">
+                    <h2>Controles</h2>
+                    <button id="startBtn">Iniciar Rota</button>
+                    <button id="pauseBtn">Parar</button>
+                    <button id="resetBtn">Reiniciar</button>
+                    <button id="baseBtn">Voltar à Base</button>
+                    <button id="clearRouteBtn">Limpar Rota</button>
+                    <div id="speedSliderContainer">
+                        <label for="speedSlider">Velocidade: <span id="speedValue">1x</span></label>
+                        <input type="range" id="speedSlider" min="0.1" max="2" value="1" step="0.1">
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Coluna para 'Conectividade' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="connectivity-content">
-                <h3>Conectividade</h3>
-                <span class="chevron">&#9660;</span>
-            </div>
-            <div id="connectivity-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="conn-bluetooth" name="connectivity" value="Bluetooth">
-                        <label for="conn-bluetooth">Bluetooth</label>
+                <!-- Telemetria -->
+                <div class="telemetry">
+                    <h2>Telemetria</h2>
+                    <div class="metric">
+                        <div class="metric-header">
+                            <span>Bateria</span>
+                            <span id="batteryPercent">100%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" id="batteryFill"></div>
+                        </div>
                     </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="conn-cabo" name="connectivity" value="Cabo">
-                        <label for="conn-cabo">Cabo</label>
+                    <div class="metric">
+                        <div class="metric-header">
+                            <span>Lixo Coletado</span>
+                            <span id="trashCount">0</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" id="trashFill"></div>
+                        </div>
                     </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="conn-wifi" name="connectivity" value="Wi-Fi">
-                        <label for="conn-wifi">Wi-Fi</label>
+                    <div class="metric">
+                        <div class="metric-header">
+                            <span>Velocidade</span>
+                            <span id="currentSpeed">0 km/h</span>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-header">
+                            <span>Status</span>
+                        </div>
+                        <span id="robotStatus">Pronto</span>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Coluna para 'Tipo de Fone' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="type-content">
-                <h3>Tipo de Fone</h3>
-                <span class="chevron">&#9660;</span>
-            </div>
-            <div id="type-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="type-over-ear" name="type" value="Over-ear">
-                        <label for="type-over-ear">Over-ear</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="type-on-ear" name="type" value="On-ear">
-                        <label for="type-on-ear">On-ear</label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="type-in-ear" name="type" value="In-ear">
-                        <label for="type-in-ear">In-ear</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Coluna para 'Cor' -->
-        <div class="filter-column">
-            <div class="filter-header" data-toggle-id="color-content">
-                <h3>Cor</h3>
-                <span class="chevron">&#9660;</span>
-            </div>
-            <div id="color-content" class="dropdown-menu">
-                <div class="options-list">
-                    <div class="option-item">
-                        <input type="checkbox" id="color-preto" name="color" value="Preto" class="hidden">
-                        <label for="color-preto">
-                            <div class="color-box" style="background-color: black;"></div>
-                            <span>Preto</span>
-                        </label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="color-branco" name="color" value="Branco" class="hidden">
-                        <label for="color-branco">
-                            <div class="color-box" style="background-color: white;"></div>
-                            <span>Branco</span>
-                        </label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="color-vermelho" name="color" value="Vermelho" class="hidden">
-                        <label for="color-vermelho">
-                            <div class="color-box" style="background-color: #ef4444;"></div>
-                            <span>Vermelho</span>
-                        </label>
-                    </div>
-                    <div class="option-item">
-                        <input type="checkbox" id="color-azul" name="color" value="Azul" class="hidden">
-                        <label for="color-azul">
-                            <div class="color-box" style="background-color: #3b82f6;"></div>
-                            <span>Azul</span>
-                        </label>
-                    </div>
+                <!-- Logs -->
+                <div class="log-panel">
+                    <h2>Logs</h2>
+                    <div id="logContent"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Botão de Limpar Filtros -->
-    <div class="clear-button-container">
-        <button id="clear-filters">
-            Limpar Filtros
-        </button>
+<!-- Modal para dados dos sensores IoT -->
+<div id="sensorModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h3>Dados do Sensor IoT</h3>
+        <ul id="sensorDataList"></ul>
     </div>
+</div>
 
-    <script>
-        // Adiciona funcionalidade de expandir/contrair aos cabeçalhos
-        document.querySelectorAll('[data-toggle-id]').forEach(header => {
-            header.addEventListener('click', () => {
-                const contentId = header.getAttribute('data-toggle-id');
-                const content = document.getElementById(contentId);
-                const chevron = header.querySelector('.chevron');
+<script>
+// ====================================================================================================
+// Variáveis Globais de Estado
+// ====================================================================================================
 
-                // Fecha todos os outros menus antes de abrir o atual
-                document.querySelectorAll('.dropdown-menu.open').forEach(menu => {
-                    if (menu.id !== contentId) {
-                        menu.classList.remove('open');
-                        const otherChevron = document.querySelector(`[data-toggle-id="${menu.id}"] .chevron`);
-                        if (otherChevron) otherChevron.classList.remove('rotate');
+const state = {
+    // Canvas e Contexto 2D
+    canvas: null,
+    ctx: null,
+    // Estado da simulação
+    isRunning: false,
+    isPaused: false,
+    speedFactor: 1,
+    // Estado do robô
+    robot: {
+        x: 0,
+        y: 0,
+        baseX: 100,
+        baseY: 100,
+        size: 15,
+        status: 'Pronto',
+        color: '#333'
+    },
+    // Rota
+    route: [],
+    currentPointIndex: 0,
+    // Telemetria
+    battery: 100,
+    trashCollected: 0,
+    // Itens na simulação
+    obstacles: [],
+    trashItems: [],
+    sensors: [],
+    // Controle da animação
+    animationFrameId: null
+};
+
+const mapImage = new Image();
+const MAP_WIDTH = 1200;
+const MAP_HEIGHT = 800;
+const BASE_RADIUS = 25;
+const POINT_TOLERANCE = 10; // Tolerância em pixels para clicar em um ponto da rota
+
+// Constantes de cor para evitar erros de sintaxe no JavaScript
+// Os valores são retirados das variáveis CSS na seção <style>
+const LINE_COLOR = '#4a90e2';
+const PRIMARY_COLOR = '#4a90e2';
+const SUCCESS_COLOR = '#5cb85c';
+const DANGER_COLOR = '#d9534f';
+const OBSTACLE_COLOR = '#f0ad4e';
+const TRASH_COLOR = '#d9534f';
+const SENSOR_COLOR = '#5cb85c';
+const ROBOT_COLOR = '#333';
+
+// ====================================================================================================
+// Funções de Inicialização e Desenho
+// ====================================================================================================
+
+/**
+ * Adiciona uma entrada de log no painel.
+ * @param {string} message - A mensagem a ser logada.
+ * @param {string} type - O tipo da mensagem (ex: 'info', 'success', 'warning').
+ */
+function addLog(message, type = 'info') {
+    const logContent = document.getElementById('logContent');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    logContent.prepend(entry);
+    // Limita o número de entradas para evitar sobrecarga
+    if (logContent.children.length > 50) {
+        logContent.removeChild(logContent.lastChild);
+    }
+}
+
+/**
+ * Inicializa a simulação.
+ */
+function init() {
+    state.canvas = document.getElementById('mapCanvas');
+    state.ctx = state.canvas.getContext('2d');
+    state.robot.x = state.robot.baseX;
+    state.robot.y = state.robot.baseY;
+
+    // Carrega a imagem do mapa
+    mapImage.onload = () => {
+        // Redimensiona o canvas para se ajustar ao contêiner
+        resizeCanvas();
+        // Gera os elementos do mapa
+        generateMapElements();
+        // Adiciona event listeners
+        setupEventListeners();
+        // Desenha o estado inicial
+        draw();
+        // Inicia o loop da simulação (pausado por padrão)
+        gameLoop();
+        addLog('Simulação pronta. Defina uma rota.');
+    };
+    // URL da nova imagem de fundo para o mapa
+    // É necessário usar um URL público em vez de um ficheiro local
+    mapImage.src = './rio_paraiba.png';
+}
+
+/**
+ * Gera obstáculos, lixo e sensores em posições aleatórias no mapa.
+ */
+function generateMapElements() {
+    state.obstacles = [];
+    state.trashItems = [];
+    state.sensors = [];
+
+    // Gera obstáculos amarelos
+    for (let i = 0; i < 10; i++) {
+        state.obstacles.push({
+            x: Math.random() * MAP_WIDTH,
+            y: Math.random() * MAP_HEIGHT,
+            size: 20
+        });
+    }
+    // Gera lixo vermelho
+    for (let i = 0; i < 20; i++) {
+        state.trashItems.push({
+            x: Math.random() * MAP_WIDTH,
+            y: Math.random() * MAP_HEIGHT,
+            size: 10,
+            color: TRASH_COLOR, // Usa a constante de cor
+            vx: (Math.random() - 0.5) * 0.1, // Movimento aleatório e lento
+            vy: (Math.random() - 0.5) * 0.1
+        });
+    }
+    // Gera sensores verdes
+    for (let i = 0; i < 5; i++) {
+        state.sensors.push({
+            x: Math.random() * MAP_WIDTH,
+            y: Math.random() * MAP_HEIGHT,
+            size: 15,
+            data: {
+                pH: (Math.random() * 2 + 6).toFixed(2),
+                oxigenioDissolvido: (Math.random() * 5 + 5).toFixed(2),
+                turbidez: (Math.random() * 100).toFixed(2),
+                temperatura: (Math.random() * 5 + 25).toFixed(2)
+            }
+        });
+    }
+}
+
+/**
+ * Redimensiona o canvas para se ajustar ao contêiner, mantendo a proporção.
+ */
+function resizeCanvas() {
+    const container = state.canvas.parentElement;
+    const aspectRatio = MAP_WIDTH / MAP_HEIGHT;
+    let newWidth = container.offsetWidth;
+    let newHeight = container.offsetHeight;
+
+    if (newWidth / newHeight > aspectRatio) {
+        newWidth = newHeight * aspectRatio;
+    } else {
+        newHeight = newWidth / aspectRatio;
+    }
+
+    state.canvas.width = newWidth;
+    state.canvas.height = newHeight;
+}
+
+/**
+ * Desenha todos os elementos no canvas.
+ */
+function draw() {
+    const ctx = state.ctx;
+    ctx.clearRect(0, 0, state.canvas.width, state.canvas.height);
+
+    // Desenha o mapa de fundo
+    ctx.drawImage(mapImage, 0, 0, state.canvas.width, state.canvas.height);
+
+    // Converte as coordenadas do mapa para coordenadas do canvas
+    const toCanvasX = (x) => (x / MAP_WIDTH) * state.canvas.width;
+    const toCanvasY = (y) => (y / MAP_HEIGHT) * state.canvas.height;
+    
+    // Desenha a base
+    ctx.fillStyle = '#6c757d';
+    ctx.beginPath();
+    ctx.arc(toCanvasX(state.robot.baseX), toCanvasY(state.robot.baseY), toCanvasX(BASE_RADIUS), 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText('Base', toCanvasX(state.robot.baseX), toCanvasY(state.robot.baseY) + 4);
+
+    // Desenha a rota
+    if (state.route.length > 0) {
+        // Usa a constante de cor
+        ctx.strokeStyle = LINE_COLOR;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(toCanvasX(state.robot.x), toCanvasY(state.robot.y));
+        state.route.forEach(point => {
+            ctx.lineTo(toCanvasX(point.x), toCanvasY(point.y));
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // Desenha os pontos da rota
+    state.route.forEach((point, index) => {
+        // Usa as constantes de cor
+        ctx.fillStyle = (index === state.currentPointIndex && state.isRunning) ? SUCCESS_COLOR : PRIMARY_COLOR;
+        ctx.beginPath();
+        ctx.arc(toCanvasX(point.x), toCanvasY(point.y), 6, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText(index + 1, toCanvasX(point.x), toCanvasY(point.y) + 3);
+    });
+
+    // Desenha os obstáculos
+    state.obstacles.forEach(obstacle => {
+        // Usa a constante de cor
+        ctx.fillStyle = OBSTACLE_COLOR;
+        ctx.beginPath();
+        ctx.arc(toCanvasX(obstacle.x), toCanvasY(obstacle.y), toCanvasX(obstacle.size / 2), 0, 2 * Math.PI);
+        ctx.fill();
+    });
+
+    // Desenha o lixo flutuante
+    state.trashItems.forEach(trash => {
+        ctx.fillStyle = trash.color;
+        ctx.beginPath();
+        ctx.arc(toCanvasX(trash.x), toCanvasY(trash.y), toCanvasX(trash.size / 2), 0, 2 * Math.PI);
+        ctx.fill();
+    });
+
+    // Desenha os sensores IoT
+    state.sensors.forEach(sensor => {
+        // Usa a constante de cor
+        ctx.fillStyle = SENSOR_COLOR;
+        ctx.beginPath();
+        ctx.arc(toCanvasX(sensor.x), toCanvasY(sensor.y), toCanvasX(sensor.size / 2), 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('IoT', toCanvasX(sensor.x), toCanvasY(sensor.y) + 4);
+    });
+
+    // Desenha o robô
+    ctx.fillStyle = state.robot.color;
+    ctx.beginPath();
+    ctx.rect(toCanvasX(state.robot.x - state.robot.size / 2), toCanvasY(state.robot.y - state.robot.size / 2), toCanvasX(state.robot.size), toCanvasY(state.robot.size));
+    ctx.fill();
+
+    // Desenha o minimapa no canto inferior direito
+    drawMinimap();
+}
+
+/**
+ * Desenha o minimapa no canvas.
+ */
+function drawMinimap() {
+    const ctx = state.ctx;
+    const minimapWidth = state.canvas.width * 0.2;
+    const minimapHeight = state.canvas.height * 0.2;
+    const minimapX = state.canvas.width - minimapWidth - 10;
+    const minimapY = state.canvas.height - minimapHeight - 10;
+
+    // Fundo do minimapa - Agora usa a imagem do mapa
+    ctx.drawImage(mapImage, minimapX, minimapY, minimapWidth, minimapHeight);
+
+    // Borda do minimapa
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(minimapX, minimapY, minimapWidth, minimapHeight);
+
+    // Desenha o robô no minimapa
+    const minimapScaleX = minimapWidth / MAP_WIDTH;
+    const minimapScaleY = minimapHeight / MAP_HEIGHT;
+
+    // Usa a constante de cor
+    ctx.fillStyle = ROBOT_COLOR;
+    ctx.beginPath();
+    ctx.rect(minimapX + state.robot.x * minimapScaleX - state.robot.size / 4, minimapY + state.robot.y * minimapScaleY - state.robot.size / 4, state.robot.size / 2, state.robot.size / 2);
+    ctx.fill();
+}
+
+
+// ====================================================================================================
+// Lógica do Robô e da Simulação
+// ====================================================================================================
+
+/**
+ * O loop principal da simulação.
+ */
+function gameLoop() {
+    update();
+    draw();
+    state.animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+/**
+ * Atualiza o estado da simulação a cada quadro.
+ */
+function update() {
+    // A simulação só se move se estiver "rodando"
+    if (!state.isRunning || state.isPaused) {
+        updateTelemetry();
+        return;
+    }
+
+    // Move o robô
+    moveRobot();
+
+    // Atualiza a simulação de correnteza
+    updateCurrents();
+
+    // Drena a bateria
+    drainBattery();
+
+    // Verifica colisões com lixo, sensores e obstáculos
+    checkCollisions();
+
+    // Verifica o estado da bateria e da rota
+    checkStatus();
+
+    // Atualiza a interface do usuário
+    updateTelemetry();
+}
+
+/**
+ * Move o robô ao longo da rota definida.
+ */
+function moveRobot() {
+    if (state.currentPointIndex >= state.route.length) {
+        state.robot.status = 'Rota concluída. Retornando à base.';
+        state.currentPointIndex = -1; // Sinaliza para voltar à base
+        returnToHomeBase();
+        return;
+    }
+    
+    // Calcula o ponto de destino
+    const targetPoint = state.route[state.currentPointIndex];
+    const dx = targetPoint.x - state.robot.x;
+    const dy = targetPoint.y - state.robot.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    const stepSize = 1 * state.speedFactor;
+    if (distance > stepSize) {
+        state.robot.x += dx / distance * stepSize;
+        state.robot.y += dy / distance * stepSize;
+        state.robot.status = `Em rota (${state.currentPointIndex + 1}/${state.route.length})`;
+    } else {
+        state.robot.x = targetPoint.x;
+        state.robot.y = targetPoint.y;
+        state.currentPointIndex++;
+        if (state.currentPointIndex < state.route.length) {
+            addLog(`Ponto ${state.currentPointIndex} alcançado.`);
+        }
+    }
+}
+
+/**
+ * Simula o movimento aleatório dos itens de lixo devido à correnteza.
+ */
+function updateCurrents() {
+    state.trashItems.forEach(trash => {
+        trash.x += trash.vx * state.speedFactor;
+        trash.y += trash.vy * state.speedFactor;
+        
+        // Mantém o lixo dentro dos limites do mapa
+        if (trash.x < 0 || trash.x > MAP_WIDTH) trash.vx *= -1;
+        if (trash.y < 0 || trash.y > MAP_HEIGHT) trash.vy *= -1;
+    });
+}
+
+/**
+ * Drena a bateria do robô.
+ */
+function drainBattery() {
+    if (state.battery > 0) {
+        state.battery -= 0.005 * state.speedFactor;
+        if (state.battery < 0) state.battery = 0;
+    }
+}
+
+/**
+ * Verifica colisões com lixo, sensores e obstáculos.
+ */
+function checkCollisions() {
+    // Coleta de lixo
+    state.trashItems = state.trashItems.filter(trash => {
+        const dx = state.robot.x - trash.x;
+        const dy = state.robot.y - trash.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < (state.robot.size / 2) + (trash.size / 2)) {
+            state.trashCollected++;
+            addLog(`Lixo coletado! Total: ${state.trashCollected}`, 'success');
+            return false; // Remove o lixo do array
+        }
+        return true;
+    });
+
+    // Ativação dos sensores
+    state.sensors.forEach(sensor => {
+        const dx = state.robot.x - sensor.x;
+        const dy = state.robot.y - sensor.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < (state.robot.size / 2) + (sensor.size / 2)) {
+            openSensorModal(sensor.data);
+            addLog(`Sensor IoT detectado. Dados exibidos.`, 'info');
+            // Move o sensor para que não seja ativado repetidamente
+            sensor.x = -100;
+            sensor.y = -100;
+        }
+    });
+
+    // Desvio de obstáculos
+    state.obstacles.forEach(obstacle => {
+        const dx = state.robot.x - obstacle.x;
+        const dy = state.robot.y - obstacle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < (state.robot.size / 2) + (obstacle.size / 2) + 5) {
+            // Se o robô estiver em rota, inicia o desvio
+            if (state.isRunning && state.currentPointIndex > -1) {
+                addLog('Obstáculo detectado! Calculando rota de desvio...', 'warning');
+                state.robot.status = 'A desviar de obstáculo';
+
+                // Cria uma grelha do mapa
+                const gridSize = 20;
+                const gridWidth = Math.floor(MAP_WIDTH / gridSize);
+                const gridHeight = Math.floor(MAP_HEIGHT / gridSize);
+                const grid = Array.from({ length: gridHeight }, () => Array(gridWidth).fill(0));
+
+                // Marcar obstáculos na grelha
+                state.obstacles.forEach(obs => {
+                    const gx = Math.floor(obs.x / gridSize);
+                    const gy = Math.floor(obs.y / gridSize);
+                    const obsSizeInCells = Math.ceil(obs.size / gridSize);
+                    for(let i = -obsSizeInCells; i <= obsSizeInCells; i++){
+                        for(let j = -obsSizeInCells; j <= obsSizeInCells; j++){
+                            const nx = gx + i;
+                            const ny = gy + j;
+                            if(nx >= 0 && nx < gridWidth && ny >= 0 && ny < gridHeight){
+                                grid[ny][nx] = 1; // 1 = Obstáculo
+                            }
+                        }
                     }
                 });
 
-                // Alterna o estado do menu atual
-                content.classList.toggle('open');
-                chevron.classList.toggle('rotate');
-            });
-        });
+                // Converte as coordenadas do robô e do próximo ponto da rota para a grelha
+                const startGrid = {
+                    x: Math.floor(state.robot.x / gridSize),
+                    y: Math.floor(state.robot.y / gridSize)
+                };
+                const endGrid = {
+                    x: Math.floor(state.route[state.currentPointIndex].x / gridSize),
+                    y: Math.floor(state.route[state.currentPointIndex].y / gridSize)
+                };
 
-        // Função para atualizar os filtros selecionados
-        function updateSelectedFilters() {
-            const selectedFilters = {};
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                if (checkbox.checked) {
-                    const groupName = checkbox.name;
-                    const value = checkbox.value;
-                    if (!selectedFilters[groupName]) {
-                        selectedFilters[groupName] = [];
-                    }
-                    selectedFilters[groupName].push(value);
+                // Encontrar o caminho usando o algoritmo A*
+                const path = findPathWithAStar(grid, startGrid, endGrid);
+
+                if (path && path.length > 0) {
+                    // Se o caminho for encontrado, substitui a rota atual
+                    state.route.splice(state.currentPointIndex, state.route.length - state.currentPointIndex, ...path.map(p => ({
+                        x: p.x * gridSize + gridSize / 2,
+                        y: p.y * gridSize + gridSize / 2
+                    })));
+                } else {
+                    // Se nenhum caminho for encontrado, faz um desvio aleatório simples
+                    const angle = Math.atan2(dy, dx);
+                    const detourDistance = 50;
+                    const newX = state.robot.x + Math.cos(angle + Math.PI / 2) * detourDistance;
+                    const newY = state.robot.y + Math.sin(angle + Math.PI / 2) * detourDistance;
+                    state.route.splice(state.currentPointIndex, 0, { x: newX, y: newY });
                 }
-            });
-            console.log("Filtros Selecionados:", selectedFilters);
+            }
+        }
+    });
+}
+
+/**
+ * Verifica o estado geral da simulação (bateria, rota) e age de acordo.
+ */
+function checkStatus() {
+    // Retorna à base se a bateria estiver baixa
+    if (state.battery < 20 && state.isRunning) {
+        addLog('Bateria fraca! Retornando à base.', 'error');
+        returnToHomeBase();
+    }
+}
+
+/**
+ * Inicia o processo de retorno à base.
+ */
+function returnToHomeBase() {
+    state.isRunning = true;
+    state.isPaused = false;
+    // Define a base como o único ponto da rota
+    state.route = [{ x: state.robot.baseX, y: state.robot.baseY }];
+    state.currentPointIndex = 0;
+    state.robot.status = 'Retornando à base';
+}
+
+/**
+ * Reinicia a simulação.
+ */
+function resetSimulation() {
+    state.isRunning = false;
+    state.isPaused = false;
+    state.route = [];
+    state.currentPointIndex = 0;
+    state.battery = 100;
+    state.trashCollected = 0;
+    state.robot.x = state.robot.baseX;
+    state.robot.y = state.robot.baseY;
+    state.robot.status = 'Pronto';
+    generateMapElements();
+    updateTelemetry();
+    addLog('Simulação reiniciada. Defina uma nova rota.', 'info');
+}
+
+/**
+ * Recarrega a bateria e esvazia o lixo quando o robô está na base.
+ */
+function handleBaseOperations() {
+    // Esta função só deve ser ativada se a simulação não estiver em execução E a rota estiver vazia.
+    // Isso evita que o robô seja "teletransportado" para o estado de "Pronto" logo após iniciar a rota.
+    if (!state.isRunning && state.route.length === 0) {
+        if (state.battery < 100) {
+            state.battery += 0.5 * state.speedFactor;
+            if (state.battery >= 100) {
+                state.battery = 100;
+                addLog('Bateria 100% carregada!', 'success');
+            }
+        }
+        if (state.trashCollected > 0) {
+            state.trashCollected = 0;
+            addLog('Lixo esvaziado!', 'success');
         }
 
-        // Adiciona um ouvinte de evento para cada checkbox
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', updateSelectedFilters);
-        });
+        if (state.battery >= 100 && state.trashCollected === 0) {
+            state.robot.status = 'Na base, pronto para nova rota.';
+        }
+    }
+}
 
-        // Adiciona um ouvinte de evento para o botão de limpar filtros
-        document.getElementById('clear-filters').addEventListener('click', () => {
-            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            updateSelectedFilters();
-        });
 
-        // Chama a função de atualização quando a página carrega
-        window.addEventListener('load', updateSelectedFilters);
-    </script>
+// ====================================================================================================
+// Funções de Interface (UI) e Eventos
+// ====================================================================================================
+
+/**
+ * Configura todos os event listeners para os botões e o canvas.
+ */
+function setupEventListeners() {
+    const canvas = state.canvas;
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const baseBtn = document.getElementById('baseBtn');
+    const clearRouteBtn = document.getElementById('clearRouteBtn');
+    const speedSlider = document.getElementById('speedSlider');
+
+    // Mapeia coordenadas do mouse para coordenadas do mapa
+    const getMouseCoords = (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = MAP_WIDTH / rect.width;
+        const scaleY = MAP_HEIGHT / rect.height;
+        return {
+            x: (event.clientX - rect.left) * scaleX,
+            y: (event.clientY - rect.top) * scaleY
+        };
+    };
+
+    // Adiciona ou remove pontos da rota ao clicar no mapa
+    canvas.addEventListener('click', (e) => {
+        if (state.isRunning) {
+            return;
+        }
+
+        const coords = getMouseCoords(e);
+        let pointRemoved = false;
+
+        // Verifica se clicou em um ponto existente para removê-lo
+        for (let i = 0; i < state.route.length; i++) {
+            const point = state.route[i];
+            const dx = coords.x - point.x;
+            const dy = coords.y - point.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Se a distância for menor que a tolerância, remove o ponto
+            if (distance < POINT_TOLERANCE) {
+                state.route.splice(i, 1);
+                addLog(`Ponto de rota removido.`);
+                pointRemoved = true;
+                break;
+            }
+        }
+
+        // Se nenhum ponto foi removido, adiciona um novo ponto
+        if (!pointRemoved) {
+            state.route.push(coords);
+            addLog(`Ponto de rota adicionado em (${Math.round(coords.x)}, ${Math.round(coords.y)}).`);
+        }
+        draw();
+    });
+
+    // Eventos dos botões
+    startBtn.addEventListener('click', () => {
+        if (state.route.length === 0) {
+            addLog('Nenhuma rota definida. Clique no mapa para adicionar pontos.', 'error');
+            return;
+        }
+        if (!state.isRunning) {
+            state.isRunning = true;
+            state.isPaused = false;
+            // Define o status imediatamente ao iniciar
+            state.robot.status = `Em rota (${state.currentPointIndex + 1}/${state.route.length})`;
+            addLog('Simulação iniciada.', 'info');
+        } else {
+            addLog('A simulação já está em andamento.', 'warning');
+        }
+    });
+
+    pauseBtn.addEventListener('click', () => {
+        state.isPaused = !state.isPaused;
+        pauseBtn.textContent = state.isPaused ? "Continuar" : "Parar";
+        // Define o status ao pausar/continuar
+        state.robot.status = state.isPaused ? 'Parado' : `Em rota (${state.currentPointIndex + 1}/${state.route.length})`;
+        addLog(state.isPaused ? 'Simulação pausada.' : 'Simulação continuada.', 'info');
+    });
+
+    resetBtn.addEventListener('click', resetSimulation);
+    baseBtn.addEventListener('click', () => {
+        if (!state.isRunning) {
+            returnToHomeBase();
+        }
+    });
+
+    clearRouteBtn.addEventListener('click', () => {
+        state.route = [];
+        state.currentPointIndex = 0;
+        addLog('Rota limpa. Por favor, defina uma nova rota.', 'info');
+        draw();
+    });
+
+    // Controle da velocidade
+    speedSlider.addEventListener('input', (e) => {
+        state.speedFactor = parseFloat(e.target.value);
+        document.getElementById('speedValue').textContent = `${e.target.value}x`;
+    });
+
+    // Responsividade do canvas
+    window.addEventListener('resize', resizeCanvas);
+}
+
+/**
+ * Atualiza os valores de telemetria na interface.
+ */
+function updateTelemetry() {
+    const batteryFill = document.getElementById('batteryFill');
+    const trashFill = document.getElementById('trashFill');
+
+    // Atualiza Bateria
+    const batteryPercent = Math.max(0, Math.min(100, state.battery)).toFixed(0);
+    document.getElementById('batteryPercent').textContent = `${batteryPercent}%`;
+    batteryFill.style.width = `${batteryPercent}%`;
+    if (batteryPercent < 25) {
+        batteryFill.style.backgroundColor = DANGER_COLOR;
+    } else {
+        batteryFill.style.backgroundColor = SUCCESS_COLOR;
+    }
+
+    // Atualiza Lixo
+    const trashProgress = Math.min(state.trashCollected, 10) * 10;
+    document.getElementById('trashCount').textContent = state.trashCollected;
+    trashFill.style.width = `${trashProgress}%`;
+
+    // Atualiza Velocidade
+    document.getElementById('currentSpeed').textContent = `${(state.speedFactor * 5).toFixed(1)} km/h`;
+
+    // Atualiza Status do Robô
+    document.getElementById('robotStatus').textContent = state.robot.status;
+
+    // Checa se está na base para recarregar
+    const dx = state.robot.x - state.robot.baseX;
+    const dy = state.robot.y - state.robot.baseY;
+    const distanceToBase = Math.sqrt(dx * dx + dy * dy);
+    if (distanceToBase < BASE_RADIUS) {
+        handleBaseOperations();
+    }
+}
+
+/**
+ * Abre o modal para exibir dados do sensor IoT.
+ * @param {object} data - O objeto com os dados do sensor.
+ */
+function openSensorModal(data) {
+    const modal = document.getElementById('sensorModal');
+    const dataList = document.getElementById('sensorDataList');
+    dataList.innerHTML = '';
+    
+    // Converte o objeto de dados em uma lista de itens de lista HTML
+    for (const [key, value] of Object.entries(data)) {
+        const li = document.createElement('li');
+        li.textContent = `${key}: ${value}`;
+        dataList.appendChild(li);
+    }
+    
+    modal.style.display = 'flex';
+    state.isPaused = true;
+}
+
+/**
+ * Fecha o modal.
+ */
+function closeModal() {
+    const modal = document.getElementById('sensorModal');
+    modal.style.display = 'none';
+    state.isPaused = false;
+}
+
+/**
+ * Recarrega a bateria e esvazia o lixo quando o robô está na base.
+ */
+function handleBaseOperations() {
+    // Esta função só deve ser ativada se a simulação não estiver em execução E a rota estiver vazia.
+    // Isso evita que o robô seja "teletransportado" para o estado de "Pronto" logo após iniciar a rota.
+    if (!state.isRunning && state.route.length === 0) {
+        if (state.battery < 100) {
+            state.battery += 0.5 * state.speedFactor;
+            if (state.battery >= 100) {
+                state.battery = 100;
+                addLog('Bateria 100% carregada!', 'success');
+            }
+        }
+        if (state.trashCollected > 0) {
+            state.trashCollected = 0;
+            addLog('Lixo esvaziado!', 'success');
+        }
+
+        if (state.battery >= 100 && state.trashCollected === 0) {
+            state.robot.status = 'Na base, pronto para nova rota.';
+        }
+    }
+}
+
+// Inicia o processo de inicialização quando a página estiver carregada
+window.onload = init;
+
+// ====================================================================================================
+// Algoritmo de Busca de Caminho A-star (A*) - Simula ficheiro JS separado
+// ====================================================================================================
+
+/**
+ * @typedef {Object} Node
+ * @property {number} x - A coordenada x na grelha.
+ * @property {number} y - A coordenada y na grelha.
+ * @property {number} gScore - O custo do caminho do início até este nó.
+ * @property {number} fScore - O custo total estimado do caminho (gScore + hScore).
+ * @property {Node | null} parent - O nó pai no caminho.
+ */
+
+/**
+ * Função de heurística (distância de Manhattan).
+ * Estima o custo do caminho do nó atual até o destino.
+ * @param {Node} a - Nó atual.
+ * @param {Node} b - Nó de destino.
+ * @returns {number} A distância estimada.
+ */
+function heuristic(a, b) {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+}
+
+/**
+ * Reconstrói o caminho a partir do nó de destino.
+ * @param {Node} current - O nó de destino.
+ * @returns {Array<Object>} O caminho do início ao fim.
+ */
+function reconstructPath(current) {
+    const totalPath = [];
+    let temp = current;
+    while (temp !== null) {
+        totalPath.push({ x: temp.x, y: temp.y });
+        temp = temp.parent;
+    }
+    return totalPath.reverse();
+}
+
+/**
+ * Encontra o caminho mais curto usando o algoritmo A-star.
+ * @param {Array<Array<number>>} grid - A grelha do mapa (0 = livre, 1 = obstáculo).
+ * @param {Object} start - O nó de início {x, y}.
+ * @param {Object} end - O nó de destino {x, y}.
+ * @returns {Array<Object> | null} O caminho ou null se não for encontrado.
+ */
+function findPathWithAStar(grid, start, end) {
+    const gridHeight = grid.length;
+    const gridWidth = grid[0].length;
+
+    // A lista de nós a serem avaliados
+    const openSet = new Set();
+    const openList = [];
+
+    // O nó de início
+    const startNode = {
+        x: start.x,
+        y: start.y,
+        gScore: 0,
+        fScore: heuristic(start, end),
+        parent: null
+    };
+
+    // Verificar se o ponto de partida já é um obstáculo.
+    // Se for, o algoritmo não pode continuar.
+    if (grid[start.y][start.x] === 1) {
+        addLog("A* não pode iniciar: ponto de partida é um obstáculo.", "error");
+        return null;
+    }
+
+    openSet.add(`${startNode.x},${startNode.y}`);
+    openList.push(startNode);
+    
+    // Mapeia os scores de cada nó
+    const gScore = {};
+    gScore[`${start.x},${start.y}`] = 0;
+    const fScore = {};
+    fScore[`${start.x},${start.y}`] = heuristic(start, end);
+
+    while (openList.length > 0) {
+        // Encontra o nó com o menor fScore
+        openList.sort((a, b) => a.fScore - b.fScore);
+        const current = openList.shift();
+        openSet.delete(`${current.x},${current.y}`);
+        
+        // Se o destino for alcançado, reconstrói e retorna o caminho
+        if (current.x === end.x && current.y === end.y) {
+            return reconstructPath(current);
+        }
+
+        // Obtém os vizinhos (horizontal e vertical)
+        const neighbors = [
+            { x: current.x, y: current.y - 1 }, // Cima
+            { x: current.x, y: current.y + 1 }, // Baixo
+            { x: current.x - 1, y: current.y }, // Esquerda
+            { x: current.x + 1, y: current.y }  // Direita
+        ];
+
+        for (const neighbor of neighbors) {
+            // Verifica se o vizinho é válido e não é um obstáculo
+            if (neighbor.x >= 0 && neighbor.x < gridWidth && neighbor.y >= 0 && neighbor.y < gridHeight && grid[neighbor.y][neighbor.x] === 0) {
+                const tentativeGScore = current.gScore + 1;
+
+                if (tentativeGScore < (gScore[`${neighbor.x},${neighbor.y}`] || Infinity)) {
+                    // Este caminho para o vizinho é melhor. Guarda o caminho.
+                    const neighborNode = {
+                        x: neighbor.x,
+                        y: neighbor.y,
+                        gScore: tentativeGScore,
+                        fScore: tentativeGScore + heuristic(neighbor, end),
+                        parent: current
+                    };
+
+                    gScore[`${neighbor.x},${neighbor.y}`] = tentativeGScore;
+                    fScore[`${neighbor.x},${neighbor.y}`] = neighborNode.fScore;
+
+                    if (!openSet.has(`${neighbor.x},${neighbor.y}`)) {
+                        openSet.add(`${neighbor.x},${neighbor.y}`);
+                        openList.push(neighborNode);
+                    }
+                }
+            }
+        }
+    }
+
+    // Nenhum caminho foi encontrado
+    return null;
+}
+</script>
+
 </body>
 </html>
