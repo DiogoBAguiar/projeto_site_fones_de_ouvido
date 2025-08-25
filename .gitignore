@@ -13,3 +13,5 @@ __pycache__/
 # Pasta de instância do Flask (pode conter segredos e o DB)
 banco_de_dados/
 
+
+

@@ -51,7 +51,9 @@ def create_admin_user():
     users = data_manager.get_users()
     if any(u.email == email or u.username == username for u in users):
         print("Já existe um usuário ou email com este nome. Por favor, tente novamente com outro.")
-        return
+        username = input("Digite o nome de usuário para o admin: ")
+        email = input("Digite o email para o admin: ")
+        password = input("Digite a senha para o admin: ")
 
     # Cria o hash da senha de forma segura
     hashed_password = generate_password_hash(password)
