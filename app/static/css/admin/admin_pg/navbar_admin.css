@@ -1,0 +1,36 @@
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 2rem;
+}
+body.dark-mode .tabs {
+    border-bottom-color: var(--border-dark);
+}
+.tab-link {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary-light);
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+body.dark-mode .tab-link {
+    color: var(--text-secondary-dark);
+}
+.tab-link:hover {
+    color: var(--text-primary-light);
+}
+body.dark-mode .tab-link:hover {
+    color: var(--text-primary-dark);
+}
+.tab-link.active {
+    color: var(--accent-light);
+    border-bottom-color: var(--accent-light);
+}
+body.dark-mode .tab-link.active {
+    color: var(--accent-light);
+}
