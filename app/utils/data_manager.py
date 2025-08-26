@@ -25,7 +25,8 @@ USERS_FIELDNAMES = ['id', 'username', 'email', 'password_hash', 'role', 'profile
 PRODUCTS_FIELDNAMES = ['id', 'name', 'brand', 'price', 'status', 'images', 'description', 'specs', 'seller_id', 'filters']
 REVIEWS_FIELDNAMES = ['id', 'rating', 'comment', 'media_url', 'date_posted', 'user_id', 'product_id']
 FILTERS_FIELDNAMES = ['id', 'name', 'type']
-VISITS_FIELDNAMES = ['timestamp']
+# NOVO: Adicionado o campo 'session_id' para rastrear visitas únicas
+VISITS_FIELDNAMES = ['timestamp', 'session_id']
 
 # --- FUNÇÕES UTILITÁRIAS GENÉRICAS ---
 def _read_csv(filepath):
@@ -170,38 +171,44 @@ def delete_filter(filter_id):
     return False
 
 # --- FUNÇÕES DE ANÁLISE E VISITAS ---
-def register_visit():
-    """Registra o timestamp de uma nova visita."""
+def register_visit(session_id):
+    """
+    Registra o timestamp e o ID da sessão de uma nova visita.
+    A lógica de visita única por sessão deve ser gerenciada pelo chamador.
+    """
     _ensure_file_exists(VISITS_CSV)
     try:
         with open(VISITS_CSV, 'a', newline='', encoding='utf-8') as file:
             writer = csv.DictWriter(file, fieldnames=VISITS_FIELDNAMES)
             if file.tell() == 0:
                 writer.writeheader()
-            writer.writerow({'timestamp': datetime.utcnow().isoformat()})
+            writer.writerow({'timestamp': datetime.utcnow().isoformat(), 'session_id': session_id})
     except IOError as e:
         print(f"Erro ao registrar visita: {e}")
 
 def get_visits_count(time_range_str):
-    """Calcula o número de visitas em um determinado período de tempo."""
+    """Calcula o número de visitas únicas em um determinado período de tempo."""
     visits_data = _read_csv(VISITS_CSV)
     if not visits_data: return 0
     now = datetime.utcnow()
     range_map = {'24h': 1, '7d': 7, '30d': 30, '12m': 365}
     days = range_map.get(time_range_str, 365)
     start_time = now - timedelta(days=days)
-    count = 0
+    
+    unique_sessions = set()
     for row in visits_data:
         timestamp_str = row.get('timestamp')
-        if not timestamp_str: continue
+        session_id = row.get('session_id')
+        if not timestamp_str or not session_id: continue
         try:
             if datetime.fromisoformat(timestamp_str.strip()) >= start_time:
-                count += 1
+                unique_sessions.add(session_id)
         except (ValueError, KeyError): continue
-    return count
+    
+    return len(unique_sessions)
 
 def get_visits_per_period(period='day'):
-    """Agrupa as visitas por período (dia, semana, mês, ano)."""
+    """Agrupa as visitas únicas por período (dia, semana, mês, ano)."""
     visits_data = _read_csv(VISITS_CSV)
     now = datetime.utcnow()
     
@@ -230,17 +237,19 @@ def get_visits_per_period(period='day'):
         date_format = '%Y'
         labels = [str(year) for year in range(now.year - 4, now.year + 1)]
 
-    counts = Counter({label: 0 for label in labels})
+    # Usa um dicionário para rastrear sessões únicas por período
+    counts = {label: set() for label in labels}
     
     for row in visits_data:
         timestamp_str = row.get('timestamp')
-        if not timestamp_str: continue
+        session_id = row.get('session_id')
+        if not timestamp_str or not session_id: continue
         try:
             visit_time = datetime.fromisoformat(timestamp_str.strip())
             if visit_time >= start_time:
                 key = visit_time.strftime(date_format)
                 if key in counts:
-                    counts[key] += 1
+                    counts[key].add(session_id)
         except (ValueError, KeyError): continue
-            
-    return [{"date": label, "count": counts[label]} for label in labels]
+    
+    return [{"date": label, "count": len(counts[label])} for label in labels]

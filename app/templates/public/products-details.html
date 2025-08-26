@@ -35,7 +35,12 @@
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         {% if current_user.is_authenticated %}
                             <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                            <button id="alternar-tema-dropdown">Configurações</button>
+                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                <span class="toggle-text"></span>
+                                <div class="toggle-switch">
+                                    <span class="toggle-circle"></span>
+                                </div>
+                            </button>
                             <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
                         {% else %}
                             <button id="alternar-tema-dropdown">Configurações</button>

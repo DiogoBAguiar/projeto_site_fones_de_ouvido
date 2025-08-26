@@ -2,7 +2,7 @@
 # Lida com as rotas públicas da aplicação, como home, login e visualização de produtos.
 
 import json
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -15,10 +15,14 @@ public_bp = Blueprint('public', __name__)
 
 @public_bp.before_app_request
 def before_request():
-    """Registra uma visita antes de cada requisição, exceto para rotas de API e arquivos estáticos."""
+    """Registra uma visita única por sessão, exceto para APIs e arquivos estáticos."""
     if request.path.startswith('/api/') or request.path.startswith('/static/'):
         return
-    data_manager.register_visit()
+    
+    # Verifica se a visita já foi registrada nesta sessão
+    if 'visit_counted' not in session:
+        data_manager.register_visit(session.sid)
+        session['visit_counted'] = True
 
 
 # --- ROTAS DE PÁGINAS (HTML) ---

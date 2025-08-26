@@ -150,3 +150,53 @@
         grid-template-columns: 1fr;
     }
 }
+.theme-toggle-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--texto-claro);
+    text-align: left;
+    width: 100%;
+    transition: background-color 0.2s;
+    border-radius: 8px;
+}
+
+.theme-toggle-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.tema-escuro .theme-toggle-btn:hover {
+    background-color: #3a3d40;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    background-color: var(--secundaria-claro);
+    border-radius: 22px;
+    transition: background-color 0.3s;
+}
+
+.toggle-switch .toggle-circle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.tema-escuro .toggle-switch {
+    background-color: var(--cor-link);
+}
+
+.tema-escuro .toggle-switch .toggle-circle {
+    transform: translateX(18px);
+}
