@@ -4,19 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Decibell</title>
-    
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Lucide Icons -->
     <script src="https://cdn.jsdelivr.net/npm/lucide-static@0.378.0/lucide.min.js"></script>
-    
-    <!-- Chart.js para os gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/global_admin.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/admin_stats.css') }}">
 </head>
@@ -62,8 +54,6 @@
             <button class="tab-link" data-view="filters-view">Gerenciar Filtros</button>
             <button class="tab-link" data-view="stats-view">Estatísticas</button>
         </nav>
-
-        <!-- Seção de Gerenciamento de Produtos -->
         <section id="products-view" class="admin-section active">
             <div class="section-header">
                 <h2 class="section-title">Todos os Produtos</h2>
@@ -87,8 +77,6 @@
                 </table>
             </div>
         </section>
-
-        <!-- Seção de Gerenciamento de Filtros -->
         <section id="filters-view" class="admin-section">
              <div class="grid-container">
                 <form class="form-card" id="add-filter-form">
@@ -122,8 +110,6 @@
                 </div>
              </div>
         </section>
-        
-        <!-- Seção de Estatísticas -->
         <section id="stats-view" class="admin-section">
             <div class="section-header">
                 <h2 class="section-title">Estatísticas Gerais</h2>
@@ -167,8 +153,6 @@
             </div>
         </section>
     </main>
-
-    <!-- Modal para Adicionar/Editar Produto -->
     <div id="product-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -228,8 +212,7 @@
     <div id="loader" class="loader-overlay" style="display: none;">
         <div class="loader"></div>
     </div>
-
-    <!-- SCRIPTS -->
+    
     <script src="{{ url_for('static', filename='js/admin/admin_ui.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin/admin.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin/admin_stats.js') }}"></script>

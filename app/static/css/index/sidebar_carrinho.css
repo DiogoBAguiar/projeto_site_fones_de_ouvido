@@ -1,6 +1,5 @@
-/* Sidebar do Carrinho */
 .carrinho {
-    position: relative; /* Adicione esta linha */
+    position: relative; 
     background: none;
     border: none;
     cursor: pointer;
@@ -141,7 +140,6 @@
     text-align: center;
     color: var(--secundaria-claro);
 }
-/* Adicione este código no final do seu arquivo CSS */
 .contador-carrinho {
     background-color: var(--cor-link);
     color: #ffffff;
@@ -157,7 +155,6 @@
     transition: transform 0.3s ease-in-out;
 }
 
-/* Mostra o contador quando o valor é maior que zero */
 .contador-carrinho.visivel {
     transform: scale(1);
 }

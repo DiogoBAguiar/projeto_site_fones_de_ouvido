@@ -21,7 +21,6 @@
                     {% endif %}
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                        <!-- Botão com animação de tema -->
                         <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
                             <span class="toggle-text"></span>
                             <div class="toggle-switch">
@@ -37,7 +36,6 @@
 
     <main class="checkout-container">
         <div class="checkout-layout">
-            <!-- Coluna da direita: Formulários -->
             <div class="form-column">
                 <h2>Informações de Entrega</h2>
                 <form id="checkout-form">
@@ -121,12 +119,9 @@
                     </div>
                 </form>
             </div>
-
-            <!-- Coluna da esquerda: Resumo do Pedido -->
             <div class="summary-column">
                 <h2>Resumo do Pedido</h2>
                 <div id="summary-items">
-                    <!-- Itens do carrinho serão inseridos aqui pelo JS -->
                 </div>
                 <div class="coupon-section">
                     <input type="text" id="coupon-input" placeholder="Código do cupom">
@@ -154,8 +149,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Modal de Sucesso -->
     <div id="success-modal" class="modal-overlay">
         <div class="modal-content">
             <i class="fas fa-check-circle success-icon"></i>

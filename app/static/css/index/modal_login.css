@@ -1,6 +1,5 @@
-/* Estilos para o Modal de Login */
 .modal {
-    display: none; /* Oculto por padrão */
+    display: none;
     position: fixed;
     z-index: 102;
     left: 0;

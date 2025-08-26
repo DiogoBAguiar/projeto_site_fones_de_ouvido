@@ -1,28 +1,27 @@
 
 .produtos-destaque-container {
     position: relative;
-    max-width: 1200px; /* Limita a largura do carrossel */
+    max-width: 1200px; 
     margin: 0px auto;
-    padding: 5px 50px; /* Espaço para os botões */
+    padding: 5px 50px; 
 }
 
 .grade-produtos {
-    display: flex; /* Alterado de grid para flex */
+    display: flex; 
     gap: 2rem;
-    overflow-x: auto; /* Permite a rolagem horizontal */
+    overflow-x: auto;
     scroll-behavior: smooth;
-    padding-bottom: 1rem; /* Espaço para a barra de rolagem não sobrepor a sombra */
-    /* Esconde a barra de rolagem */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* IE and Edge */
+    padding-bottom: 1rem; 
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
 }
 
 .grade-produtos::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Opera */
+    display: none; 
 }
 
 .cartao-produto {
-    flex: 0 0 300px; /* Define um tamanho fixo para os cards */
+    flex: 0 0 300px; 
     background-color: var(--card-claro);
     border-radius: 12px;
     overflow: hidden;
@@ -52,13 +51,12 @@
 .descricao-produto {
     color: var(--secundaria-claro);
     margin-bottom: 1rem;
-    /* Limita o texto da descrição para evitar que o card cresça muito */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 2.5em; /* Garante altura mínima para 2 linhas */
+    min-height: 2.5em;
 }
 
 .preco-produto {
@@ -86,7 +84,6 @@
     transform: scale(1.01);
 }
 
-/* Estilos dos botões do slider */
 .slider-btn {
     position: absolute;
     top: 50%;
@@ -101,7 +98,7 @@
     color: var(--primaria-claro);
     cursor: pointer;
     z-index: 10;
-    display: none; /* Escondido por padrão */
+    display: none; 
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);

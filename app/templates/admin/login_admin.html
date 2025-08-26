@@ -9,11 +9,8 @@
 </head>
 <body>
     <main class="container">
-        <!-- O action do formulário aponta para a rota de login do administrador -->
         <form action="{{ url_for('admin_page.admin_login') }}" method="post">
             <h1>Login de Administrador</h1>
-            
-            <!-- Mensagens de erro/sucesso do Flask -->
             {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <ul class="flashes">
