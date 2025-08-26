@@ -3,7 +3,7 @@
 
 import os
 from flask import (
-    Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
+    Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, send_from_directory
 )
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
@@ -37,36 +37,48 @@ def update_profile():
         confirm_password = request.form.get('confirm_password')
         profile_picture_file = request.files.get('profile_picture')
 
-        # Validação dos dados
-        if email != current_user.email and data_manager.get_user_by_email(email):
-            flash('O novo email informado já está em uso por outra conta.', 'danger')
-            return redirect(url_for('user.profile'))
-
+        # Validações básicas
         if password and password != confirm_password:
-            flash('As novas senhas não coincidem.', 'danger')
+            flash('As senhas não coincidem.', 'danger')
             return redirect(url_for('user.profile'))
-
-        # Atualiza os dados do objeto 'current_user'
+        
+        # Atualiza o nome de usuário e o email
         current_user.username = username
         current_user.email = email
+        
+        # NOVOS CAMPOS: Coleta e atualiza os dados de endereço
+        current_user.address = request.form.get('address')
+        current_user.city = request.form.get('city')
+        current_user.state = request.form.get('state')
+        current_user.zip_code = request.form.get('zip')
 
-        # Se uma nova senha foi fornecida, atualiza o hash
+        # Atualiza a senha, se fornecida
         if password:
             current_user.password_hash = generate_password_hash(password)
 
-        # Se uma nova foto de perfil foi enviada, salva o arquivo
+        # Lógica para salvar a foto de perfil
         if profile_picture_file and profile_picture_file.filename != '':
-            # Cria um nome de arquivo seguro para evitar conflitos e problemas de segurança
-            filename = f"user_{current_user.id}_{secure_filename(profile_picture_file.filename)}"
-            save_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            # Define o diretório de uploads para o banco de dados
+            user_upload_folder = os.path.join(data_manager.DATA_FOLDER, 'uploads', 'users', str(current_user.id))
             
-            # Cria a pasta de uploads se não existir
-            os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-            
-            profile_picture_file.save(save_path)
-            # Salva o caminho relativo para ser usado no template HTML
-            current_user.profile_picture = f"/static/uploads/{filename}"
+            # Cria a pasta se ela não existir
+            os.makedirs(user_upload_folder, exist_ok=True)
 
+            # Deleta a foto antiga, se existir
+            if current_user.profile_picture:
+                old_picture_filename = os.path.basename(current_user.profile_picture)
+                old_picture_path = os.path.join(user_upload_folder, old_picture_filename)
+                if os.path.exists(old_picture_path):
+                    os.remove(old_picture_path)
+                    
+            # Salva o novo arquivo
+            filename = secure_filename(profile_picture_file.filename)
+            save_path = os.path.join(user_upload_folder, filename)
+            profile_picture_file.save(save_path)
+            
+            # Atualiza o caminho da imagem no modelo de usuário
+            current_user.profile_picture = url_for('user.profile_picture', filename=f"{current_user.id}/{filename}")
+        
         # Salva o objeto User atualizado no arquivo CSV
         data_manager.save_user(current_user)
         
@@ -76,6 +88,18 @@ def update_profile():
         flash(f'Ocorreu um erro inesperado ao atualizar o perfil: {e}', 'danger')
     
     return redirect(url_for('user.profile'))
+
+@user_bp.route('/profile-pictures/<path:filename>')
+def profile_picture(filename):
+    """
+    Serve a foto de perfil do usuário a partir da pasta de dados,
+    fora do diretório 'static'.
+    """
+    # A URL é formatada como "ID/nome_do_arquivo", então precisamos separar.
+    user_id = filename.split('/')[0]
+    file_name = "/".join(filename.split('/')[1:])
+    folder_path = os.path.join(data_manager.DATA_FOLDER, 'uploads', 'users', user_id)
+    return send_from_directory(folder_path, file_name)
 
 
 # --- ROTAS DE API DO USUÁRIO (JSON) ---
@@ -89,7 +113,10 @@ def get_profile_data():
             "id": current_user.id,
             "username": current_user.username,
             "email": current_user.email,
-            "profile_picture": current_user.profile_picture,
-            "date_joined": current_user.date_joined.isoformat()
+            "profile_picture": current_user.profile_picture or '',
+            "address": current_user.address or '',  # NOVO: Incluído na resposta da API
+            "city": current_user.city or '',        # NOVO: Incluído na resposta da API
+            "state": current_user.state or '',      # NOVO: Incluído na resposta da API
+            "zip_code": current_user.zip_code or ''  # NOVO: Incluído na resposta da API
         })
     return jsonify({"error": "Usuário não autenticado"}), 401

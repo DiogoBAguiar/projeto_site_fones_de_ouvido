@@ -20,7 +20,11 @@ class User(UserMixin):
                  password_hash: str,
                  role: str,
                  profile_picture: Optional[str] = None,
-                 date_joined: Optional[datetime] = None):
+                 date_joined: Optional[datetime] = None,
+                 address: Optional[str] = None, # NOVO: Campo de endereço
+                 city: Optional[str] = None,    # NOVO: Campo de cidade
+                 state: Optional[str] = None,   # NOVO: Campo de estado
+                 zip_code: Optional[str] = None): # NOVO: Campo de CEP
         """
         Inicializa uma instância de Usuário.
 
@@ -32,6 +36,10 @@ class User(UserMixin):
             role (str): O papel do usuário (ex: 'user', 'admin').
             profile_picture (Optional[str]): O caminho URL para a foto de perfil.
             date_joined (Optional[datetime]): A data e hora do registro. Se None, usa o tempo atual.
+            address (Optional[str]): Endereço do usuário.
+            city (Optional[str]): Cidade do usuário.
+            state (Optional[str]): Estado do usuário.
+            zip_code (Optional[str]): Código postal (CEP) do usuário.
         """
         self.id = id
         self.username = username
@@ -40,6 +48,10 @@ class User(UserMixin):
         self.role = role
         self.profile_picture = profile_picture
         self.date_joined = date_joined or datetime.utcnow()
+        self.address = address
+        self.city = city
+        self.state = state
+        self.zip_code = zip_code
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -55,7 +67,11 @@ class User(UserMixin):
             'password_hash': self.password_hash,
             'role': self.role,
             'profile_picture': self.profile_picture or '', # Garante que não seja None
-            'date_joined': self.date_joined.isoformat()
+            'date_joined': self.date_joined.isoformat(),
+            'address': self.address or '', # NOVO: Incluído no dicionário
+            'city': self.city or '',       # NOVO: Incluído no dicionário
+            'state': self.state or '',     # NOVO: Incluído no dicionário
+            'zip_code': self.zip_code or '' # NOVO: Incluído no dicionário
         }
 
     @classmethod
@@ -74,7 +90,7 @@ class User(UserMixin):
             date_joined = datetime.fromisoformat(data.get('date_joined'))
         except (ValueError, TypeError):
             date_joined = datetime.utcnow()
-
+        
         return cls(
             id=int(data['id']),
             username=data.get('username', 'Usuário Anônimo'),
@@ -82,11 +98,13 @@ class User(UserMixin):
             password_hash=data.get('password_hash', ''),
             role=data.get('role', 'user'),
             profile_picture=data.get('profile_picture'),
-            date_joined=date_joined
+            date_joined=date_joined,
+            address=data.get('address'), # NOVO: Carrega os dados de endereço
+            city=data.get('city'),       # NOVO: Carrega os dados de cidade
+            state=data.get('state'),     # NOVO: Carrega os dados de estado
+            zip_code=data.get('zip_code') # NOVO: Carrega os dados de CEP
         )
 
-    # O método get_id() já é fornecido pelo UserMixin, mas podemos mantê-lo
-    # para clareza, garantindo que ele retorne uma string.
     def get_id(self) -> str:
         """
         Retorna o ID do usuário como uma string, conforme exigido pelo Flask-Login.

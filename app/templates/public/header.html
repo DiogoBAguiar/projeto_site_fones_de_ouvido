@@ -48,10 +48,22 @@
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         {% if current_user.is_authenticated %}
                             <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                            <button id="alternar-tema-dropdown">Configurações do Sistema</button>
+                            <!-- Botão com animação de tema -->
+                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                <span class="toggle-text">Configurações do Sistema</span>
+                                <div class="toggle-switch">
+                                    <span class="toggle-circle"></span>
+                                </div>
+                            </button>
                             <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
                         {% else %}
-                            <button id="alternar-tema-dropdown">Configurações do Sistema</button>
+                             <!-- Botão com animação de tema para usuários não logados -->
+                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                <span class="toggle-text">Configurações do Sistema</span>
+                                <div class="toggle-switch">
+                                    <span class="toggle-circle"></span>
+                                </div>
+                            </button>
                         {% endif %}
                     </div>
                 </div>

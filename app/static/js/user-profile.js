@@ -3,12 +3,18 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    const API_PROFILE_URL = window.location.origin + '/api/user/profile';
+    const API_PROFILE_URL = window.location.origin + '/user/api/profile';
     const formProfile = document.getElementById('edit-profile-form');
     const profilePictureInput = document.getElementById('profile-picture-input');
     const profilePictureImg = document.getElementById('profile-picture-display');
     const formUsername = document.getElementById('username');
     const formEmail = document.getElementById('email');
+    
+    // NOVOS CAMPOS: Seleciona os elementos de endereço
+    const formAddress = document.getElementById('address');
+    const formCity = document.getElementById('city');
+    const formState = document.getElementById('state');
+    const formZip = document.getElementById('zip');
 
     // Função para carregar os dados do perfil do usuário
     async function fetchUserProfile() {
@@ -22,8 +28,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Popula o formulário com os dados do usuário
             formUsername.value = user.username;
             formEmail.value = user.email;
+            
+            // Popula os novos campos de endereço
+            formAddress.value = user.address;
+            formCity.value = user.city;
+            formState.value = user.state;
+            formZip.value = user.zip_code;
+            
+            // Corrige o caminho da foto de perfil
             if (user.profile_picture) {
                 profilePictureImg.src = user.profile_picture;
+            } else {
+                 profilePictureImg.src = "{{ url_for('static', filename='images/perfil_padrao.png') }}";
             }
         } catch (error) {
             console.error("Erro ao carregar o perfil:", error);

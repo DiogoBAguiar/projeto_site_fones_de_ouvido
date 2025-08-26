@@ -89,8 +89,8 @@ def create_product():
             price=float(product_data['price']), 
             status=product_data['status'], 
             description=product_data['description'], 
+            specs=product_data['specs'], # NOVO: Inclui as especificações aqui
             images=[], 
-            specs="", 
             seller_id=current_user.id, 
             filters=product_data.get('filters', [])
         )
@@ -133,6 +133,7 @@ def update_product(product_id):
         product.price = float(product_data['price'])
         product.status = product_data['status']
         product.description = product_data['description']
+        product.specs = product_data['specs'] # NOVO: Atualiza as especificações
         product.filters = product_data.get('filters', [])
 
         if images:

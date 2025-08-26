@@ -31,6 +31,7 @@ window.addEventListener('load', () => {
     const productBrandSelect = document.getElementById('product-brand');
     const productStatusSelect = document.getElementById('product-status');
     const productDescriptionInput = document.getElementById('product-description');
+    const productSpecsInput = document.getElementById('product-specs'); // NOVO: Campo de especificações
     const productFiltersAccordion = document.getElementById('product-filters-accordion');
     
     // Upload de Imagens
@@ -124,6 +125,7 @@ window.addEventListener('load', () => {
             brand: productBrandSelect.value,
             status: productStatusSelect.value,
             description: productDescriptionInput.value,
+            specs: productSpecsInput.value, // NOVO: Adiciona o valor do campo de especificações
             filters: selectedFilters
         };
 
@@ -200,6 +202,7 @@ window.addEventListener('load', () => {
             productBrandSelect.value = product.brand;
             productStatusSelect.value = product.status;
             productDescriptionInput.value = product.description;
+            productSpecsInput.value = product.specs; // NOVO: Popula o campo de especificações
             
             if (product.filters) {
                 product.filters.forEach(filterId => {

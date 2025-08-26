@@ -3,28 +3,32 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- LÓGICA DO HEADER (MENU DE PERFIL E TEMA) ---
-    // Adicionado aqui para garantir a funcionalidade na página de checkout.
+    // --- LÓGICA DE ALTERNÂNCIA DE TEMA (Claro/Escuro) ---
     const body = document.body;
     const alternarTemaDropdown = document.getElementById('alternar-tema-dropdown');
-    const btnPerfil = document.getElementById('btn-perfil');
-    const dropdownPerfil = document.getElementById('dropdown-perfil');
 
-    // Função para alternar o tema
+    function carregarTema() {
+        const temaSalvo = localStorage.getItem('tema') || 'claro';
+        body.classList.toggle('tema-escuro', temaSalvo === 'escuro');
+    }
+
     function alternarTema() {
         body.classList.toggle('tema-escuro');
         const novoTema = body.classList.contains('tema-escuro') ? 'escuro' : 'claro';
         localStorage.setItem('tema', novoTema);
     }
-
+    
+    carregarTema();
     if (alternarTemaDropdown) {
         alternarTemaDropdown.addEventListener('click', alternarTema);
     }
 
-    // Lógica para o menu dropdown do perfil
+    // --- LÓGICA DO MENU DROPDOWN DE PERFIL ---
+    const btnPerfil = document.getElementById('btn-perfil');
+    const dropdownPerfil = document.getElementById('dropdown-perfil');
+
     if (btnPerfil && dropdownPerfil) {
         btnPerfil.addEventListener('click', (e) => {
-            // Previne o comportamento padrão apenas se for um botão (usuário logado)
             if (btnPerfil.tagName === 'BUTTON') {
                 e.preventDefault();
                 dropdownPerfil.classList.toggle('ativo');
@@ -32,12 +36,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Fecha o dropdown se o usuário clicar fora
     document.addEventListener('click', (e) => {
         if (dropdownPerfil && !e.target.closest('.perfil-container')) {
             dropdownPerfil.classList.remove('ativo');
         }
     });
+
+    // --- FUNÇÃO GLOBAL DE MENSAGEM ---
+    function exibirMensagem(message, type = 'info') {
+        const modalMessage = document.getElementById('modal-message');
+        if (!modalMessage) return;
+        modalMessage.textContent = message;
+        modalMessage.className = `modal-message ${type}`;
+        modalMessage.style.display = 'block';
+        setTimeout(() => {
+            modalMessage.style.display = 'none';
+        }, 3000);
+    }
 
 
     // --- LÓGICA ESPECÍFICA DO CHECKOUT ---
@@ -106,10 +121,16 @@ document.addEventListener('DOMContentLoaded', () => {
     applyCouponBtn.addEventListener('click', () => {
         if (couponInput.value.toUpperCase() === 'DECI10') {
             discount = subtotal * 0.10; // 10% de desconto
-            alert('Cupom de 10% aplicado!');
+            // NOTA: Foi alterado de `alert` para `exibirMensagem`
+            if (window.exibirMensagem) {
+                exibirMensagem('Cupom de 10% aplicado!', 'success');
+            }
             calculateTotals();
         } else {
-            alert('Cupom inválido.');
+            // NOTA: Foi alterado de `alert` para `exibirMensagem`
+            if (window.exibirMensagem) {
+                exibirMensagem('Cupom inválido.', 'warning');
+            }
         }
     });
 
@@ -138,7 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const form = document.getElementById('checkout-form');
         if (!form.checkValidity()) {
-            alert('Por favor, preencha todos os campos obrigatórios.');
+            // NOTA: Foi alterado de `alert` para `exibirMensagem`
+            if (window.exibirMensagem) {
+                exibirMensagem('Por favor, preencha todos os campos obrigatórios.', 'danger');
+            }
             return;
         }
         successModal.style.display = 'flex';

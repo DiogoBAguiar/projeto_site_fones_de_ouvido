@@ -1,154 +1,344 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Perfil - Decibell</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
     <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
     <style>
-        .profile-container {
-            max-width: 800px;
-            margin: 4rem auto;
-            padding: 2rem;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* Estilos específicos para a página de perfil */
+        .profile-main-content {
+            padding: 4rem 0;
+            margin-top: 65px;
         }
+
+        .profile-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--card-claro);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--sombra-claro);
+        }
+
         .profile-header {
             text-align: center;
             margin-bottom: 2rem;
-            width: 100%;
+            border-bottom: 1px solid var(--borda-claro);
+            padding-bottom: 1.5rem;
         }
+
         .profile-header h1 {
             font-size: 2.5rem;
-            color: #333;
+            font-weight: 700;
+            color: var(--primaria-claro);
+            margin-bottom: 0.5rem;
         }
-        .profile-info, .edit-form {
+
+        .profile-form {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .profile-info p {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: #555;
+
+        .profile-form .form-group {
+            margin-bottom: 1.5rem;
         }
-        .profile-info span {
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-        .edit-form .form-group {
-            margin-bottom: 1rem;
-        }
-        .edit-form label {
+
+        .profile-form label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #333;
+            font-weight: 500;
+            color: var(--texto-claro);
         }
-        .edit-form input {
+
+        .profile-form input,
+        .profile-form .form-row input {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border: 1px solid var(--borda-claro);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: transparent;
+            color: var(--texto-claro);
+            transition: border-color 0.2s ease;
         }
+
+        .profile-form input:focus,
+        .profile-form .form-row input:focus {
+            outline: none;
+            border-color: var(--cor-link);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+        }
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
             gap: 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--borda-claro);
+            padding-top: 1.5rem;
         }
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
+
         .profile-picture-container {
             margin-bottom: 1.5rem;
             text-align: center;
         }
+
         .profile-picture {
             width: 150px;
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #ccc;
+            border: 3px solid var(--borda-claro);
         }
+
         .change-photo-btn {
             display: block;
             margin-top: 0.5rem;
-            color: #007bff;
+            color: var(--cor-link);
             cursor: pointer;
+        }
+
+        /* Estilos dos botões do checkout (reutilizados) */
+        .btn-primary {
+            padding: 0.8rem 1.5rem;
+            background: var(--primaria-claro);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secundaria-claro);
+        }
+
+        .btn-secondary {
+            padding: 0.8rem 1.5rem;
+            background: #dcdcdc;
+            color: var(--primaria-claro);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tema-escuro .btn-secondary {
+            background-color: #545458;
+            color: var(--texto-claro);
+        }
+
+        .btn-secondary:hover {
+            background-color: #c0c0c0;
+        }
+
+        .tema-escuro .btn-secondary:hover {
+            background-color: #6e6e73;
         }
     </style>
 </head>
-<body>
-    <div class="profile-container">
-        <div class="profile-header">
-            <h1>Meu Perfil</h1>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="flash-message {{ category }}">{{ message }}</li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-            {% endwith %}
+<body class="tema-claro">
+    <!-- Cabeçalho (Header) do Site -->
+    <header class="cabecalho">
+        <div class="cabecalho-conteiner">
+            <a href="{{ url_for('public.home') }}" class="logo">
+                Decibell
+            </a>
+            <div class="nav-utilidades">
+                <div class="barra-busca-container">
+                    <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
+                </div>
+                <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="contador-carrinho" class="contador-carrinho">0</span>
+                </button>
+                <div class="perfil-container">
+                    {% if current_user.is_authenticated %}
+                        <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
+                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
+                        </button>
+                    {% else %}
+                        <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}">Login</a>
+                    {% endif %}
+                    <div id="dropdown-perfil" class="dropdown-perfil">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
+                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                <span class="toggle-text">Configurações do Sistema</span>
+                                <div class="toggle-switch">
+                                    <span class="toggle-circle"></span>
+                                </div>
+                            </button>
+                            <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
+                        {% else %}
+                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                <span class="toggle-text">Configurações do Sistema</span>
+                                <div class="toggle-switch">
+                                    <span class="toggle-circle"></span>
+                                </div>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <button id="botao-menu-mobile" class="botao-menu-mobile">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
-        
-        <!-- Formulário para editar perfil -->
-        <form id="edit-profile-form" class="edit-form" action="{{ url_for('user.update_profile') }}" method="post" enctype="multipart/form-data">
-            <div class="profile-picture-container">
-                <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="profile-picture">
-                <label for="profile-picture-input" class="change-photo-btn">Alterar Foto</label>
-                <input type="file" id="profile-picture-input" name="profile_picture" accept="image/*" style="display: none;">
+        <nav id="menu-mobile" class="menu-mobile">
+            <button class="fechar-menu-mobile" aria-label="Fechar menu">
+                <i class="fas fa-times"></i>
+            </button>
+            <a href="{{ url_for('public.home') }}" class="link-nav-mobile">Início</a>
+            <a href="{{ url_for('public.products') }}" class="link-nav-mobile">Produtos</a>
+            <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">Alternar Tema</button>
+        </nav>
+    </header>
+    <div id="overlay" class="overlay"></div>
+    <aside id="carrinho-lateral" class="carrinho-lateral">
+        <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">&times;</button>
+        <h2>Seu Carrinho</h2>
+        <ul id="lista-carrinho" class="lista-carrinho"></ul>
+        <div class="total-carrinho">
+            <span>Total:</span>
+            <span id="carrinho-total-valor">R$ 0,00</span>
+        </div>
+        <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
+    </aside>
+
+    <div id="modal-message" class="modal-message"></div>
+
+    <!-- Conteúdo Principal do Perfil -->
+    <main class="profile-main-content">
+        <div class="profile-container">
+            <div class="profile-header">
+                <h1>Meu Perfil</h1>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="flash-message {{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+                {% endwith %}
             </div>
 
-            <div class="form-group">
-                <label for="username">Nome de Usuário</label>
-                <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Nova Senha (deixe em branco para não alterar)</label>
-                <input type="password" id="password" name="password">
-            </div>
-            <div class="form-group">
-                <label for="confirm_password">Confirmar Nova Senha</label>
-                <input type="password" id="confirm_password" name="confirm_password">
-            </div>
+            <form id="edit-profile-form" class="profile-form" action="{{ url_for('user.update_profile') }}" method="post" enctype="multipart/form-data">
+                <div class="profile-picture-container">
+                    <img id="profile-picture-display" src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="profile-picture">
+                    <label for="profile-picture-input" class="change-photo-btn">Alterar Foto</label>
+                    <input type="file" id="profile-picture-input" name="profile_picture" accept="image/*" style="display: none;">
+                </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                <a href="{{ url_for('public.home') }}" class="btn btn-secondary">Cancelar</a>
+                <div class="form-group">
+                    <label for="username">Nome de Usuário</label>
+                    <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+                </div>
+
+                <!-- Novos campos de endereço -->
+                <div class="form-group">
+                    <label for="address">Endereço</label>
+                    <input type="text" id="address" name="address" placeholder="Rua, Número, Bairro" value="{{ current_user.address }}">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">Cidade</label>
+                        <input type="text" id="city" name="city" value="{{ current_user.city }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">Estado</label>
+                        <input type="text" id="state" name="state" value="{{ current_user.state }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="zip">CEP</label>
+                        <input type="text" id="zip" name="zip" value="{{ current_user.zip }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Nova Senha (deixe em branco para não alterar)</label>
+                    <input type="password" id="password" name="password">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirmar Nova Senha</label>
+                    <input type="password" id="confirm_password" name="confirm_password">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    <a href="{{ url_for('public.home') }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="rodape">
+        <div class="conteiner">
+            <div class="rodape-conteiner">
+                <div class="rodape-coluna">
+                    <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
+                    <p>A mais alta fidelidade sonora para seus ouvidos.</p>
+                    <div class="rodape-redes-sociais">
+                        <a href="#" aria-label="Siga-nos no Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Siga-nos no Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Siga-nos no Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Inscreva-se no Youtube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Navegação</h3>
+                    <ul>
+                        <li><a href="{{ url_for('public.products') }}">Produtos</a></li>
+                        <li><a href="#tipos-fones">Estilos</a></li>
+                        <li><a href="#sobre">Sobre</a></li>
+                        <li><a href="#depoimentos">Depoimentos</a></li>
+                    </ul>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Ajuda e Suporte</h3>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#">Contato</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                    </ul>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Newsletter</h3>
+                    <p>Receba ofertas e novidades por e-mail.</p>
+                    <form action="#" class="form-newsletter">
+                        <input type="email" placeholder="Seu e-mail" required>
+                        <button type="submit">Assinar</button>
+                    </form>
+                </div>
             </div>
-        </form>
-    </div>
+            <p class="rodape-copyright">&copy; 2025 Decibell. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-profile.js') }}"></script>
 </body>
 </html>

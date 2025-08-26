@@ -20,7 +20,8 @@ REVIEWS_CSV = os.path.join(DATA_FOLDER, 'reviews.csv')
 FILTERS_CSV = os.path.join(DATA_FOLDER, 'filters.csv')
 VISITS_CSV = os.path.join(DATA_FOLDER, 'visits.csv')
 
-USERS_FIELDNAMES = ['id', 'username', 'email', 'password_hash', 'role', 'profile_picture', 'date_joined']
+# NOVO: Adicionado os campos de endereço aos fieldnames do usuário
+USERS_FIELDNAMES = ['id', 'username', 'email', 'password_hash', 'role', 'profile_picture', 'date_joined', 'address', 'city', 'state', 'zip_code']
 PRODUCTS_FIELDNAMES = ['id', 'name', 'brand', 'price', 'status', 'images', 'description', 'specs', 'seller_id', 'filters']
 REVIEWS_FIELDNAMES = ['id', 'rating', 'comment', 'media_url', 'date_posted', 'user_id', 'product_id']
 FILTERS_FIELDNAMES = ['id', 'name', 'type']
