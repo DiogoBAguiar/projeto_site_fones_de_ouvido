@@ -1,12 +1,8 @@
-# app/__init__.py
-# Implementa o padrão de fábrica de aplicação (Application Factory).
-
 import os
 from flask import Flask, jsonify, request, redirect, url_for
 from flask_login import LoginManager
 from config import config
 
-# Instancia as extensões do Flask fora da fábrica
 login_manager = LoginManager()
 login_manager.login_view = 'public.login'
 login_manager.login_message_category = 'info'
@@ -29,11 +25,9 @@ def create_app(config_name):
     """
     app = Flask(__name__)
 
-    # 1. Carrega a configuração
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
-    # 2. Inicializa as extensões
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -41,11 +35,9 @@ def create_app(config_name):
         from .utils import data_manager
         return data_manager.get_user_by_id(user_id)
 
-    # Garante que a pasta de uploads exista
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
 
-    # 3. Registra os Blueprints
     from .routes.public import public_bp as public_blueprint
     app.register_blueprint(public_blueprint)
 

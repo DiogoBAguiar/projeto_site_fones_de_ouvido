@@ -8,12 +8,10 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 </head>
 <body>
-    <main class="container">
-        <!-- O action do formulário aponta para a rota de login no public.py -->
+    <main class="container"> 
         <form action="{{ url_for('public.login') }}" method="post">
             <h1>Login Decibell</h1>
-            
-            <!-- Mensagens de erro/sucesso do Flask -->
+
             {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <ul class="flashes">

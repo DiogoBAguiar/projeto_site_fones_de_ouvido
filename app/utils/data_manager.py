@@ -1,7 +1,3 @@
-# app/utils/data_manager.py
-# Módulo para gerenciar a leitura e escrita de dados em arquivos CSV.
-# Refatorado para remover a dependência do pandas e otimizar as operações.
-
 import csv
 import os
 import json
@@ -12,23 +8,18 @@ from app.models.product import Product
 from app.models.review import Review
 from app.models.filter import Filter
 
-# --- CONFIGURAÇÃO DE CAMINHOS E CABEÇALHOS ---
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'banco_de_dados')
 USERS_CSV = os.path.join(DATA_FOLDER, 'users.csv')
 PRODUCTS_CSV = os.path.join(DATA_FOLDER, 'products.csv')
 REVIEWS_CSV = os.path.join(DATA_FOLDER, 'reviews.csv')
 FILTERS_CSV = os.path.join(DATA_FOLDER, 'filters.csv')
 VISITS_CSV = os.path.join(DATA_FOLDER, 'visits.csv')
-
-# NOVO: Adicionado os campos de endereço aos fieldnames do usuário
 USERS_FIELDNAMES = ['id', 'username', 'email', 'password_hash', 'role', 'profile_picture', 'date_joined', 'address', 'city', 'state', 'zip_code']
 PRODUCTS_FIELDNAMES = ['id', 'name', 'brand', 'price', 'status', 'images', 'description', 'specs', 'seller_id', 'filters']
 REVIEWS_FIELDNAMES = ['id', 'rating', 'comment', 'media_url', 'date_posted', 'user_id', 'product_id']
 FILTERS_FIELDNAMES = ['id', 'name', 'type']
-# NOVO: Adicionado o campo 'session_id' para rastrear visitas únicas
 VISITS_FIELDNAMES = ['timestamp', 'session_id']
 
-# --- FUNÇÕES UTILITÁRIAS GENÉRICAS ---
 def _read_csv(filepath):
     """Lê um arquivo CSV e retorna uma lista de dicionários. Retorna lista vazia se não existir."""
     if not os.path.exists(filepath):
@@ -36,8 +27,7 @@ def _read_csv(filepath):
         return []
     try:
         with open(filepath, mode='r', newline='', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            # Filtra linhas vazias que podem ser geradas por alguns editores
+            reader = csv.DictReader(file)       
             return [row for row in reader if row]
     except Exception as e:
         print(f"Erro CRÍTICO ao ler o arquivo CSV {filepath}: {e}")
@@ -72,7 +62,6 @@ def _ensure_file_exists(filepath):
         os.makedirs(DATA_FOLDER, exist_ok=True)
         _write_csv(filepath, [], fieldnames)
 
-# --- FUNÇÕES DE GERENCIAMENTO (Usuários, Produtos, Filtros) ---
 def get_users():
     """Retorna uma lista de todos os usuários como objetos User."""
     return [User.from_dict(row) for row in _read_csv(USERS_CSV)]
@@ -126,7 +115,6 @@ def save_product(product):
     products_data = _read_csv(PRODUCTS_CSV)
     product_found = False
 
-    # Se é uma atualização
     if product.id is not None:
         for i, p in enumerate(products_data):
             if str(p.get('id')) == str(product.id):
@@ -134,14 +122,13 @@ def save_product(product):
                 product_found = True
                 break
     
-    # Se é um novo produto
     if not product_found:
-        if product.id is None: # Garante que é novo
+        if product.id is None: 
             product.id = get_next_id(PRODUCTS_CSV)
         products_data.append(product.to_dict())
 
     _write_csv(PRODUCTS_CSV, products_data, PRODUCTS_FIELDNAMES)
-    return product # Retorna o produto com o ID atribuído
+    return product 
     
 def delete_product(product_id):
     """Deleta um produto pelo ID."""
@@ -170,7 +157,6 @@ def delete_filter(filter_id):
         return True
     return False
 
-# --- FUNÇÕES DE ANÁLISE E VISITAS ---
 def register_visit(session_id):
     """
     Registra o timestamp e o ID da sessão de uma nova visita.
@@ -232,12 +218,11 @@ def get_visits_per_period(period='day'):
                 year -= 1
             labels.append(datetime(year, month, 1).strftime(date_format))
         labels.reverse()
-    else: # year
+    else: 
         start_time = now - timedelta(days=5*365)
         date_format = '%Y'
         labels = [str(year) for year in range(now.year - 4, now.year + 1)]
 
-    # Usa um dicionário para rastrear sessões únicas por período
     counts = {label: set() for label in labels}
     
     for row in visits_data:

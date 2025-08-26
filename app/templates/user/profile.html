@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Perfil - Decibell</title>
-    <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
     <style>
         /* Estilos específicos para a página de perfil */
@@ -224,8 +222,6 @@
     </aside>
 
     <div id="modal-message" class="modal-message"></div>
-
-    <!-- Conteúdo Principal do Perfil -->
     <main class="profile-main-content">
         <div class="profile-container">
             <div class="profile-header">
@@ -255,9 +251,7 @@
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
-                </div>
-
-                <!-- Novos campos de endereço -->
+                </div>           
                 <div class="form-group">
                     <label for="address">Endereço</label>
                     <input type="text" id="address" name="address" placeholder="Rua, Número, Bairro" value="{{ current_user.address }}">
@@ -293,8 +287,6 @@
             </form>
         </div>
     </main>
-
-    <!-- Rodapé -->
     <footer class="rodape">
         <div class="conteiner">
             <div class="rodape-conteiner">

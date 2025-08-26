@@ -9,46 +9,32 @@
 <body>
     <header class="cabecalho">
         <div class="cabecalho-conteiner">
-            <!-- Logo/Nome da Loja -->
             <a href="{{ url_for('public.home') }}" class="logo">
                 Decibell
             </a>
-
-            <!-- Utilitários: Lupa, Carrinho e Perfil -->
             <div class="nav-utilidades">
-                <!-- Contêiner da barra de pesquisa -->
                 <div class="barra-busca-container">
                     <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
                         <i class="fas fa-search"></i>
                     </button>
                     <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
                 </div>
-
-                <!-- Ícone de Carrinho (agora um botão para abrir o menu lateral) -->
                 <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
                     <i class="fas fa-shopping-cart"></i>
                     <span id="contador-carrinho" class="contador-carrinho">0</span>
                 </button>
-
-                <!-- Menu de Perfil do Usuário -->
                 <div class="perfil-container">
-                    <!-- O conteúdo deste botão será definido via Jinja/Flask -->
                     {% if current_user.is_authenticated %}
-                        <!-- Se o usuário estiver logado, mostra a foto de perfil -->
-                        <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
-                            <!-- A foto de perfil agora vem do modelo de usuário, que será atualizado para CSV -->
+                        <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">                          
                             <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
                         </button>
-                    {% else %}
-                        <!-- Se o usuário não estiver logado, mostra o botão de login -->
+                    {% else %}                 
                         <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}">Login</a>
                     {% endif %}
-                    
-                    <!-- Dropdown de Perfil -->
+                                      
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         {% if current_user.is_authenticated %}
                             <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                            <!-- Botão com animação de tema -->
                             <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
                                 <span class="toggle-text">Configurações do Sistema</span>
                                 <div class="toggle-switch">
@@ -57,7 +43,6 @@
                             </button>
                             <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
                         {% else %}
-                             <!-- Botão com animação de tema para usuários não logados -->
                             <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
                                 <span class="toggle-text">Configurações do Sistema</span>
                                 <div class="toggle-switch">
@@ -68,14 +53,11 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Botão do Menu Mobile (oculto em desktop) -->
             <button id="botao-menu-mobile" class="botao-menu-mobile">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
 
-        <!-- Menu Mobile - Conteúdo (oculto por padrão) -->
         <nav id="menu-mobile" class="menu-mobile">
             <button class="fechar-menu-mobile" aria-label="Fechar menu">
                 <i class="fas fa-times"></i>
@@ -92,18 +74,13 @@
             </button>
         </nav>
     </header>
-    
-    <!-- Overlay para o menu lateral -->
     <div id="overlay" class="overlay"></div>
-
-    <!-- Menu Lateral do Carrinho (Sidebar) -->
     <aside id="carrinho-lateral" class="carrinho-lateral">
         <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">
             &times;
         </button>
         <h2>Seu Carrinho</h2>
         <ul id="lista-carrinho" class="lista-carrinho">
-            <!-- Itens do carrinho serão adicionados aqui via JS -->
         </ul>
         <div class="total-carrinho">
             <span>Total:</span>
@@ -111,8 +88,6 @@
         </div>
         <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
     </aside>
-
-    <!-- Modal para mensagens de feedback -->
     <div id="modal-message" class="modal-message"></div>
 
 </body>

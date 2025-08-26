@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.name }} - Detalhes do Produto</title>
-    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/products/products-details.css') }}">
-    <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="tema-claro">
-    <!-- Cabeçalho (Header) do Site -->
     <header class="cabecalho">
         <div class="cabecalho-conteiner">
             <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
@@ -57,8 +54,6 @@
             <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">Alternar Tema</button>
         </nav>
     </header>
-
-    <!-- Overlay e Carrinho Lateral -->
     <div id="overlay" class="overlay"></div>
     <aside id="carrinho-lateral" class="carrinho-lateral">
         <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">&times;</button>
@@ -71,8 +66,6 @@
         <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
     </aside>
     <div id="modal-message" class="modal-message"></div>
-
-    <!-- Conteúdo Principal -->
     <main class="conteudo-principal-details">
         <div class="container-details">
             <nav class="breadcrumb">
@@ -122,8 +115,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Rodapé -->
     <footer class="rodape">
         <div class="conteiner">
             <p class="rodape-copyright">&copy; 2025 Decibell. Todos os direitos reservados.</p>

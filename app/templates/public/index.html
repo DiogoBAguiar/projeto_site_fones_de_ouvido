@@ -6,59 +6,40 @@
     <meta name="description" content="Decibell - Fones de ouvido premium. Tecnologia de áudio de alta qualidade, conforto e design sofisticado.">
     <meta name="theme-color" content="#1a1a1a">
     <title>Decibell - Fones de Ouvido</title>
-    
-    <!-- Fonte Inter do Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Ícones - Font Awesome para ícones como lupa, carrinho, menu, etc. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body class="tema-claro">
-    <!-- Cabeçalho (Header) do Site -->
     <header class="cabecalho">
         <div class="cabecalho-conteiner">
-            <!-- Logo/Nome da Loja -->
             <a href="{{ url_for('public.home') }}" class="logo">
                 Decibell
             </a>
-
-            <!-- Utilitários: Lupa, Carrinho e Perfil -->
             <div class="nav-utilidades">
-                <!-- Contêiner da barra de pesquisa -->
                 <div class="barra-busca-container">
                     <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
                         <i class="fas fa-search"></i>
                     </button>
                     <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
                 </div>
-
-                <!-- Ícone de Carrinho (agora um botão para abrir o menu lateral) -->
                 <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
                     <i class="fas fa-shopping-cart"></i>
                     <span id="contador-carrinho" class="contador-carrinho">0</span>
                 </button>
-
-                <!-- Menu de Perfil do Usuário -->
                 <div class="perfil-container">
-                    <!-- O conteúdo deste botão será definido via Jinja/Flask -->
                     {% if current_user.is_authenticated %}
-                        <!-- Se o usuário estiver logado, mostra a foto de perfil -->
                         <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
-                            <!-- A foto de perfil agora vem do modelo de usuário, que será atualizado para CSV -->
                             <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
                         </button>
                     {% else %}
-                        <!-- Se o usuário não estiver logado, mostra o botão de login -->
                         <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}">Login</a>
                     {% endif %}
-                    
-                    <!-- Dropdown de Perfil -->
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         {% if current_user.is_authenticated %}
                             <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                            <!-- Botão com animação de tema -->
                             <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
                                 <span class="toggle-text"></span>
                                 <div class="toggle-switch">
@@ -67,7 +48,6 @@
                             </button>
                             <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
                         {% else %}
-                             <!-- Botão com animação de tema para usuários não logados -->
                             <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
                                 <span class="toggle-text"></span>
                                 <div class="toggle-switch">
@@ -78,14 +58,10 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Botão do Menu Mobile (oculto em desktop) -->
             <button id="botao-menu-mobile" class="botao-menu-mobile">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
-
-        <!-- Menu Mobile - Conteúdo (oculto por padrão) -->
         <nav id="menu-mobile" class="menu-mobile">
             <button class="fechar-menu-mobile" aria-label="Fechar menu">
                 <i class="fas fa-times"></i>
@@ -102,18 +78,13 @@
             </button>
         </nav>
     </header>
-    
-    <!-- Overlay para o menu lateral -->
     <div id="overlay" class="overlay"></div>
-
-    <!-- Menu Lateral do Carrinho (Sidebar) -->
     <aside id="carrinho-lateral" class="carrinho-lateral">
         <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">
             &times;
         </button>
         <h2>Seu Carrinho</h2>
         <ul id="lista-carrinho" class="lista-carrinho">
-            <!-- Itens do carrinho serão adicionados aqui via JS -->
         </ul>
         <div class="total-carrinho">
             <span>Total:</span>
@@ -121,15 +92,9 @@
         </div>
         <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
     </aside>
-
-    <!-- Modal para mensagens de feedback -->
     <div id="modal-message" class="modal-message"></div>
-
-    <!-- Conteúdo Principal -->
     <main class="conteudo-principal">
-        <!-- Seção de Destaque (Hero) -->
         <section id="destaque" class="secao secao-destaque oculta">
-            <!-- Canvas para a animação de fundo -->
             <canvas id="hero-animation-canvas"></canvas>
             <div class="destaque-content">
                 <h1 class="titulo-destaque">
@@ -143,8 +108,6 @@
                 </a>
             </div>
         </section>
-
-        <!-- Seção de Banners -->
         <section id="banners" class="secao secao-banners oculta">
             <div class="conteiner">
                 <div class="cartao-banner">
@@ -163,29 +126,23 @@
                 </div>
             </div>
         </section>
-
-        <!-- Seção de Tipos de Fones -->
         <section id="tipos-fones" class="secao secao-tipos-fones oculta">
             <div class="conteiner">
                 <h1 class="titulo-secao">Siga o seu estilo</h1>
                 <h2 class="titulo-tipos-fones">Do imersivo ao portátil, encontre o fone de ouvido que se adapta perfeitamente à sua vida.</h2>
                 <div class="grade-tipos-fones">
-                    <!-- Fone Supra-auricular -->
                     <a href="{{ url_for('public.products', tipo='supra-auricular') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/94a3b8/ffffff?text=Supra-auricular" alt="Fone de ouvido supra-auricular" class="imagem-tipo">
                         <h3 class="nome-tipo">Supra-auricular</h3>
                     </a>
-                    <!-- Fone Circumaural -->
                     <a href="{{ url_for('public.products', tipo='circumaural') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/64748b/ffffff?text=Circumaural" alt="Fone de ouvido circumaural" class="imagem-tipo">
                         <h3 class="nome-tipo">Circumaural</h3>
                     </a>
-                    <!-- Fone Intra-auricular -->
                     <a href="{{ url_for('public.products', tipo='intra-auricular') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/475569/ffffff?text=Intra-auricular" alt="Fone de ouvido intra-auricular" class="imagem-tipo">
                         <h3 class="nome-tipo">Intra-auricular</h3>
                     </a>
-                    <!-- Fone Sem fio -->
                     <a href="{{ url_for('public.products', tipo='sem-fio') }}" class="cartao-tipo">
                         <img src="https://placehold.co/400x400/334155/ffffff?text=Sem+fio" alt="Fone de ouvido sem fio" class="imagem-tipo">
                         <h3 class="nome-tipo">Sem fio</h3>
@@ -193,20 +150,15 @@
                 </div>
             </div>
         </section>
-
-        <!-- Seção de Produtos em Destaque -->
         <section id="produtos-destaque" class="secao secao-produtos-destaque oculta">
             <h2 class="titulo-secao">Produtos em Destaque</h2>
             <div class="produtos-destaque-container">
                 <button class="slider-btn prev" aria-label="Anterior">&lt;</button>
                 <div class="grade-produtos">
-                    <!-- Os produtos serão injetados aqui via JavaScript. -->
                 </div>
                 <button class="slider-btn next" aria-label="Próximo">&gt;</button>
             </div>
         </section>
-
-        <!-- Seção de Depoimentos -->
         <section id="depoimentos" class="secao secao-depoimentos oculta">
             <div class="conteiner">
                 <h2 class="titulo-secao">O que nossos clientes dizem</h2>
@@ -244,8 +196,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Seção Sobre a Decibell -->
         <section id="sobre" class="secao secao-sobre oculta">
             <div class="conteiner">
                 <div class="conteudo-sobre">
@@ -258,8 +208,7 @@
                 </div>
             </div>
         </section>
-        
-        <!-- Seção de FAQ (Perguntas Frequentes) -->
+
         <section id="faq" class="secao secao-faq oculta">
             <h2 class="titulo-secao">Perguntas Frequentes</h2>
             <div class="faq-grade">
@@ -282,7 +231,6 @@
             </div>
         </section>
 
-        <!-- Seção de Newsletter -->
         <section class="secao secao-newsletter oculta">
             <div class="conteiner">
                 <h2 class="titulo-secao">Receba nossas novidades</h2>
@@ -295,7 +243,6 @@
         </section>
     </main>
 
-    <!-- Rodapé -->
     <footer class="rodape">
         <div class="conteiner">
             <div class="rodape-conteiner">
@@ -340,7 +287,6 @@
         </div>
     </footer>
 
-    <!-- Modal de Login (em index.html agora) -->
     <div id="modal-login" class="modal">
         <div class="conteudo-modal-login">
             <span class="fechar-modal-login">&times;</span>
