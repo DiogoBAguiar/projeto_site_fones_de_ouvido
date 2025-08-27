@@ -1,6 +1,3 @@
-# app/routes/user.py
-# Lida com as rotas para usuários autenticados, como a página de perfil.
-
 import os
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, send_from_directory
@@ -45,25 +42,16 @@ def update_profile():
         # Atualiza o nome de usuário e o email
         current_user.username = username
         current_user.email = email
-        
-        # NOVOS CAMPOS: Coleta e atualiza os dados de endereço
         current_user.address = request.form.get('address')
         current_user.city = request.form.get('city')
         current_user.state = request.form.get('state')
         current_user.zip_code = request.form.get('zip')
-
-        # Atualiza a senha, se fornecida
         if password:
             current_user.password_hash = generate_password_hash(password)
-
-        # Lógica para salvar a foto de perfil
         if profile_picture_file and profile_picture_file.filename != '':
-            # Define o diretório de uploads para o banco de dados
             user_upload_folder = os.path.join(data_manager.DATA_FOLDER, 'uploads', 'users', str(current_user.id))
             
-            # Cria a pasta se ela não existir
             os.makedirs(user_upload_folder, exist_ok=True)
-
             # Deleta a foto antiga, se existir
             if current_user.profile_picture:
                 old_picture_filename = os.path.basename(current_user.profile_picture)
@@ -114,9 +102,9 @@ def get_profile_data():
             "username": current_user.username,
             "email": current_user.email,
             "profile_picture": current_user.profile_picture or '',
-            "address": current_user.address or '',  # NOVO: Incluído na resposta da API
-            "city": current_user.city or '',        # NOVO: Incluído na resposta da API
-            "state": current_user.state or '',      # NOVO: Incluído na resposta da API
-            "zip_code": current_user.zip_code or ''  # NOVO: Incluído na resposta da API
+            "address": current_user.address or '',  
+            "city": current_user.city or '',       
+            "state": current_user.state or '',     
+            "zip_code": current_user.zip_code or ''  
         })
     return jsonify({"error": "Usuário não autenticado"}), 401

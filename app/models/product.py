@@ -1,16 +1,8 @@
-# app/models/product.py
-# Define o modelo de dados para os produtos da aplicação.
-
 import json
 from typing import List, Dict, Any, Optional
 
 class Product:
-    """
-    Representa um produto no catálogo da loja.
 
-    Esta classe serve como um modelo de dados para manipular informações de produtos
-    que são lidas e escritas em arquivos CSV.
-    """
     def __init__(self,
                  id: Optional[int],
                  name: str,
@@ -22,21 +14,7 @@ class Product:
                  specs: str,
                  seller_id: int,
                  filters: Optional[List[int]] = None):
-        """
-        Inicializa uma instância de Produto.
-
-        Args:
-            id (Optional[int]): O ID único do produto. Pode ser None para novos produtos.
-            name (str): O nome do produto.
-            brand (str): A marca do produto.
-            price (float): O preço do produto.
-            status (str): O status (ex: 'Em estoque', 'Em destaque').
-            images (List[str]): Uma lista de caminhos URL para as imagens do produto.
-            description (str): A descrição detalhada do produto.
-            specs (str): As especificações técnicas do produto.
-            seller_id (int): O ID do usuário que vende/cadastrou o produto.
-            filters (Optional[List[int]]): Uma lista de IDs de filtros associados.
-        """
+        
         self.id = id
         self.name = name
         self.brand = brand
@@ -49,16 +27,7 @@ class Product:
         self.filters = filters if filters is not None else []
 
     def to_dict(self, simplify: bool = False) -> Dict[str, Any]:
-        """
-        Converte a instância do produto para um dicionário.
 
-        Args:
-            simplify (bool): Se True, retorna uma versão simplificada do dicionário,
-                             adequada para listagens públicas na API.
-
-        Returns:
-            Dict[str, Any]: Um dicionário representando o produto.
-        """
         data = {
             'id': self.id,
             'name': self.name,
@@ -66,32 +35,23 @@ class Product:
             'price': self.price,
             'status': self.status,
             'images': self.images,
-            'description': self.description, # CORREÇÃO: Adicionado ao dicionário base
+            'description': self.description, 
         }
         if not simplify:
-            # Para salvar no CSV ou para visualizações detalhadas, serializa tudo
+
             data.update({
                 'specs': self.specs,
                 'seller_id': self.seller_id,
                 'filters': self.filters
             })
-            # Converte listas para string JSON para armazenamento no CSV
+    
             data['images'] = json.dumps(self.images)
             data['filters'] = json.dumps(self.filters)
         return data
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Product':
-        """
-        Cria uma instância de Produto a partir de um dicionário (geralmente de uma linha de CSV).
-
-        Args:
-            data (Dict[str, Any]): O dicionário com os dados do produto.
-
-        Returns:
-            Product: Uma nova instância da classe Product.
-        """
-        # Tenta carregar 'images' e 'filters' de uma string JSON, com fallback para lista vazia.
+        
         try:
             images = json.loads(data.get('images', '[]'))
         except (json.JSONDecodeError, TypeError):

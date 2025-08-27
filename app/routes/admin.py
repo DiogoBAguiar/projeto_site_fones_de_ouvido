@@ -1,6 +1,3 @@
-# app/routes/admin.py
-# Lida com as rotas do painel de administração e a API de gerenciamento.
-
 import os
 import json
 import shutil

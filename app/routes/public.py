@@ -1,6 +1,3 @@
-# app/routes/public.py
-# Lida com as rotas públicas da aplicação, como home, login e visualização de produtos.
-
 import json
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user

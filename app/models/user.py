@@ -1,6 +1,3 @@
-# app/models/user.py
-# Define o modelo de dados para os usuários da aplicação.
-
 from datetime import datetime
 from typing import Dict, Any, Optional
 from flask_login import UserMixin
@@ -21,10 +18,10 @@ class User(UserMixin):
                  role: str,
                  profile_picture: Optional[str] = None,
                  date_joined: Optional[datetime] = None,
-                 address: Optional[str] = None, # NOVO: Campo de endereço
-                 city: Optional[str] = None,    # NOVO: Campo de cidade
-                 state: Optional[str] = None,   # NOVO: Campo de estado
-                 zip_code: Optional[str] = None): # NOVO: Campo de CEP
+                 address: Optional[str] = None, 
+                 city: Optional[str] = None,    
+                 state: Optional[str] = None,  
+                 zip_code: Optional[str] = None): 
         """
         Inicializa uma instância de Usuário.
 
@@ -66,12 +63,12 @@ class User(UserMixin):
             'email': self.email,
             'password_hash': self.password_hash,
             'role': self.role,
-            'profile_picture': self.profile_picture or '', # Garante que não seja None
+            'profile_picture': self.profile_picture or '',
             'date_joined': self.date_joined.isoformat(),
-            'address': self.address or '', # NOVO: Incluído no dicionário
-            'city': self.city or '',       # NOVO: Incluído no dicionário
-            'state': self.state or '',     # NOVO: Incluído no dicionário
-            'zip_code': self.zip_code or '' # NOVO: Incluído no dicionário
+            'address': self.address or '',
+            'city': self.city or '',       
+            'state': self.state or '',   
+            'zip_code': self.zip_code or '' 
         }
 
     @classmethod
@@ -99,10 +96,10 @@ class User(UserMixin):
             role=data.get('role', 'user'),
             profile_picture=data.get('profile_picture'),
             date_joined=date_joined,
-            address=data.get('address'), # NOVO: Carrega os dados de endereço
-            city=data.get('city'),       # NOVO: Carrega os dados de cidade
-            state=data.get('state'),     # NOVO: Carrega os dados de estado
-            zip_code=data.get('zip_code') # NOVO: Carrega os dados de CEP
+            address=data.get('address'), 
+            city=data.get('city'),      
+            state=data.get('state'),    
+            zip_code=data.get('zip_code') 
         )
 
     def get_id(self) -> str:
