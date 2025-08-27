@@ -58,6 +58,7 @@ def create_admin_user():
         role='admin'
     )
     
+
     data_manager.save_user(admin_user)
     print(f"Usuário administrador '{username}' criado com sucesso!")
 

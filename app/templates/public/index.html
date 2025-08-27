@@ -32,10 +32,16 @@
                 <div class="perfil-container">
                     {% if current_user.is_authenticated %}
                         <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
-                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
+                            {% if current_user.profile_picture %}
+                                <img src="{{ current_user.profile_picture }}" alt="Foto de Perfil" class="foto-perfil">
+                            {% else %}
+                                <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
+                            {% endif %}
                         </button>
                     {% else %}
-                        <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}">Login</a>
+                        <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}" aria-label="Fazer login">
+                             <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
+                        </a>
                     {% endif %}
                     <div id="dropdown-perfil" class="dropdown-perfil">
                         {% if current_user.is_authenticated %}
@@ -63,19 +69,26 @@
             </button>
         </div>
         <nav id="menu-mobile" class="menu-mobile">
-            <button class="fechar-menu-mobile" aria-label="Fechar menu">
-                <i class="fas fa-times"></i>
-            </button>
-            <a href="#destaque" class="link-nav-mobile">Início</a>
-            <a href="#tipos-fones" class="link-nav-mobile">Estilos</a>
-            <a href="#produtos-destaque" class="link-nav-mobile">Produtos</a>
-            <a href="#depoimentos" class="link-nav-mobile">Depoimentos</a>
-            <a href="#sobre" class="link-nav-mobile">Sobre</a>
-            <a href="#faq" class="link-nav-mobile">FAQ</a>
-            
-            <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">
-                Alternar Tema
-            </button>
+            <div class="menu-mobile-header">
+                <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
+                <button class="fechar-menu-mobile" aria-label="Fechar menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="menu-mobile-links">
+                <a href="{{ url_for('public.home') }}" class="link-nav-mobile"><i class="fas fa-home"></i> Início</a>
+                <a href="{{ url_for('public.products') }}" class="link-nav-mobile"><i class="fas fa-headphones"></i> Produtos</a>
+                <a href="#sobre" class="link-nav-mobile"><i class="fas fa-info-circle"></i> Sobre</a>
+                <a href="#faq" class="link-nav-mobile"><i class="fas fa-question-circle"></i> FAQ</a>
+            </div>
+            <div class="menu-mobile-footer">
+                <button id="botao-alternar-tema-mobile" class="theme-toggle-btn-mobile" aria-label="Alternar tema claro/escuro">
+                    <span class="toggle-text">Alternar Tema</span>
+                    <div class="toggle-switch">
+                        <span class="toggle-circle"></span>
+                    </div>
+                </button>
+            </div>
         </nav>
     </header>
     <div id="overlay" class="overlay"></div>
@@ -132,15 +145,15 @@
                 <h2 class="titulo-tipos-fones">Do imersivo ao portátil, encontre o fone de ouvido que se adapta perfeitamente à sua vida.</h2>
                 <div class="grade-tipos-fones">
                     <a href="{{ url_for('public.products', tipo='supra-auricular') }}" class="cartao-tipo">
-                        <img src="https://placehold.co/400x400/94a3b8/ffffff?text=Supra-auricular" alt="Fone de ouvido supra-auricular" class="imagem-tipo">
+                        <img src="{{ url_for('static', filename='images/supra-auricular.jpeg') }}" alt="Fone de ouvido supra-auricular" class="imagem-tipo">
                         <h3 class="nome-tipo">Supra-auricular</h3>
                     </a>
                     <a href="{{ url_for('public.products', tipo='circumaural') }}" class="cartao-tipo">
-                        <img src="https://placehold.co/400x400/64748b/ffffff?text=Circumaural" alt="Fone de ouvido circumaural" class="imagem-tipo">
+                        <img src="{{ url_for('static', filename='images/circumaural.jpeg') }}" alt="Fone de ouvido circumaural" class="imagem-tipo">
                         <h3 class="nome-tipo">Circumaural</h3>
                     </a>
                     <a href="{{ url_for('public.products', tipo='intra-auricular') }}" class="cartao-tipo">
-                        <img src="https://placehold.co/400x400/475569/ffffff?text=Intra-auricular" alt="Fone de ouvido intra-auricular" class="imagem-tipo">
+                        <img src="{{ url_for('static', filename='images/intra-auricular.jpeg') }}" alt="Fone de ouvido intra-auricular" class="imagem-tipo">
                         <h3 class="nome-tipo">Intra-auricular</h3>
                     </a>
                     <a href="{{ url_for('public.products', tipo='sem-fio') }}" class="cartao-tipo">
@@ -199,7 +212,7 @@
         <section id="sobre" class="secao secao-sobre oculta">
             <div class="conteiner">
                 <div class="conteudo-sobre">
-                    <img src="https://placehold.co/600x600/1a1a1a/ffffff?text=Equipe+Decibell" alt="Imagem da equipe Decibell em um estúdio de áudio" class="imagem-sobre">
+                    <img src="{{ url_for('static', filename='images/equipe_decibell.jpg') }}" alt="Imagem da equipe Decibell em um estúdio de áudio" class="imagem-sobre">
                     <div class="texto-sobre">
                         <h2>Nossa História: Paixão pela Perfeição</h2>
                         <p>A Decibell nasceu da busca incessante por uma experiência de áudio que fosse além da simples reprodução sonora. Acreditamos que cada nota, cada detalhe, importa. Por isso, combinamos tecnologia de ponta com um design minimalista e materiais de alta qualidade para criar fones de ouvido que não apenas soam bem, mas também se integram ao seu estilo de vida.</p>

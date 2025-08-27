@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaCarrinho = document.getElementById('lista-carrinho');
     const carrinhoTotalValor = document.getElementById('carrinho-total-valor');
     const contadorCarrinho = document.getElementById('contador-carrinho');
+    const btnCheckout = document.getElementById('btn-checkout'); // Adicionado seletor do botão
     
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
@@ -149,6 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
             removerDoCarrinho(produtoId);
         }
     });
+
+    // **NOVO: Adicionado evento para o botão Finalizar Compra**
+    if (btnCheckout) {
+        btnCheckout.addEventListener('click', () => {
+            window.location.href = '/checkout';
+        });
+    }
 
     // --- Lógica do Menu de Busca ---
     const btnLupa = document.querySelector('.btn-lupa');
