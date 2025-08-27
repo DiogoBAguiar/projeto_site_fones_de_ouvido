@@ -11,8 +11,6 @@ window.addEventListener('load', () => {
     //-----------------------------------------
     //  SELETORES DE ELEMENTOS DO DOM
     //-----------------------------------------
-    const tabLinks = document.querySelectorAll('.tab-link');
-    const adminSections = document.querySelectorAll('.admin-section');
     const addProductBtn = document.getElementById('add-product-btn');
     const modal = document.getElementById('product-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -31,13 +29,12 @@ window.addEventListener('load', () => {
     const productBrandSelect = document.getElementById('product-brand');
     const productStatusSelect = document.getElementById('product-status');
     const productDescriptionInput = document.getElementById('product-description');
-    const productSpecsInput = document.getElementById('product-specs'); // NOVO: Campo de especificações
+    const productSpecsInput = document.getElementById('product-specs');
     const productFiltersAccordion = document.getElementById('product-filters-accordion');
     
     // Upload de Imagens
     const dropZone = document.getElementById('drop-zone');
     const imageUploadInput = document.getElementById('image-upload');
-    const imagePreviewContainer = document.getElementById('image-preview');
     
     let uploadedFiles = [];
     let allProducts = [];
@@ -116,8 +113,12 @@ window.addEventListener('load', () => {
         e.preventDefault();
         const id = productIdInput.value;
         const isEditing = !!id;
-
         const selectedFilters = Array.from(productFiltersAccordion.querySelectorAll('input:checked')).map(cb => parseInt(cb.value));
+        
+        // Separa as imagens existentes das novas
+        const existingImages = uploadedFiles
+            .filter(f => f.file === null) // Imagens que já estavam salvas
+            .map(f => f.url); // Pega apenas a URL delas
 
         const productData = {
             name: productNameInput.value,
@@ -125,19 +126,24 @@ window.addEventListener('load', () => {
             brand: productBrandSelect.value,
             status: productStatusSelect.value,
             description: productDescriptionInput.value,
-            specs: productSpecsInput.value, // NOVO: Adiciona o valor do campo de especificações
-            filters: selectedFilters
+            specs: productSpecsInput.value,
+            filters: selectedFilters,
+            // Envia a lista final de imagens existentes para o backend
+            existing_images: existingImages 
         };
 
         const formData = new FormData();
         formData.append('product_data', JSON.stringify(productData));
+        
+        // Adiciona apenas os NOVOS arquivos de imagem ao formulário
         uploadedFiles.forEach(fileData => {
-            formData.append('images', fileData.file, fileData.file.name);
+            if (fileData.file) { // Se 'file' não for nulo, é um novo arquivo
+                formData.append('images', fileData.file, fileData.file.name);
+            }
         });
 
         const url = isEditing ? `${API_URLS.PRODUCTS}/${id}` : API_URLS.PRODUCTS;
         const method = isEditing ? 'PUT' : 'POST';
-
         const result = await apiRequest(url, { method, body: formData });
         if (result) {
             closeModal();
@@ -190,8 +196,8 @@ window.addEventListener('load', () => {
     function openModal(product = null) {
         productForm.reset();
         productIdInput.value = '';
-        imagePreviewContainer.innerHTML = '';
         uploadedFiles = [];
+        clearImagePreviews();
         populateFiltersAccordion(allFilters);
 
         if (product) {
@@ -202,7 +208,7 @@ window.addEventListener('load', () => {
             productBrandSelect.value = product.brand;
             productStatusSelect.value = product.status;
             productDescriptionInput.value = product.description;
-            productSpecsInput.value = product.specs; // NOVO: Popula o campo de especificações
+            productSpecsInput.value = product.specs;
             
             if (product.filters) {
                 product.filters.forEach(filterId => {
@@ -211,9 +217,14 @@ window.addEventListener('load', () => {
                 });
             }
 
+            // ALTERAÇÃO: Carrega as imagens existentes do produto
             if (product.images && product.images.length > 0) {
-                 imagePreviewContainer.innerHTML = `<p class="text-secondary">Para alterar, adicione novas imagens. As atuais serão substituídas.</p>`;
+                // Popula o array 'uploadedFiles' com as imagens existentes
+                // Marcamos 'file' como nulo para saber que não é um novo upload
+                uploadedFiles = product.images.map(imageUrl => ({ file: null, url: imageUrl }));
+                renderImagePreviews();
             }
+
         } else {
             modalTitle.textContent = 'Adicionar Novo Produto';
         }
@@ -225,18 +236,9 @@ window.addEventListener('load', () => {
     }
 
     //-----------------------------------------
-    //  UPLOAD DE IMAGENS
+    //  UPLOAD DE IMAGENS (COM REORDENAÇÃO)
     //-----------------------------------------
-    function handleDragOver(e) { e.preventDefault(); dropZone.classList.add('drag-over'); }
-    function handleDragLeave() { dropZone.classList.remove('drag-over'); }
-    function handleDrop(e) {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        handleFiles(e.dataTransfer.files);
-    }
     function handleFiles(files) {
-        uploadedFiles = [];
-        imagePreviewContainer.innerHTML = '';
         for (const file of files) {
             if (!file.type.startsWith('image/')) continue;
             const reader = new FileReader();
@@ -248,13 +250,37 @@ window.addEventListener('load', () => {
             reader.readAsDataURL(file);
         }
     }
+
     function renderImagePreviews() {
-        imagePreviewContainer.innerHTML = uploadedFiles.map((fileData, index) => `
-            <div class="preview-item">
+        dropZone.querySelectorAll('.preview-item').forEach(item => item.remove());
+
+        uploadedFiles.forEach((fileData, index) => {
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            item.setAttribute('draggable', 'true');
+            item.dataset.index = index;
+
+            item.innerHTML = `
+                <span class="preview-item-position">${index + 1}</span>
                 <img src="${fileData.url}" alt="preview">
                 <button type="button" class="remove-img-btn" data-index="${index}">&times;</button>
-            </div>
-        `).join('');
+            `;
+            dropZone.insertBefore(item, imageUploadInput);
+        });
+        updateDropZoneState();
+    }
+    
+    function clearImagePreviews() {
+        dropZone.querySelectorAll('.preview-item').forEach(item => item.remove());
+        updateDropZoneState();
+    }
+
+    function updateDropZoneState() {
+        if (uploadedFiles.length > 0) {
+            dropZone.classList.add('has-files');
+        } else {
+            dropZone.classList.remove('has-files');
+        }
     }
 
     //-----------------------------------------
@@ -299,15 +325,12 @@ window.addEventListener('load', () => {
         for (const type in filtersByType) {
             const group = document.createElement('div');
             group.className = 'filter-accordion-group';
-            
             const header = document.createElement('button');
             header.type = 'button';
             header.className = 'filter-accordion-header';
             header.textContent = type.charAt(0).toUpperCase() + type.slice(1);
-
             const panel = document.createElement('div');
             panel.className = 'filter-accordion-panel';
-            
             const checkboxContainer = document.createElement('div');
             checkboxContainer.className = 'checkbox-container';
             checkboxContainer.innerHTML = filtersByType[type].map(f => `
@@ -316,12 +339,10 @@ window.addEventListener('load', () => {
                     ${f.name}
                 </label>
             `).join('');
-            
             panel.appendChild(checkboxContainer);
             group.appendChild(header);
             group.appendChild(panel);
             productFiltersAccordion.appendChild(group);
-
             header.addEventListener('click', () => {
                 header.classList.toggle('active');
                 panel.classList.toggle('show');
@@ -330,15 +351,7 @@ window.addEventListener('load', () => {
     }
 
     function setupEventListeners() {
-        tabLinks.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabLinks.forEach(t => t.classList.remove('active'));
-                adminSections.forEach(s => s.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(tab.dataset.view).classList.add('active');
-            });
-        });
-
+        // Eventos de Modal, Abas e Formulários
         addProductBtn.addEventListener('click', () => openModal());
         closeModalBtn.addEventListener('click', closeModal);
         cancelBtn.addEventListener('click', closeModal);
@@ -346,30 +359,91 @@ window.addEventListener('load', () => {
         productForm.addEventListener('submit', handleProductFormSubmit);
         addFilterForm.addEventListener('submit', handleFilterFormSubmit);
 
+        // Eventos de Tabelas
         productsTableBody.addEventListener('click', (e) => {
             const editBtn = e.target.closest('.edit-btn');
             const deleteBtn = e.target.closest('.delete-product-btn');
             if (editBtn) handleEditProduct(editBtn.dataset.id);
             if (deleteBtn) handleDeleteProduct(deleteBtn.dataset.id);
         });
-
         filtersTableBody.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('.delete-filter-btn');
             if (deleteBtn) handleDeleteFilter(deleteBtn.dataset.id);
         });
         
-        dropZone.addEventListener('click', () => imageUploadInput.click());
-        dropZone.addEventListener('dragover', handleDragOver);
-        dropZone.addEventListener('dragleave', handleDragLeave);
-        dropZone.addEventListener('drop', handleDrop);
+        // Eventos de Upload de Imagens
         imageUploadInput.addEventListener('change', (e) => handleFiles(e.target.files));
         
-        imagePreviewContainer.addEventListener('click', (e) => {
+        dropZone.addEventListener('click', (e) => {
             if (e.target.classList.contains('remove-img-btn')) {
                 const index = parseInt(e.target.dataset.index);
                 uploadedFiles.splice(index, 1);
                 renderImagePreviews();
+            } 
+            else if (!e.target.closest('.preview-item')) {
+                imageUploadInput.click();
             }
+        });
+
+        // LÓGICA DE UPLOAD E REORDENAÇÃO POR DRAG AND DROP
+        let draggedIndex = null;
+
+        dropZone.addEventListener('dragstart', (e) => {
+            const target = e.target.closest('.preview-item');
+            if (target) {
+                draggedIndex = parseInt(target.dataset.index);
+                setTimeout(() => {
+                    target.classList.add('dragging');
+                }, 0);
+            }
+        });
+
+        dropZone.addEventListener('dragend', (e) => {
+            const target = e.target.closest('.preview-item');
+            if (target) {
+                target.classList.remove('dragging');
+            }
+            draggedIndex = null;
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+            const target = e.target.closest('.preview-item');
+            dropZone.querySelectorAll('.preview-item').forEach(item => item.classList.remove('drag-over-item'));
+            if (target) {
+                target.classList.add('drag-over-item');
+            }
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+             dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            dropZone.querySelectorAll('.preview-item').forEach(item => {
+                item.classList.remove('drag-over-item');
+                item.classList.remove('dragging');
+            });
+
+            if (draggedIndex !== null) {
+                const target = e.target.closest('.preview-item');
+                if (target) {
+                    const droppedOnIndex = parseInt(target.dataset.index);
+                    if (draggedIndex !== droppedOnIndex) {
+                        const itemToMove = uploadedFiles.splice(draggedIndex, 1)[0];
+                        uploadedFiles.splice(droppedOnIndex, 0, itemToMove);
+                        renderImagePreviews();
+                    }
+                }
+            } 
+            else {
+                handleFiles(e.dataTransfer.files);
+            }
+            
+            draggedIndex = null;
         });
     }
 

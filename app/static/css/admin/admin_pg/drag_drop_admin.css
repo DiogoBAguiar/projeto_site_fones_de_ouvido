@@ -1,42 +1,76 @@
+/* drag_drop_admin.css */
+
 #drop-zone {
     border: 2px dashed var(--border-light);
     border-radius: 12px;
-    padding: 2rem;
-    text-align: center;
+    padding: 1rem;
+    min-height: 160px; /* Altura mínima para a área */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    align-content: flex-start; /* Alinha os itens no topo */
     color: var(--text-secondary-light);
     cursor: pointer;
     transition: border-color 0.2s ease, background-color 0.2s ease;
+    position: relative; /* Necessário para o posicionamento do prompt */
 }
+
+/* Container para o texto de instrução */
+#drop-zone .drop-zone-prompt {
+    /* Ocupa todo o espaço do grid */
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    /* Impede que o texto bloqueie o clique na drop-zone */
+    pointer-events: none; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Esconde o prompt quando a classe .has-files é adicionada */
+#drop-zone.has-files .drop-zone-prompt {
+    display: none;
+}
+
 body.dark-mode #drop-zone {
     border-color: var(--border-dark);
     color: var(--text-secondary-dark);
 }
+
 #drop-zone.drag-over {
     border-color: var(--accent-light);
     background-color: rgba(0, 122, 255, 0.05);
 }
-#image-preview {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
+
+/* Estilos para cada item de pré-visualização */
 .preview-item {
     position: relative;
+    height: 100px;
+    transition: transform 0.2s ease, border 0.2s ease; /* Adiciona transição suave */
 }
+
 .preview-item img {
     width: 100%;
-    height: 100px;
+    height: 100%;
     object-fit: cover;
     border-radius: 8px;
+    /* Impede que a imagem seja o alvo do evento de arrastar */
+    pointer-events: none; 
 }
+
 .remove-img-btn {
     position: absolute;
     top: -8px;
     right: -8px;
     background-color: var(--danger-color);
     color: white;
-    border: 2px solid white;
+    border: 2px solid var(--card-bg-light); /* Borda da cor do fundo do modal */
     border-radius: 50%;
     width: 24px;
     height: 24px;
@@ -46,4 +80,46 @@ body.dark-mode #drop-zone {
     justify-content: center;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 3; /* Garante que o botão fique sobre a imagem e o indicador */
+}
+
+body.dark-mode .remove-img-btn {
+    border-color: var(--card-bg-dark);
+}
+
+/* NOVO: Estilo para o indicador de posição */
+.preview-item-position {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background-color: var(--accent-light);
+    color: white;
+    border: 2px solid var(--card-bg-light);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 2; /* Garante que fique sobre a imagem */
+}
+
+body.dark-mode .preview-item-position {
+     border-color: var(--card-bg-dark);
+}
+
+
+/* Estilo para o item que está sendo arrastado */
+.preview-item.dragging {
+    opacity: 0.4;
+}
+
+/* Estilo para indicar onde o item será solto */
+.preview-item.drag-over-item {
+    transform: scale(1.05);
+    border: 2px dashed var(--accent-light);
+    border-radius: 10px;
 }

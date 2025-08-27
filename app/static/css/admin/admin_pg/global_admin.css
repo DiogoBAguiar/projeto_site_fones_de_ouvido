@@ -1,37 +1,12 @@
-/*------------------------------------*
- * #RESET & VARIÁVEIS GLOBAIS
- *------------------------------------*/
- @import url("admin_header.css");
- /*------------------------------------*
- * #LAYOUT PRINCIPAL
- *------------------------------------*/
+@import url("admin_header.css");
 @import url("layout_admin.css");
-
-/*------------------------------------*
- * #COMPONENTES
- *------------------------------------*/
-/* Abas de Navegação */
 @import url("navbar_admin.css");
-
-/* Botões */
 @import url("button_admin.css");
-
-/* Tabela */
 @import url("table_admin.css");
-
-/* Modal */
 @import url("./modal_admin.css");
-
-/* Formulários */
 @import url("forms_admin.css");
-
-/* Drag and Drop Uploader */
 @import url("drag_drop_admin.css");
-
-/* Loader */
 @import url("loader_admin.css");
-
-/* Acordeão de Filtros */
 @import url("filter_accordion_admin.css");
 
 :root {

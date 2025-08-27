@@ -9,8 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide-static@0.378.0/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Assume-se que os caminhos do CSS estão corretos no seu ambiente Flask -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/global_admin.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/admin_stats.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_pg/admi_stats.css') }}">
+    
 </head>
 <body>
 
@@ -24,6 +26,7 @@
             <input type="text" id="product-search-input" placeholder="Buscar por nome do produto...">
         </div>
         <div class="header-user-container">
+            <!-- CORREÇÃO: Restaurado o código dinâmico para carregar dados do usuário -->
             <button class="header-user" id="admin-profile-btn">
                 <img src="{{ current_user.profile_picture or url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto do Admin" class="admin-avatar">
                 <span>{{ current_user.username }}</span>
@@ -33,12 +36,12 @@
                 <a href="{{ url_for('user.profile') }}" class="dropdown-item">
                     <i data-lucide="user-circle"></i> Meu Perfil
                 </a>
-                <button class="dropdown-item theme-toggle" id="theme-toggle">
-                    <div class="theme-icon-wrapper">
-                        <i data-lucide="sun" class="sun-icon"></i>
-                        <i data-lucide="moon" class="moon-icon"></i>
+                <!-- ALTERAÇÃO: Estrutura do botão de tema atualizada -->
+                <button class="dropdown-item theme-toggle" id="theme-toggle" aria-label="Alternar tema claro/escuro">
+                    <span>Alternar</span>
+                    <div class="toggle-switch">
+                        <span class="toggle-circle"></span>
                     </div>
-                    Alternar Tema
                 </button>
                 <div class="dropdown-divider"></div>
                 <a href="{{ url_for('admin_page.admin_logout') }}" class="dropdown-item dropdown-item-logout">
@@ -157,7 +160,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-title" class="modal-title">Adicionar Novo Produto</h2>
-                <button id="close-modal-btn" class="close-btn"><i data-lucide="x"></i></button>
+                <button id="close-modal-btn" class="close-btn" aria-label="Fechar modal"><i data-lucide="x"></i></button>
             </div>
             <form id="product-form">
                 <input type="hidden" id="product-id">
@@ -194,12 +197,13 @@
                     <div id="product-filters-accordion"></div>
                 </div>
                 <div class="form-group">
-                    <label>Imagens</label>
+                    <label for="image-upload">Imagens</label>
                     <div id="drop-zone">
-                        <p>Arraste e solte arquivos ou clique para selecionar</p>
-                        <input type="file" id="image-upload" multiple accept="image/*" style="display: none;">
+                        <div class="drop-zone-prompt">
+                            <p>Arraste e solte arquivos ou clique para selecionar</p>
+                        </div>
+                        <input type="file" id="image-upload" multiple accept="image/*" title="Selecionar Imagens" style="display: none;">
                     </div>
-                    <div id="image-preview"></div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" id="cancel-btn" class="btn btn-secondary">Cancelar</button>

@@ -112,6 +112,16 @@
     background-color: var(--secundaria-claro);
 }
 
+.tema-escuro .btn-add-to-cart {
+    background-color: var(--cor-link);
+}
+
+.tema-escuro .btn-add-to-cart:hover {
+    background-color: var(--cor-link-hover);
+}
+
+
+
 /* --- Abas de Informação --- */
 .tabs-nav {
     border-bottom: 1px solid var(--borda-claro);

@@ -135,7 +135,13 @@
 .btn-checkout:hover {
     background-color: var(--secundaria-claro);
 }
+.tema-escuro .btn-checkout {
+    background-color: var(--cor-link);
+}
 
+.tema-escuro .btn-checkout:hover {
+    background-color: var(--cor-link-hover);
+}
 .carrinho-vazio {
     text-align: center;
     color: var(--secundaria-claro);
