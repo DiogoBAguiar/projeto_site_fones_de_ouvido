@@ -69,8 +69,8 @@
     <main class="conteudo-principal-details">
         <div class="container-details">
             <nav class="breadcrumb">
-                <a href="{{ url_for('public.home') }}">Início</a> &gt; 
-                <a href="{{ url_for('public.products') }}">Produtos</a> &gt; 
+                <a href="{{ url_for('public.home') }}">Início</a> &gt;
+                <a href="{{ url_for('public.products') }}">Produtos</a> &gt;
                 <span>{{ product.name }}</span>
             </nav>
 
@@ -90,13 +90,13 @@
                     <h1 id="product-name">{{ product.name }}</h1>
                     <p class="product-brand">Marca: {{ product.brand }}</p>
                     <p id="product-price" class="product-price">R$ {{ "%.2f"|format(product.price|float) }}</p>
-                    
+
                     <div class="add-to-cart-section">
                         <label for="quantity-input">Quantidade:</label>
                         <input type="number" value="1" min="1" class="quantity-input" id="quantity-input">
                         <button class="btn-add-to-cart">Adicionar ao Carrinho</button>
                     </div>
-                    
+
                     <div class="product-tabs">
                         <div class="tabs-nav">
                             <button class="tab-link active" data-tab="description">Descrição</button>
@@ -104,10 +104,10 @@
                         </div>
                         <div class="tabs-content">
                             <div id="description-content" class="tab-pane active">
-                                <p>{{ product.description or 'Nenhuma descrição disponível.' }}</p>
+                                <p>{{ product.description|nl2br or 'Nenhuma descrição disponível.' }}</p>
                             </div>
                             <div id="specs-content" class="tab-pane">
-                                <p>{{ product.specs or 'Nenhuma especificação disponível.' }}</p>
+                                <p>{{ product.specs|nl2br or 'Nenhuma especificação disponível.' }}</p>
                             </div>
                         </div>
                     </div>

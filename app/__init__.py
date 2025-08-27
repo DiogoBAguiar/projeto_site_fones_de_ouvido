@@ -18,6 +18,16 @@ def unauthorized():
         return jsonify(error="Autenticação necessária para acessar este recurso."), 401
     return redirect(url_for('public.login'))
 
+def load_filters(app):
+    """Adiciona filtros customizados ao ambiente Jinja2."""
+    from markupsafe import Markup
+
+    @app.template_filter('nl2br')
+    def nl2br(s):
+        if not s:
+            return ''
+        return Markup(s.replace('\n', '<br>'))
+
 
 def create_app(config_name):
     """
@@ -29,6 +39,9 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     login_manager.init_app(app)
+    
+    # Adiciona o filtro nl2br ao ambiente Jinja da aplicação
+    load_filters(app)
 
     @login_manager.user_loader
     def load_user(user_id):

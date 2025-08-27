@@ -26,6 +26,7 @@ def _read_csv(filepath):
         _ensure_file_exists(filepath)
         return []
     try:
+        # A biblioteca csv.DictReader lida com aspas automaticamente
         with open(filepath, mode='r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)       
             return [row for row in reader if row]
@@ -34,10 +35,15 @@ def _read_csv(filepath):
         return []
 
 def _write_csv(filepath, data, fieldnames):
-    """Escreve uma lista de dicionários em um arquivo CSV, sobrescrevendo o conteúdo."""
+    """
+    Escreve uma lista de dicionários em um arquivo CSV, sobrescrevendo o conteúdo.
+    Usa 'quoting=csv.QUOTE_ALL' para garantir que todos os campos sejam envolvidos por aspas,
+    resolvendo problemas com vírgulas e quebras de linha dentro dos campos.
+    """
     try:
+        # Mudança principal aqui: Usamos QUOTE_ALL para evitar quebras
         with open(filepath, mode='w', newline='', encoding='utf-8') as file:
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer = csv.DictWriter(file, fieldnames=fieldnames, quoting=csv.QUOTE_ALL)
             writer.writeheader()
             writer.writerows(data)
     except Exception as e:
@@ -47,6 +53,7 @@ def get_next_id(filepath):
     """Calcula o próximo ID disponível para um novo registro."""
     data = _read_csv(filepath)
     if not data: return 1
+    # Garante que o ID seja tratado como um inteiro, mesmo se for uma string no CSV
     return max(int(row.get('id', 0)) for row in data) + 1
 
 def _ensure_file_exists(filepath):

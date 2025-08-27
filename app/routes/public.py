@@ -1,4 +1,8 @@
+# app/routes/public.py
+# Lida com as rotas públicas da aplicação, como home, login e visualização de produtos.
+
 import json
+import uuid
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -16,9 +20,13 @@ def before_request():
     if request.path.startswith('/api/') or request.path.startswith('/static/'):
         return
     
+    # Gera um ID de sessão único se ainda não existir
+    if 'session_id' not in session:
+        session['session_id'] = str(uuid.uuid4())
+    
     # Verifica se a visita já foi registrada nesta sessão
     if 'visit_counted' not in session:
-        data_manager.register_visit(session.sid)
+        data_manager.register_visit(session['session_id'])
         session['visit_counted'] = True
 
 
