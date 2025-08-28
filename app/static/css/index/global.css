@@ -13,6 +13,7 @@
 @import url(./modal_produtos.css);
 @import url(./responsividade.css);
 @import url(./modal_login.css);
+@import url(./slider_indicators.css);
 /* Paleta de cores */
 :root {
     --fundo-claro: linear-gradient(to right, #e0e2e5, #f0f2f5); /* Gradiente para o tema claro */

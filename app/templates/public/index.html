@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- O seu global.css já importa todos os outros, incluindo o novo slider_indicators.css -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body class="tema-claro">
@@ -19,7 +20,6 @@
                 Decibell
             </a>
             
-            <!-- Wrapper para todos os elementos da direita -->
             <div class="nav-direita">
                 <div class="nav-utilidades">
                     <div class="barra-busca-container">
@@ -186,6 +186,8 @@
                 </div>
                 <button class="slider-btn next" aria-label="Próximo">&gt;</button>
             </div>
+            <!-- A ÚNICA MUDANÇA FOI ADICIONAR ESTA DIV ABAIXO -->
+            <div class="slider-indicators"></div>
         </section>
         <section id="depoimentos" class="secao secao-depoimentos oculta">
             <div class="conteiner">

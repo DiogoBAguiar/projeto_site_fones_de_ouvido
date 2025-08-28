@@ -1,0 +1,32 @@
+/* static/css/index/slider_indicators.css */
+
+.slider-indicators {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 1.5rem; /* Espaço entre o slider e os indicadores */
+}
+
+.indicator-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--borda-claro);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.indicator-dot:hover {
+    background-color: var(--secundaria-claro);
+    transform: scale(1.2);
+}
+
+.indicator-dot.active {
+    background-color: var(--primaria-claro);
+    transform: scale(1.2);
+}
+
+.tema-escuro .indicator-dot.active {
+    background-color: var(--cor-link);
+}
