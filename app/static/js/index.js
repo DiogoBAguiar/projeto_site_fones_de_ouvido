@@ -45,13 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', () => toggleMenu('close'));
     });
 
-    // Adicionando lógica para fechar o menu ao clicar fora dele
-    document.addEventListener('click', (e) => {
-        console.log('Clique detectado:', e.target); // Para depuração
-        if (menuMobile.classList.contains('ativo') && !e.target.closest('#menu-mobile') && !e.target.closest('#botao-menu-mobile')) {
-        toggleMenu('close');
-        }
-    });
 
     // --- Lógica do Carrinho de Compras ---
     const btnCarrinho = document.getElementById('btn-carrinho');
@@ -334,16 +327,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevBtnTipos = tiposFonesContainer.querySelector('.slider-btn-tipos.prev');
         const nextBtnTipos = tiposFonesContainer.querySelector('.slider-btn-tipos.next');
 
-        const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
-        const gap = 30; // Espaço entre os cartões
-        const scrollAmount = (cardWidth + gap) * 2; // Deslocamento para 2 cartões
-
         prevBtnTipos.addEventListener('click', () => {
-            gradeTiposFones.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
+            gradeTiposFones.scrollBy({ left: -(cardWidth + 16), behavior: 'smooth' }); // 16px é o gap
         });
 
         nextBtnTipos.addEventListener('click', () => {
-            gradeTiposFones.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
+            gradeTiposFones.scrollBy({ left: cardWidth + 16, behavior: 'smooth' }); // 16px é o gap
         });
     }
 });
