@@ -1,10 +1,30 @@
-.grade-depoimentos {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+/* Container que esconde o excesso do slider e aplica um fade nas bordas */
+.depoimentos-container {
+    overflow: hidden;
+    position: relative;
+    /* Efeito de máscara para suavizar as bordas esquerda e direita */
+    -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
 }
 
+/* A "pista" onde os depoimentos irão correr */
+.grade-depoimentos {
+    display: flex; /* Mudamos de grid para flex para criar uma linha contínua */
+    gap: 2rem;
+    /* Calcula a largura total para todos os 12 cards (6 originais + 6 duplicados) */
+    width: calc(12 * (300px + 2rem)); 
+    /* Aplica a animação de scroll */
+    animation: scroll 60s linear infinite;
+}
+
+/* Pausa a animação quando o mouse está sobre o slider */
+.depoimentos-container:hover .grade-depoimentos {
+    animation-play-state: paused;
+}
+
+/* Estilo dos cards de depoimento */
 .cartao-depoimento {
+    flex: 0 0 300px; /* Garante que cada card tenha uma largura fixa de 300px */
     background-color: var(--card-claro);
     border-radius: 12px;
     padding: 2rem;
@@ -38,4 +58,15 @@
 .nome-cliente {
     font-weight: 600;
     font-size: 1.1rem;
+}
+
+/* A animação de scroll infinito */
+@keyframes scroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        /* Move a "pista" para a esquerda pela largura exata do primeiro bloco de 6 cards */
+        transform: translateX(calc(-6 * (300px + 2rem)));
+    }
 }

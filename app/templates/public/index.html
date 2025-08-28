@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- O seu global.css já importa todos os outros, incluindo o novo slider_indicators.css -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body class="tema-claro">
@@ -186,46 +185,106 @@
                 </div>
                 <button class="slider-btn next" aria-label="Próximo">&gt;</button>
             </div>
-            <!-- A ÚNICA MUDANÇA FOI ADICIONAR ESTA DIV ABAIXO -->
             <div class="slider-indicators"></div>
         </section>
+        
+        <!-- SEÇÃO DE DEPOIMENTOS ATUALIZADA -->
         <section id="depoimentos" class="secao secao-depoimentos oculta">
             <div class="conteiner">
                 <h2 class="titulo-secao">O que nossos clientes dizem</h2>
-                <div class="grade-depoimentos">
-                    <div class="cartao-depoimento">
-                        <p>"Qualidade de som impecável e um conforto que me permite usar por horas. Perfeito para minhas longas sessões de trabalho."</p>
-                        <div class="info-cliente">
-                            <img src="https://placehold.co/60x60/808080/ffffff?text=JB" alt="Foto de João B." class="avatar-cliente">
-                            <div>
-                                <p class="nome-cliente">João B.</p>
-                                <p>Cliente Decibell</p>
+                <div class="depoimentos-container">
+                    <div class="grade-depoimentos">
+                        <!-- Bloco Original -->
+                        <div class="cartao-depoimento">
+                            <p>"Qualidade de som impecável e um conforto que me permite usar por horas. Perfeito para minhas longas sessões de trabalho."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/808080/ffffff?text=JB" alt="Foto de João B." class="avatar-cliente">
+                                <div><p class="nome-cliente">João B.</p><p>Cliente Decibell</p></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="cartao-depoimento">
-                        <p>"Simplesmente incríveis! O cancelamento de ruído é o melhor que já testei, e a bateria dura o dia todo. Recomendo muito!"</p>
-                        <div class="info-cliente">
-                            <img src="https://placehold.co/60x60/a0a0a0/ffffff?text=MJ" alt="Foto de Maria J." class="avatar-cliente">
-                            <div>
-                                <p class="nome-cliente">Maria J.</p>
-                                <p>Amante de música</p>
+                        <div class="cartao-depoimento">
+                            <p>"Simplesmente incríveis! O cancelamento de ruído é o melhor que já testei, e a bateria dura o dia todo. Recomendo muito!"</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/a0a0a0/ffffff?text=MJ" alt="Foto de Maria J." class="avatar-cliente">
+                                <div><p class="nome-cliente">Maria J.</p><p>Amante de música</p></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="cartao-depoimento">
-                        <p>"Design elegante e som de alta fidelidade. A Decibell realmente superou minhas expectativas. Não troco por nada!"</p>
-                        <div class="info-cliente">
-                            <img src="https://placehold.co/60x60/c0c0c0/ffffff?text=FS" alt="Foto de Felipe S." class="avatar-cliente">
-                            <div>
-                                <p class="nome-cliente">Felipe S.</p>
-                                <p>Profissional de áudio</p>
+                        <div class="cartao-depoimento">
+                            <p>"Design elegante e som de alta fidelidade. A Decibell realmente superou minhas expectativas. Não troco por nada!"</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/c0c0c0/ffffff?text=FS" alt="Foto de Felipe S." class="avatar-cliente">
+                                <div><p class="nome-cliente">Felipe S.</p><p>Profissional de áudio</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"O presente perfeito! Comprei para meu filho, que é gamer, e ele adorou a precisão do som nos jogos. Valeu cada centavo."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/d3d3d3/ffffff?text=RC" alt="Foto de Ricardo C." class="avatar-cliente">
+                                <div><p class="nome-cliente">Ricardo C.</p><p>Pai de um gamer feliz</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"Uso para reuniões online e a clareza do microfone é fantástica. Todos me ouvem perfeitamente, sem ruídos externos."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/b0b0b0/ffffff?text=LA" alt="Foto de Lúcia A." class="avatar-cliente">
+                                <div><p class="nome-cliente">Lúcia A.</p><p>Gerente de Projetos</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"A durabilidade me surpreendeu. Já tenho o meu há mais de dois anos e funciona como se fosse novo. Qualidade impressionante."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/909090/ffffff?text=PS" alt="Foto de Paulo S." class="avatar-cliente">
+                                <div><p class="nome-cliente">Paulo S.</p><p>Viajante Frequente</p></div>
+                            </div>
+                        </div>
+                        <!-- Bloco Duplicado para Loop -->
+                        <div class="cartao-depoimento">
+                            <p>"Qualidade de som impecável e um conforto que me permite usar por horas. Perfeito para minhas longas sessões de trabalho."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/808080/ffffff?text=JB" alt="Foto de João B." class="avatar-cliente">
+                                <div><p class="nome-cliente">João B.</p><p>Cliente Decibell</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"Simplesmente incríveis! O cancelamento de ruído é o melhor que já testei, e a bateria dura o dia todo. Recomendo muito!"</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/a0a0a0/ffffff?text=MJ" alt="Foto de Maria J." class="avatar-cliente">
+                                <div><p class="nome-cliente">Maria J.</p><p>Amante de música</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"Design elegante e som de alta fidelidade. A Decibell realmente superou minhas expectativas. Não troco por nada!"</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/c0c0c0/ffffff?text=FS" alt="Foto de Felipe S." class="avatar-cliente">
+                                <div><p class="nome-cliente">Felipe S.</p><p>Profissional de áudio</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"O presente perfeito! Comprei para meu filho, que é gamer, e ele adorou a precisão do som nos jogos. Valeu cada centavo."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/d3d3d3/ffffff?text=RC" alt="Foto de Ricardo C." class="avatar-cliente">
+                                <div><p class="nome-cliente">Ricardo C.</p><p>Pai de um gamer feliz</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"Uso para reuniões online e a clareza do microfone é fantástica. Todos me ouvem perfeitamente, sem ruídos externos."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/b0b0b0/ffffff?text=LA" alt="Foto de Lúcia A." class="avatar-cliente">
+                                <div><p class="nome-cliente">Lúcia A.</p><p>Gerente de Projetos</p></div>
+                            </div>
+                        </div>
+                        <div class="cartao-depoimento">
+                            <p>"A durabilidade me surpreendeu. Já tenho o meu há mais de dois anos e funciona como se fosse novo. Qualidade impressionante."</p>
+                            <div class="info-cliente">
+                                <img src="https://placehold.co/60x60/909090/ffffff?text=PS" alt="Foto de Paulo S." class="avatar-cliente">
+                                <div><p class="nome-cliente">Paulo S.</p><p>Viajante Frequente</p></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
         <section id="sobre" class="secao secao-sobre oculta">
             <div class="conteiner">
                 <div class="conteudo-sobre">

@@ -56,3 +56,11 @@
     transform: translateY(-5px);
     background-color: #e0e0e0;
 }
+
+.nome-produto {
+    font-size: 1.5rem; /* ou o tamanho que estiver usando */
+    margin-bottom: 0.5rem; /* ou o tamanho que estiver usando */
+    white-space: nowrap;        /* Impede que o texto quebre para a segunda linha */
+    overflow: hidden;           /* Esconde o texto que ultrapassa o limite do container */
+    text-overflow: ellipsis;    /* Adiciona "..." ao final do texto cortado */
+}
