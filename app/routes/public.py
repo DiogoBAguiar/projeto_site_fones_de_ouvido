@@ -172,7 +172,8 @@ def get_featured_products():
         featured_products = [p for p in all_products if p.status == 'Em destaque']
         
         products_list = []
-        for p in featured_products[:4]:
+        for p in featured_products[:12]:
+            """ aqui muda a quantidade de produtos em destaque que aparecem"""
             # Constrói o dicionário manualmente para garantir que 'images' seja uma lista
             product_dict = {
                 'id': p.id,

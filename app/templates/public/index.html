@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/global.css') }}">
 </head>
 <body class="tema-claro">
-    <header class="cabecalho">
+     <header class="cabecalho">
         <div class="cabecalho-conteiner">
             <a href="{{ url_for('public.home') }}" class="logo">
                 Decibell
@@ -22,10 +22,12 @@
             <div class="nav-direita">
                 <div class="nav-utilidades">
                     <div class="barra-busca-container">
-                        <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
+                        <form id="form-busca" role="search">
+                             <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <input type="search" id="barra-busca-input" class="barra-busca-input" placeholder="Buscar produtos...">
+                        </form>
                     </div>
                     <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
                         <i class="fas fa-shopping-cart"></i>
@@ -73,6 +75,9 @@
         </div>
     </header>
     
+    <!-- O contêiner de resultados da busca foi adicionado aqui -->
+    <div id="search-results" class="search-results-container"></div>
+
     <nav id="menu-mobile" class="menu-mobile">
         <div class="menu-mobile-header">
             <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
@@ -188,7 +193,6 @@
             <div class="slider-indicators"></div>
         </section>
         
-        <!-- SEÇÃO DE DEPOIMENTOS ATUALIZADA -->
         <section id="depoimentos" class="secao secao-depoimentos oculta">
             <div class="conteiner">
                 <h2 class="titulo-secao">O que nossos clientes dizem</h2>
@@ -404,7 +408,8 @@
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/hero-animation.js') }}"></script>
+    
+    <script type="module" src="{{ url_for('static', filename='js/index/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index/hero-animation.js') }}"></script>
 </body>
 </html>
