@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function toggleMenu(action) {
         const open = action === 'open';
+        body.classList.toggle('menu-aberto', open);
         menuMobile.classList.toggle('ativo', open);
         overlay.classList.toggle('ativo', open);
         body.classList.toggle('no-scroll', open);
@@ -64,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderizarCarrinho() {
+        if (!listaCarrinho) return;
         listaCarrinho.innerHTML = '';
         let total = 0;
 
@@ -89,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        carrinhoTotalValor.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        if(carrinhoTotalValor) carrinhoTotalValor.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         localStorage.setItem('carrinho', JSON.stringify(carrinho));
         atualizarContadorCarrinho();
     }
@@ -102,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             carrinho.push({ ...produto, quantidade: 1 });
         }
         renderizarCarrinho();
-        exibirMensagem(`"${produto.nome}" adicionado ao carrinho!`, 'success');
     }
 
     function removerDoCarrinho(produtoId) {
@@ -123,47 +124,31 @@ document.addEventListener('DOMContentLoaded', () => {
         body.classList.remove('no-scroll');
     }
 
-    btnCarrinho.addEventListener('click', abrirCarrinho);
-    fecharCarrinho.addEventListener('click', fecharCarrinhoHandler);
+    if(btnCarrinho) btnCarrinho.addEventListener('click', abrirCarrinho);
+    if(fecharCarrinho) fecharCarrinho.addEventListener('click', fecharCarrinhoHandler);
     
-    // --- LÓGICA UNIFICADA DO OVERLAY ---
-    overlay.addEventListener('click', () => {
-        if (menuMobile.classList.contains('ativo')) {
-            toggleMenu('close');
-        }
-        if (carrinhoLateral.classList.contains('ativo')) {
-            fecharCarrinhoHandler();
-        }
-    });
-
-    listaCarrinho.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-remover-item')) {
-            const produtoId = e.target.dataset.id;
-            removerDoCarrinho(produtoId);
-        }
-    });
-
-    if (btnCheckout) {
-        btnCheckout.addEventListener('click', () => {
-            window.location.href = '/checkout';
+    if(listaCarrinho) {
+        listaCarrinho.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-remover-item')) {
+                const produtoId = e.target.dataset.id;
+                removerDoCarrinho(produtoId);
+            }
         });
     }
 
-    // --- Lógica do Menu de Busca ---
+    if (btnCheckout) btnCheckout.addEventListener('click', () => { window.location.href = '/checkout'; });
+
     const btnLupa = document.querySelector('.btn-lupa');
     const barraBuscaInput = document.querySelector('.barra-busca-input');
-
-    btnLupa.addEventListener('click', () => {
-        barraBuscaInput.classList.toggle('ativo');
-        if (barraBuscaInput.classList.contains('ativo')) {
-            barraBuscaInput.focus();
-        }
-    });
+    if(btnLupa) {
+        btnLupa.addEventListener('click', () => {
+            barraBuscaInput.classList.toggle('ativo');
+            if (barraBuscaInput.classList.contains('ativo')) barraBuscaInput.focus();
+        });
+    }
     
-    // --- Lógica do Dropdown de Perfil ---
     const btnPerfil = document.getElementById('btn-perfil');
     const dropdownPerfil = document.getElementById('dropdown-perfil');
-    
     if (btnPerfil) {
         btnPerfil.addEventListener('click', (e) => {
             e.preventDefault();
@@ -175,13 +160,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- LÓGICA UNIFICADA PARA FECHAR ELEMENTOS AO CLICAR FORA (CORRIGIDA) ---
     document.addEventListener('click', (e) => {
-        if (dropdownPerfil && !e.target.closest('.perfil-container') && dropdownPerfil.classList.contains('ativo')) {
+        const target = e.target;
+
+        // Fecha o dropdown de perfil
+        if (dropdownPerfil && dropdownPerfil.classList.contains('ativo') && !target.closest('.perfil-container')) {
             dropdownPerfil.classList.remove('ativo');
+        }
+
+        // Fecha o menu mobile se o clique for fora dele e do seu botão de abrir
+        if (menuMobile && menuMobile.classList.contains('ativo') && !menuMobile.contains(target) && !botaoMenuMobile.contains(target)) {
+             toggleMenu('close');
+        }
+
+        // Fecha o carrinho se o clique for fora dele e do seu botão de abrir
+        if (carrinhoLateral && carrinhoLateral.classList.contains('ativo') && !carrinhoLateral.contains(target) && !btnCarrinho.contains(target)) {
+            fecharCarrinhoHandler();
         }
     });
 
-    // --- Animação de Scroll-Reveal ---
     const secoes = document.querySelectorAll('.secao');
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
@@ -190,18 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 observer.unobserve(entry.target);
             }
         });
-    }, {
-        threshold: 0.1
-    });
-
-    secoes.forEach(secao => {
-        observer.observe(secao);
-    });
+    }, { threshold: 0.1 });
+    secoes.forEach(secao => { observer.observe(secao); });
     
     renderizarCarrinho();
     
     // ==============================================================================
-    // SLIDER DE PRODUTOS EM DESTAQUE
+    // SLIDER DE PRODUTOS EM DESTAQUE (COM MELHORIAS DE UX)
     // ==============================================================================
     
     const destaqueContainer = document.querySelector('.produtos-destaque-container');
@@ -210,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevBtn = destaqueContainer.querySelector('.slider-btn.prev');
         const nextBtn = destaqueContainer.querySelector('.slider-btn.next');
         const API_FEATURED_URL = window.location.origin + "/api/products/featured";
-        let allFeaturedProducts = []; // Armazena os produtos buscados
+        let allFeaturedProducts = [];
 
         function setupSlider() {
             if (!gradeProdutos.querySelector('.cartao-produto')) return;
@@ -236,13 +229,29 @@ document.addEventListener('DOMContentLoaded', () => {
             gradeProdutos.scrollLeft += (cardWidth + 32); // 32px é o gap
         });
 
+        function renderSkeletons(count = 4) {
+            gradeProdutos.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const skeletonCard = document.createElement('div');
+                skeletonCard.classList.add('skeleton-card');
+                skeletonCard.innerHTML = `
+                    <div class="skeleton-image shimmer"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton-text shimmer"></div>
+                        <div class="skeleton-text short shimmer"></div>
+                        <div class="skeleton-button shimmer"></div>
+                    </div>
+                `;
+                gradeProdutos.appendChild(skeletonCard);
+            }
+        }
+
         function renderFeaturedProducts(produtos) {
             gradeProdutos.innerHTML = '';
             if (produtos.length === 0) {
-                gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Nenhum produto em destaque encontrado.</p>';
+                gradeProdutos.innerHTML = '<p>Nenhum produto em destaque encontrado.</p>';
                 return;
             }
-
             produtos.forEach(produto => {
                 const card = document.createElement('div');
                 card.classList.add('cartao-produto');
@@ -261,39 +270,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 gradeProdutos.appendChild(card);
             });
-
             setupSlider();
         }
 
-        // --- LÓGICA PARA ADICIONAR AO CARRINHO DOS PRODUTOS EM DESTAQUE ---
-        gradeProdutos.addEventListener('click', (e) => {
-            if (e.target.classList.contains('botao-add-carrinho')) {
-                e.preventDefault();
-                const productId = e.target.dataset.productId;
-                const productData = allFeaturedProducts.find(p => p.id == productId);
-                if (productData) {
-                    const productToAdd = {
-                        id: productData.id,
-                        nome: productData.name,
-                        preco: productData.price,
-                        imagem: productData.images.length > 0 ? productData.images[0] : 'https://placehold.co/300'
-                    };
-                    adicionarAoCarrinho(productToAdd);
-                }
-            }
-        });
-
         async function fetchFeaturedProducts() {
+            renderSkeletons();
             try {
                 const response = await fetch(API_FEATURED_URL);
-                if (!response.ok) {
-                    throw new Error('Erro ao buscar produtos em destaque da API.');
-                }
-                allFeaturedProducts = await response.json(); // Armazena os dados
+                if (!response.ok) throw new Error('Erro ao buscar produtos da API.');
+                
+                allFeaturedProducts = await response.json();
                 renderFeaturedProducts(allFeaturedProducts);
+
             } catch (error) {
-                console.error("Erro ao carregar produtos em destaque:", error);
-                gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Não foi possível carregar os produtos em destaque.</p>';
+                console.error("Erro ao carregar produtos:", error);
+                gradeProdutos.innerHTML = '<p>Não foi possível carregar os produtos.</p>';
             }
         }
         
@@ -308,18 +299,56 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
         }
 
+        gradeProdutos.addEventListener('click', (e) => {
+            if (e.target.classList.contains('botao-add-carrinho')) {
+                const button = e.target;
+                const productId = button.dataset.productId;
+                const productData = allFeaturedProducts.find(p => p.id == productId);
+                
+                if (productData) {
+                    const productImageEl = button.closest('.cartao-produto').querySelector('.imagem-produto');
+                    const flyingImage = productImageEl.cloneNode();
+                    flyingImage.classList.add('flying-image');
+
+                    const rect = productImageEl.getBoundingClientRect();
+                    flyingImage.style.top = `${rect.top}px`;
+                    flyingImage.style.left = `${rect.left}px`;
+                    flyingImage.style.width = `${rect.width}px`;
+                    flyingImage.style.height = `${rect.height}px`;
+
+                    document.body.appendChild(flyingImage);
+
+                    const cartIcon = document.getElementById('btn-carrinho');
+                    const cartRect = cartIcon.getBoundingClientRect();
+                    const endTop = cartRect.top + cartRect.height / 2;
+                    const endLeft = cartRect.left + cartRect.width / 2;
+
+                    requestAnimationFrame(() => {
+                        flyingImage.style.transform = `translate(${endLeft - rect.left}px, ${endTop - rect.top}px) scale(0.1)`;
+                        flyingImage.style.opacity = '0';
+                    });
+
+                    flyingImage.addEventListener('transitionend', () => {
+                        flyingImage.remove();
+                        const productToAdd = {
+                            id: productData.id,
+                            nome: productData.name,
+                            preco: productData.price,
+                            imagem: productData.images.length > 0 ? productData.images[0] : 'https://placehold.co/300'
+                        };
+                        adicionarAoCarrinho(productToAdd);
+                        exibirMensagem(`"${productData.name}" adicionado ao carrinho!`, 'success');
+                    }, { once: true });
+                }
+            }
+        });
+
         fetchFeaturedProducts();
         window.addEventListener('resize', setupSlider);
     }
-    function toggleMenu(action) {
-    const open = action === 'open';
-    body.classList.toggle('menu-aberto', open); // Esta linha ativa a animação do CSS
-    menuMobile.classList.toggle('ativo', open);
-    overlay.classList.toggle('ativo', open);
-    body.classList.toggle('no-scroll', open);
-}
+    
     // ==============================================================================
-    // SLIDER PARA TIPOS DE FONES
+    // SLIDER PARA TIPOS DE FONES (CÓDIGO ORIGINAL)
     // ==============================================================================
     const tiposFonesContainer = document.querySelector('.tipos-fones-container');
     if (tiposFonesContainer) {
@@ -327,14 +356,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevBtnTipos = tiposFonesContainer.querySelector('.slider-btn-tipos.prev');
         const nextBtnTipos = tiposFonesContainer.querySelector('.slider-btn-tipos.next');
 
-        prevBtnTipos.addEventListener('click', () => {
-            const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
-            gradeTiposFones.scrollBy({ left: -(cardWidth + 16), behavior: 'smooth' }); // 16px é o gap
-        });
+        if(prevBtnTipos) {
+            prevBtnTipos.addEventListener('click', () => {
+                const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
+                gradeTiposFones.scrollBy({ left: -(cardWidth + 16), behavior: 'smooth' });
+            });
+        }
 
-        nextBtnTipos.addEventListener('click', () => {
-            const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
-            gradeTiposFones.scrollBy({ left: cardWidth + 16, behavior: 'smooth' }); // 16px é o gap
-        });
+        if(nextBtnTipos) {
+            nextBtnTipos.addEventListener('click', () => {
+                const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
+                gradeTiposFones.scrollBy({ left: cardWidth + 16, behavior: 'smooth' });
+            });
+        }
     }
 });
