@@ -29,6 +29,7 @@ def before_request():
         data_manager.register_visit(session['session_id'])
         session['visit_counted'] = True
 
+# --- ROTAS DE ERRO ---
 
 # --- ROTAS DE PÁGINAS (HTML) ---
 
