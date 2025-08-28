@@ -1,16 +1,38 @@
+.secao-tipos-fones {
+    padding: 2rem 0; /* Espaçamento vertical */
+}
+
+/* Título da seção */
+.titulo-secao {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
 .titulo-tipos-fones {
     text-align: center;
     max-width: 800px;
-    margin: 0 auto 3rem auto;
+    margin: 0 auto 3rem;
     color: var(--secundaria-claro);
 }
 
-.grade-tipos-fones {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
+/* Container principal dos tipos de fones */
+.tipos-fones-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Oculta conteúdo que transborda */
 }
 
+/* Grade dos tipos de fones */
+.grade-tipos-fones {
+    display: flex; /* Usa flexbox para layout */
+    justify-content: center; /* Centraliza os cartões */
+    gap: 30px; /* Aumenta o espaço entre os cartões */
+    transition: transform 0.3s ease; /* Suaviza a transição */
+}
+
+/* Cartão de cada tipo de fone */
 .cartao-tipo {
     display: block;
     text-align: center;
@@ -19,21 +41,47 @@
     padding: 1.5rem;
     transition: transform 0.3s, box-shadow 0.3s;
     box-shadow: 0 4px 10px var(--sombra-claro);
+    width: 220px; /* Largura ligeiramente ajustada para melhor apresentação */
 }
 
+/* Efeito de hover no cartão */
 .cartao-tipo:hover {
     transform: translateY(-10px);
     box-shadow: 0 8px 15px var(--sombra-claro);
 }
 
-.imagem-tipo {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+/* Link dentro do cartão */
+.cartao-tipo a {
+    text-decoration: none; /* Remove sublinhado do link */
+    color: inherit; /* Herda a cor do texto */
+    display: block; /* Garante que o link preencha todo o cartão */
 }
 
+/* Imagem do tipo de fone */
+.imagem-tipo {
+    width: 100%; /* Imagem ocupa 100% da largura do cartão */
+    height: 180px; /* Altura ajustada para melhor proporção */
+    object-fit: cover; /* Corta a imagem para preencher o espaço */
+    border-radius: 8px; /* Borda arredondada */
+    margin-bottom: 1rem; /* Espaço abaixo da imagem */
+}
+
+/* Nome do tipo de fone */
 .nome-tipo {
     font-size: 1.2rem;
     font-weight: 600;
+}
+
+/* Media query para telas menores */
+@media (max-width: 900px) {
+    .grade-tipos-fones {
+        flex-direction: column; /* Alinha os cartões em coluna */
+        align-items: center; /* Centraliza os cartões */
+        gap: 10px; /* Reduz o espaço entre os itens */
+    }
+
+    .cartao-tipo {
+        width: 90%; /* Cartões ocupam 90% da largura do container */
+        max-width: 300px; /* Largura máxima para evitar cartões muito largos */
+    }
 }

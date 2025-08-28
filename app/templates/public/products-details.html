@@ -11,61 +11,106 @@
 <body class="tema-claro">
     <header class="cabecalho">
         <div class="cabecalho-conteiner">
-            <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
-            <div class="nav-utilidades">
-                <div class="barra-busca-container">
-                    <button class="btn-lupa" aria-label="Buscar"><i class="fas fa-search"></i></button>
-                    <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
-                </div>
-                <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="contador-carrinho" class="contador-carrinho">0</span>
-                </button>
-                <div class="perfil-container">
-                    {% if current_user.is_authenticated %}
-                        <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil">
-                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='images/perfil_padrao.png') }}" alt="Foto de Perfil" class="foto-perfil">
+            <a href="{{ url_for('public.home') }}" class="logo">
+                Decibell
+            </a>
+            
+            <!-- Wrapper para todos os elementos da direita -->
+            <div class="nav-direita">
+                <div class="nav-utilidades">
+                    <div class="barra-busca-container">
+                        <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
+                            <i class="fas fa-search"></i>
                         </button>
-                    {% else %}
-                        <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}">Login</a>
-                    {% endif %}
-                    <div id="dropdown-perfil" class="dropdown-perfil">
+                        <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
+                    </div>
+                    <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="contador-carrinho" class="contador-carrinho">0</span>
+                    </button>
+                    <div class="perfil-container">
                         {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
-                                <span class="toggle-text"></span>
-                                <div class="toggle-switch">
-                                    <span class="toggle-circle"></span>
-                                </div>
+                            <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
+                                {% if current_user.profile_picture %}
+                                    <img src="{{ current_user.profile_picture }}" alt="Foto de Perfil" class="foto-perfil">
+                                {% else %}
+                                    <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
+                                {% endif %}
                             </button>
-                            <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
                         {% else %}
-                            <button id="alternar-tema-dropdown">Configurações</button>
+                            <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}" aria-label="Fazer login">
+                                 <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
+                            </a>
                         {% endif %}
+                        <div id="dropdown-perfil" class="dropdown-perfil">
+                            {% if current_user.is_authenticated %}
+                                <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
+                                <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                    <span class="toggle-text"></span>
+                                    <div class="toggle-switch">
+                                        <span class="toggle-circle"></span>
+                                    </div>
+                                </button>
+                                <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
+                            {% else %}
+                                <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                    <span class="toggle-text"></span>
+                                    <div class="toggle-switch">
+                                        <span class="toggle-circle"></span>
+                                    </div>
+                                </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+                <button id="botao-menu-mobile" class="botao-menu-mobile">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
-            <button id="botao-menu-mobile" class="botao-menu-mobile"><i class="fas fa-bars"></i></button>
         </div>
-        <nav id="menu-mobile" class="menu-mobile">
-            <button class="fechar-menu-mobile" aria-label="Fechar menu"><i class="fas fa-times"></i></button>
-            <a href="{{ url_for('public.home') }}" class="link-nav-mobile">Início</a>
-            <a href="{{ url_for('public.products') }}" class="link-nav-mobile">Produtos</a>
-            <button id="botao-alternar-tema-mobile" class="botao-alternar-tema-mobile">Alternar Tema</button>
-        </nav>
     </header>
-    <div id="overlay" class="overlay"></div>
+    
+    <nav id="menu-mobile" class="menu-mobile">
+        <div class="menu-mobile-header">
+            <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
+            <button class="fechar-menu-mobile" aria-label="Fechar menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="menu-mobile-links">
+            <a href="{{ url_for('public.home') }}" class="link-nav-mobile"><i class="fas fa-home"></i> Início</a>
+            <a href="{{ url_for('public.products') }}" class="link-nav-mobile"><i class="fas fa-headphones"></i> Produtos</a>
+            <a href="#sobre" class="link-nav-mobile"><i class="fas fa-info-circle"></i> Sobre</a>
+            <a href="#faq" class="link-nav-mobile"><i class="fas fa-question-circle"></i> FAQ</a>
+        </div>
+        <div class="menu-mobile-footer">
+            <button id="botao-alternar-tema-mobile" class="theme-toggle-btn-mobile" aria-label="Alternar tema claro/escuro">
+                <span class="toggle-text">Alternar Tema</span>
+                <div class="toggle-switch">
+                    <span class="toggle-circle"></span>
+                </div>
+            </button>
+        </div>
+    </nav>
+
     <aside id="carrinho-lateral" class="carrinho-lateral">
-        <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">&times;</button>
+        <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">
+            &times;
+        </button>
         <h2>Seu Carrinho</h2>
-        <ul id="lista-carrinho" class="lista-carrinho"></ul>
+        <ul id="lista-carrinho" class="lista-carrinho">
+        </ul>
         <div class="total-carrinho">
             <span>Total:</span>
             <span id="carrinho-total-valor">R$ 0,00</span>
         </div>
         <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
     </aside>
+    
+    <div id="overlay" class="overlay"></div>
+
     <div id="modal-message" class="modal-message"></div>
+
     <main class="conteudo-principal-details">
         <div class="container-details">
             <nav class="breadcrumb">
@@ -117,6 +162,44 @@
     </main>
     <footer class="rodape">
         <div class="conteiner">
+            <div class="rodape-conteiner">
+                <div class="rodape-coluna">
+                    <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
+                    <p>A mais alta fidelidade sonora para seus ouvidos.</p>
+                    <div class="rodape-redes-sociais">
+                        <a href="#" aria-label="Siga-nos no Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Siga-nos no Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Siga-nos no Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Inscreva-se no Youtube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Navegação</h3>
+                    <ul>
+                        <li><a href="{{ url_for('public.products') }}">Produtos</a></li>
+                        <li><a href="#tipos-fones">Estilos</a></li>
+                        <li><a href="#sobre">Sobre</a></li>
+                        <li><a href="#depoimentos">Depoimentos</a></li>
+                    </ul>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Ajuda e Suporte</h3>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#">Contato</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                    </ul>
+                </div>
+                <div class="rodape-coluna">
+                    <h3>Newsletter</h3>
+                    <p>Receba ofertas e novidades por e-mail.</p>
+                    <form action="#" class="form-newsletter">
+                        <input type="email" placeholder="Seu e-mail" required>
+                        <button type="submit">Assinar</button>
+                    </form>
+                </div>
+            </div>
             <p class="rodape-copyright">&copy; 2025 Decibell. Todos os direitos reservados.</p>
         </div>
     </footer>

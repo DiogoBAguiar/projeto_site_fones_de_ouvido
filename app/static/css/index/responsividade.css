@@ -68,6 +68,11 @@
         padding: 0;
         z-index: 1001;
         transition: transform 0.5s ease-in-out;
+        color: var(--primaria-claro);
+    }
+
+    .tema-escuro .botao-menu-mobile {
+        color: var(--texto-claro);
     }
 
     .botao-menu-mobile span {
@@ -268,16 +273,8 @@
         font-size: 0.9rem;
     }
     
-    .grade-tipos-fones {
-        grid-auto-columns: 85%;
-    }
-
     .cartao-produto {
         flex: 0 0 240px;
-    }
-    
-    .cartao-tipo {
-        padding: 1rem;
     }
     
     .cartao-depoimento {
