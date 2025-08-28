@@ -1,7 +1,3 @@
-# app/routes/public.py
-# Lida com as rotas públicas da aplicação, como home, login e visualização de produtos.
-
-import json
 import uuid
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
@@ -30,6 +26,17 @@ def before_request():
         session['visit_counted'] = True
 
 # --- ROTAS DE ERRO ---
+@public_bp.app_errorhandler(404)
+def page_not_found(e):
+    """Renderiza a página de erro 404 - Página Não Encontrada."""
+    return render_template('public/404.html'), 404
+
+@public_bp.app_errorhandler(500)
+def internal_server_error(e):
+    """Renderiza a página de erro 500 - Erro Interno do Servidor."""
+   
+    return render_template('public/500.html'), 500
+
 
 # --- ROTAS DE PÁGINAS (HTML) ---
 
@@ -47,11 +54,10 @@ def products():
 def products_details(product_id):
     """Renderiza a página de detalhes de um produto específico."""
     product = data_manager.get_product_by_id(product_id)
-    if product:
-        return render_template('public/products-details.html', product=product)
-    
-    flash("Produto não encontrado.", "danger")
-    return redirect(url_for('public.products'))
+    if not product:
+        # Se o produto não for encontrado, redireciona para a página de erro 404.
+        return redirect(url_for('public.page_not_found'))
+    return render_template('public/products-details.html', product=product)
 
 @public_bp.route('/checkout')
 @login_required
@@ -59,30 +65,30 @@ def checkout():
     """Renderiza a página de finalização de compra."""
     return render_template('public/checkout.html')
 
+# --- ROTAS DE AUTENTICAÇÃO ---
 
 @public_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Lida com o login do usuário."""
+    """Processa o login do usuário."""
     if current_user.is_authenticated:
         return redirect(url_for('public.home'))
-
+    
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('senha')
         user = data_manager.get_user_by_email(email)
-
+        
         if user and check_password_hash(user.password_hash, password):
             login_user(user, remember=True)
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('public.home'))
+            return redirect(url_for('public.home'))
         else:
-            flash('Login inválido. Verifique seu email e senha.', 'danger')
-
+            flash('Email ou senha inválidos. Por favor, tente novamente.', 'danger')
+            
     return render_template('public/login.html')
 
 @public_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    """Lida com o registro de um novo usuário."""
+    """Processa o registro de um novo usuário."""
     if current_user.is_authenticated:
         return redirect(url_for('public.home'))
 
@@ -90,9 +96,10 @@ def register():
         username = request.form.get('nome')
         email = request.form.get('email')
         password = request.form.get('senha')
-
-        if data_manager.get_user_by_email(email):
-            flash('Este email já está cadastrado. Tente fazer login.', 'warning')
+        
+        users = data_manager.get_users()
+        if any(u.email == email for u in users):
+            flash('Este email já está em uso. Por favor, escolha outro.', 'warning')
             return redirect(url_for('public.register'))
 
         hashed_password = generate_password_hash(password)
@@ -104,8 +111,7 @@ def register():
             role='user'
         )
         data_manager.save_user(new_user)
-        
-        flash('Cadastro realizado com sucesso! Faça o login para continuar.', 'success')
+        flash('Conta criada com sucesso! Por favor, faça o login.', 'success')
         return redirect(url_for('public.login'))
 
     return render_template('public/register.html')
@@ -113,31 +119,31 @@ def register():
 @public_bp.route('/logout')
 @login_required
 def logout():
-    """Faz o logout do usuário logado."""
+    """Desconecta o usuário."""
     logout_user()
-    flash('Você foi desconectado com segurança.', 'info')
     return redirect(url_for('public.home'))
 
 
-# --- ROTAS DE API PÚBLICA (JSON) ---
+# --- ROTAS DE API (JSON) ---
 
 @public_bp.route('/api/products')
 def get_all_products():
-    """API: Retorna todos os produtos para a página de listagem."""
+    """API: Retorna todos os produtos em formato JSON para a página de listagem."""
     try:
-        products = data_manager.get_products()
-        all_filters_map = {f.id: f for f in data_manager.get_filters()}
+        all_products = data_manager.get_products()
+        all_filters = data_manager.get_filters()
+        
+        filter_map = {f.id: f.name for f in all_filters}
         
         products_list = []
-        for p in products:
-            full_product_dict = p.to_dict(simplify=False)
-            filter_ids = json.loads(full_product_dict.get('filters', '[]'))
-            filter_names = [all_filters_map[fid].name for fid in filter_ids if fid in all_filters_map]
+        for p in all_products:
+            filter_names = [filter_map.get(fid) for fid in p.filters if fid in filter_map]
             
-            product_type = "Geral"
-            for fid in filter_ids:
-                if fid in all_filters_map and all_filters_map[fid].type == 'type':
-                    product_type = all_filters_map[fid].name
+            product_type = ""
+            type_filters = [f.name for f in all_filters if f.type == 'type']
+            for t in type_filters:
+                if t in filter_names:
+                    product_type = t
                     break
 
             simplified_dict = {
@@ -174,7 +180,7 @@ def get_featured_products():
                 'brand': p.brand,
                 'price': p.price,
                 'status': p.status,
-                'images': p.images,  # Garante que seja uma lista para o JSON
+                'images': p.images,  
                 'description': p.description,
             }
             products_list.append(product_dict)

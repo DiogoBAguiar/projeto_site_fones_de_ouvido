@@ -13,53 +13,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function alternarTema() {
-        if (body.classList.contains('tema-escuro')) {
-            body.classList.remove('tema-escuro');
-            localStorage.setItem('tema', 'claro');
-        } else {
-            body.classList.add('tema-escuro');
-            localStorage.setItem('tema', 'escuro');
-        }
+        body.classList.toggle('tema-escuro');
+        localStorage.setItem('tema', body.classList.contains('tema-escuro') ? 'escuro' : 'claro');
     }
     
-    // Carregar o tema assim que a página for carregada
     carregarTema();
 
-    // Event listeners para alternar o tema
     const alternarTemaDropdown = document.getElementById('alternar-tema-dropdown');
     const alternarTemaMobile = document.getElementById('botao-alternar-tema-mobile');
 
-    if (alternarTemaDropdown) {
-        alternarTemaDropdown.addEventListener('click', alternarTema);
-    }
-    if (alternarTemaMobile) {
-        alternarTemaMobile.addEventListener('click', alternarTema);
-    }
+    if (alternarTemaDropdown) alternarTemaDropdown.addEventListener('click', alternarTema);
+    if (alternarTemaMobile) alternarTemaMobile.addEventListener('click', alternarTema);
 
-    // --- Lógica do Menu Mobile ---
+    // --- LÓGICA DO MENU MOBILE ---
     const botaoMenuMobile = document.getElementById('botao-menu-mobile');
     const menuMobile = document.getElementById('menu-mobile');
     const fecharMenuMobile = document.querySelector('.fechar-menu-mobile');
     const overlay = document.getElementById('overlay');
+    const linksMenuMobile = document.querySelectorAll('.link-nav-mobile');
 
-    function abrirMenuMobile() {
-        menuMobile.classList.add('ativo');
-        overlay.style.display = 'block';
+    function toggleMenu(action) {
+        const open = action === 'open';
+        menuMobile.classList.toggle('ativo', open);
+        overlay.classList.toggle('ativo', open);
+        body.classList.toggle('no-scroll', open);
     }
 
-    function fecharMenuMobileHandler() {
-        menuMobile.classList.remove('ativo');
-        overlay.style.display = 'none';
-    }
-
-    botaoMenuMobile.addEventListener('click', abrirMenuMobile);
-    fecharMenuMobile.addEventListener('click', fecharMenuMobileHandler);
-    overlay.addEventListener('click', fecharMenuMobileHandler);
-
-    // Fechar o menu mobile ao clicar em um link
-    document.querySelectorAll('.link-nav-mobile').forEach(link => {
-        link.addEventListener('click', fecharMenuMobileHandler);
+    botaoMenuMobile.addEventListener('click', () => toggleMenu('open'));
+    fecharMenuMobile.addEventListener('click', () => toggleMenu('close'));
+    linksMenuMobile.forEach(link => {
+        link.addEventListener('click', () => toggleMenu('close'));
     });
+
 
     // --- Lógica do Carrinho de Compras ---
     const btnCarrinho = document.getElementById('btn-carrinho');
@@ -68,18 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaCarrinho = document.getElementById('lista-carrinho');
     const carrinhoTotalValor = document.getElementById('carrinho-total-valor');
     const contadorCarrinho = document.getElementById('contador-carrinho');
-    const btnCheckout = document.getElementById('btn-checkout'); // Adicionado seletor do botão
+    const btnCheckout = document.getElementById('btn-checkout');
     
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
     function atualizarContadorCarrinho() {
         const totalItens = carrinho.reduce((total, item) => total + item.quantidade, 0);
         contadorCarrinho.textContent = totalItens;
-        if (totalItens > 0) {
-            contadorCarrinho.classList.add('visivel');
-        } else {
-            contadorCarrinho.classList.remove('visivel');
-        }
+        contadorCarrinho.classList.toggle('visivel', totalItens > 0);
     }
 
     function renderizarCarrinho() {
@@ -121,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             carrinho.push({ ...produto, quantidade: 1 });
         }
         renderizarCarrinho();
-        exibirMensagem(`"${produto.name}" adicionado ao carrinho!`, 'success');
+        exibirMensagem(`"${produto.nome}" adicionado ao carrinho!`, 'success');
     }
 
     function removerDoCarrinho(produtoId) {
@@ -132,17 +113,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function abrirCarrinho() {
         carrinhoLateral.classList.add('ativo');
-        overlay.style.display = 'block';
+        overlay.classList.add('ativo');
+        body.classList.add('no-scroll');
     }
 
     function fecharCarrinhoHandler() {
         carrinhoLateral.classList.remove('ativo');
-        overlay.style.display = 'none';
+        overlay.classList.remove('ativo');
+        body.classList.remove('no-scroll');
     }
 
     btnCarrinho.addEventListener('click', abrirCarrinho);
     fecharCarrinho.addEventListener('click', fecharCarrinhoHandler);
-    overlay.addEventListener('click', fecharCarrinhoHandler);
+    
+    // --- LÓGICA UNIFICADA DO OVERLAY ---
+    overlay.addEventListener('click', () => {
+        if (menuMobile.classList.contains('ativo')) {
+            toggleMenu('close');
+        }
+        if (carrinhoLateral.classList.contains('ativo')) {
+            fecharCarrinhoHandler();
+        }
+    });
 
     listaCarrinho.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-remover-item')) {
@@ -151,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // **NOVO: Adicionado evento para o botão Finalizar Compra**
     if (btnCheckout) {
         btnCheckout.addEventListener('click', () => {
             window.location.href = '/checkout';
@@ -172,15 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Lógica do Dropdown de Perfil ---
     const btnPerfil = document.getElementById('btn-perfil');
     const dropdownPerfil = document.getElementById('dropdown-perfil');
-    const modalLogin = document.getElementById('modal-login');
-    const fecharModalLogin = document.querySelector('.fechar-modal-login');
-
+    
     if (btnPerfil) {
         btnPerfil.addEventListener('click', (e) => {
             e.preventDefault();
-            const isLoggedIn = btnPerfil.tagName === 'BUTTON';
-            
-            if (isLoggedIn) {
+            if (btnPerfil.tagName === 'BUTTON') {
                 dropdownPerfil.classList.toggle('ativo');
             } else {
                 window.location.href = btnPerfil.href;
@@ -191,18 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         if (dropdownPerfil && !e.target.closest('.perfil-container') && dropdownPerfil.classList.contains('ativo')) {
             dropdownPerfil.classList.remove('ativo');
-        }
-    });
-
-    if (fecharModalLogin) {
-        fecharModalLogin.addEventListener('click', () => {
-            modalLogin.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', (e) => {
-        if (e.target === modalLogin) {
-            modalLogin.style.display = 'none';
         }
     });
 
@@ -226,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarCarrinho();
     
     // ==============================================================================
-    // FUNÇÕES PARA PRODUTOS EM DESTAQUE (AGORA COM SLIDER)
+    // SLIDER DE PRODUTOS EM DESTAQUE
     // ==============================================================================
     
     const destaqueContainer = document.querySelector('.produtos-destaque-container');
@@ -235,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevBtn = destaqueContainer.querySelector('.slider-btn.prev');
         const nextBtn = destaqueContainer.querySelector('.slider-btn.next');
         const API_FEATURED_URL = window.location.origin + "/api/products/featured";
+        let allFeaturedProducts = []; // Armazena os produtos buscados
 
         function setupSlider() {
             if (!gradeProdutos.querySelector('.cartao-produto')) return;
@@ -273,12 +249,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.innerHTML = `
                     <a href="/products-details/${produto.id}">
                         <img src="${produto.images.length > 0 ? produto.images[0] : 'https://placehold.co/300'}" alt="${produto.name}" class="imagem-produto">
-                        <div class="info-produto">
+                    </a>
+                    <div class="info-produto">
+                        <a href="/products-details/${produto.id}">
                             <h3 class="nome-produto">${produto.name}</h3>
                             <p class="descricao-produto">${produto.description || ''}</p>
                             <p class="preco-produto">R$ ${produto.price.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                    </a>
+                        </a>
+                        <button class="botao-add-carrinho" data-product-id="${produto.id}">Adicionar ao Carrinho</button>
+                    </div>
                 `;
                 gradeProdutos.appendChild(card);
             });
@@ -286,14 +265,32 @@ document.addEventListener('DOMContentLoaded', () => {
             setupSlider();
         }
 
+        // --- LÓGICA PARA ADICIONAR AO CARRINHO DOS PRODUTOS EM DESTAQUE ---
+        gradeProdutos.addEventListener('click', (e) => {
+            if (e.target.classList.contains('botao-add-carrinho')) {
+                e.preventDefault();
+                const productId = e.target.dataset.productId;
+                const productData = allFeaturedProducts.find(p => p.id == productId);
+                if (productData) {
+                    const productToAdd = {
+                        id: productData.id,
+                        nome: productData.name,
+                        preco: productData.price,
+                        imagem: productData.images.length > 0 ? productData.images[0] : 'https://placehold.co/300'
+                    };
+                    adicionarAoCarrinho(productToAdd);
+                }
+            }
+        });
+
         async function fetchFeaturedProducts() {
             try {
                 const response = await fetch(API_FEATURED_URL);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar produtos em destaque da API.');
                 }
-                const produtos = await response.json();
-                renderFeaturedProducts(produtos);
+                allFeaturedProducts = await response.json(); // Armazena os dados
+                renderFeaturedProducts(allFeaturedProducts);
             } catch (error) {
                 console.error("Erro ao carregar produtos em destaque:", error);
                 gradeProdutos.innerHTML = '<p class="text-center text-gray-500">Não foi possível carregar os produtos em destaque.</p>';
@@ -313,5 +310,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fetchFeaturedProducts();
         window.addEventListener('resize', setupSlider);
+    }
+    function toggleMenu(action) {
+    const open = action === 'open';
+    body.classList.toggle('menu-aberto', open); // Esta linha ativa a animação do CSS
+    menuMobile.classList.toggle('ativo', open);
+    overlay.classList.toggle('ativo', open);
+    body.classList.toggle('no-scroll', open);
+}
+    // ==============================================================================
+    // SLIDER PARA TIPOS DE FONES
+    // ==============================================================================
+    const tiposFonesContainer = document.querySelector('.tipos-fones-container');
+    if (tiposFonesContainer) {
+        const gradeTiposFones = tiposFonesContainer.querySelector('.grade-tipos-fones');
+        const prevBtnTipos = tiposFonesContainer.querySelector('.slider-btn-tipos.prev');
+        const nextBtnTipos = tiposFonesContainer.querySelector('.slider-btn-tipos.next');
+
+        prevBtnTipos.addEventListener('click', () => {
+            const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
+            gradeTiposFones.scrollBy({ left: -(cardWidth + 16), behavior: 'smooth' }); // 16px é o gap
+        });
+
+        nextBtnTipos.addEventListener('click', () => {
+            const cardWidth = gradeTiposFones.querySelector('.cartao-tipo').offsetWidth;
+            gradeTiposFones.scrollBy({ left: cardWidth + 16, behavior: 'smooth' }); // 16px é o gap
+        });
     }
 });

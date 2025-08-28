@@ -18,80 +18,85 @@
             <a href="{{ url_for('public.home') }}" class="logo">
                 Decibell
             </a>
-            <div class="nav-utilidades">
-                <div class="barra-busca-container">
-                    <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
-                </div>
-                <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="contador-carrinho" class="contador-carrinho">0</span>
-                </button>
-                <div class="perfil-container">
-                    {% if current_user.is_authenticated %}
-                        <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
-                            {% if current_user.profile_picture %}
-                                <img src="{{ current_user.profile_picture }}" alt="Foto de Perfil" class="foto-perfil">
-                            {% else %}
-                                <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
-                            {% endif %}
+            
+            <!-- Wrapper para todos os elementos da direita -->
+            <div class="nav-direita">
+                <div class="nav-utilidades">
+                    <div class="barra-busca-container">
+                        <button class="btn-lupa" aria-label="Expandir ou fechar barra de pesquisa">
+                            <i class="fas fa-search"></i>
                         </button>
-                    {% else %}
-                        <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}" aria-label="Fazer login">
-                             <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
-                        </a>
-                    {% endif %}
-                    <div id="dropdown-perfil" class="dropdown-perfil">
+                        <input type="text" class="barra-busca-input" placeholder="Buscar produtos...">
+                    </div>
+                    <button id="btn-carrinho" class="carrinho" aria-label="Ver carrinho de compras">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="contador-carrinho" class="contador-carrinho">0</span>
+                    </button>
+                    <div class="perfil-container">
                         {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
-                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
-                                <span class="toggle-text"></span>
-                                <div class="toggle-switch">
-                                    <span class="toggle-circle"></span>
-                                </div>
+                            <button id="btn-perfil" class="btn-perfil" aria-label="Acessar perfil de usuário">
+                                {% if current_user.profile_picture %}
+                                    <img src="{{ current_user.profile_picture }}" alt="Foto de Perfil" class="foto-perfil">
+                                {% else %}
+                                    <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
+                                {% endif %}
                             </button>
-                            <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
                         {% else %}
-                            <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
-                                <span class="toggle-text"></span>
-                                <div class="toggle-switch">
-                                    <span class="toggle-circle"></span>
-                                </div>
-                            </button>
+                            <a id="btn-perfil" class="btn-perfil" href="{{ url_for('public.login') }}" aria-label="Fazer login">
+                                 <i class="fas fa-user-circle" style="font-size: 40px; color: var(--primaria-claro); vertical-align: middle;"></i>
+                            </a>
                         {% endif %}
+                        <div id="dropdown-perfil" class="dropdown-perfil">
+                            {% if current_user.is_authenticated %}
+                                <a href="{{ url_for('user.profile') }}">Meu Perfil</a>
+                                <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                    <span class="toggle-text"></span>
+                                    <div class="toggle-switch">
+                                        <span class="toggle-circle"></span>
+                                    </div>
+                                </button>
+                                <a href="{{ url_for('public.logout') }}" id="btn-logout">Sair</a>
+                            {% else %}
+                                <button id="alternar-tema-dropdown" class="theme-toggle-btn" aria-label="Alternar tema claro/escuro">
+                                    <span class="toggle-text"></span>
+                                    <div class="toggle-switch">
+                                        <span class="toggle-circle"></span>
+                                    </div>
+                                </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+                <button id="botao-menu-mobile" class="botao-menu-mobile">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
-            <button id="botao-menu-mobile" class="botao-menu-mobile">
-                <i class="fas fa-bars"></i>
+        </div>
+    </header>
+    
+    <nav id="menu-mobile" class="menu-mobile">
+        <div class="menu-mobile-header">
+            <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
+            <button class="fechar-menu-mobile" aria-label="Fechar menu">
+                <i class="fas fa-times"></i>
             </button>
         </div>
-        <nav id="menu-mobile" class="menu-mobile">
-            <div class="menu-mobile-header">
-                <a href="{{ url_for('public.home') }}" class="logo">Decibell</a>
-                <button class="fechar-menu-mobile" aria-label="Fechar menu">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="menu-mobile-links">
-                <a href="{{ url_for('public.home') }}" class="link-nav-mobile"><i class="fas fa-home"></i> Início</a>
-                <a href="{{ url_for('public.products') }}" class="link-nav-mobile"><i class="fas fa-headphones"></i> Produtos</a>
-                <a href="#sobre" class="link-nav-mobile"><i class="fas fa-info-circle"></i> Sobre</a>
-                <a href="#faq" class="link-nav-mobile"><i class="fas fa-question-circle"></i> FAQ</a>
-            </div>
-            <div class="menu-mobile-footer">
-                <button id="botao-alternar-tema-mobile" class="theme-toggle-btn-mobile" aria-label="Alternar tema claro/escuro">
-                    <span class="toggle-text">Alternar Tema</span>
-                    <div class="toggle-switch">
-                        <span class="toggle-circle"></span>
-                    </div>
-                </button>
-            </div>
-        </nav>
-    </header>
-    <div id="overlay" class="overlay"></div>
+        <div class="menu-mobile-links">
+            <a href="{{ url_for('public.home') }}" class="link-nav-mobile"><i class="fas fa-home"></i> Início</a>
+            <a href="{{ url_for('public.products') }}" class="link-nav-mobile"><i class="fas fa-headphones"></i> Produtos</a>
+            <a href="#sobre" class="link-nav-mobile"><i class="fas fa-info-circle"></i> Sobre</a>
+            <a href="#faq" class="link-nav-mobile"><i class="fas fa-question-circle"></i> FAQ</a>
+        </div>
+        <div class="menu-mobile-footer">
+            <button id="botao-alternar-tema-mobile" class="theme-toggle-btn-mobile" aria-label="Alternar tema claro/escuro">
+                <span class="toggle-text">Alternar Tema</span>
+                <div class="toggle-switch">
+                    <span class="toggle-circle"></span>
+                </div>
+            </button>
+        </div>
+    </nav>
+
     <aside id="carrinho-lateral" class="carrinho-lateral">
         <button id="fechar-carrinho" class="fechar-carrinho" aria-label="Fechar carrinho">
             &times;
@@ -105,7 +110,11 @@
         </div>
         <button id="btn-checkout" class="btn-checkout">Finalizar Compra</button>
     </aside>
+    
+    <div id="overlay" class="overlay"></div>
+
     <div id="modal-message" class="modal-message"></div>
+
     <main class="conteudo-principal">
         <section id="destaque" class="secao secao-destaque oculta">
             <canvas id="hero-animation-canvas"></canvas>
@@ -143,24 +152,30 @@
             <div class="conteiner">
                 <h1 class="titulo-secao">Siga o seu estilo</h1>
                 <h2 class="titulo-tipos-fones">Do imersivo ao portátil, encontre o fone de ouvido que se adapta perfeitamente à sua vida.</h2>
-                <div class="grade-tipos-fones">
-                    <a href="{{ url_for('public.products', tipo='supra-auricular') }}" class="cartao-tipo">
-                        <img src="{{ url_for('static', filename='images/supra-auricular.jpeg') }}" alt="Fone de ouvido supra-auricular" class="imagem-tipo">
-                        <h3 class="nome-tipo">Supra-auricular</h3>
-                    </a>
-                    <a href="{{ url_for('public.products', tipo='circumaural') }}" class="cartao-tipo">
-                        <img src="{{ url_for('static', filename='images/circumaural.jpeg') }}" alt="Fone de ouvido circumaural" class="imagem-tipo">
-                        <h3 class="nome-tipo">Circumaural</h3>
-                    </a>
-                    <a href="{{ url_for('public.products', tipo='intra-auricular') }}" class="cartao-tipo">
-                        <img src="{{ url_for('static', filename='images/intra-auricular.jpeg') }}" alt="Fone de ouvido intra-auricular" class="imagem-tipo">
-                        <h3 class="nome-tipo">Intra-auricular</h3>
-                    </a>
-                    <a href="{{ url_for('public.products', tipo='sem-fio') }}" class="cartao-tipo">
-                        <img src="https://placehold.co/400x400/334155/ffffff?text=Sem+fio" alt="Fone de ouvido sem fio" class="imagem-tipo">
-                        <h3 class="nome-tipo">Sem fio</h3>
-                    </a>
+                
+                <div class="tipos-fones-container">
+                    <button class="slider-btn-tipos prev" aria-label="Anterior">&lt;</button>
+                    <div class="grade-tipos-fones">
+                        <a href="{{ url_for('public.products', tipo='supra-auricular') }}" class="cartao-tipo">
+                            <img src="{{ url_for('static', filename='images/supra-auricular.jpeg') }}" alt="Fone de ouvido supra-auricular" class="imagem-tipo">
+                            <h3 class="nome-tipo">Supra-auricular</h3>
+                        </a>
+                        <a href="{{ url_for('public.products', tipo='circumaural') }}" class="cartao-tipo">
+                            <img src="{{ url_for('static', filename='images/circumaural.jpeg') }}" alt="Fone de ouvido circumaural" class="imagem-tipo">
+                            <h3 class="nome-tipo">Circumaural</h3>
+                        </a>
+                        <a href="{{ url_for('public.products', tipo='intra-auricular') }}" class="cartao-tipo">
+                            <img src="{{ url_for('static', filename='images/intra-auricular.jpeg') }}" alt="Fone de ouvido intra-auricular" class="imagem-tipo">
+                            <h3 class="nome-tipo">Intra-auricular</h3>
+                        </a>
+                        <a href="{{ url_for('public.products', tipo='sem-fio') }}" class="cartao-tipo">
+                            <img src="https://placehold.co/400x400/334155/ffffff?text=Sem+fio" alt="Fone de ouvido sem fio" class="imagem-tipo">
+                            <h3 class="nome-tipo">Sem fio</h3>
+                        </a>
+                    </div>
+                    <button class="slider-btn-tipos next" aria-label="Próximo">&gt;</button>
                 </div>
+
             </div>
         </section>
         <section id="produtos-destaque" class="secao secao-produtos-destaque oculta">
